@@ -1,6 +1,6 @@
 plugins {
-    id 'java'
-    id 'application'
+    id 'java-library'
+    //id 'application'
 }
 
 repositories {
@@ -21,7 +21,7 @@ dependencies {
     implementation 'com.github.Cristian-Sknz:Paladins-Wrapper:-SNAPSHOT'
     testImplementation 'junit:junit:4.13'
 }
-
+/*
 application {
     mainClassName = 'me.skiincraft.discord.core.OusuCore'
-}
+}*/
