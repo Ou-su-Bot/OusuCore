@@ -3,18 +3,19 @@ package me.skiincraft.discord.core.objects;
 public class DiscordInfo {
 	
 	private String botname;
-	private long botId;
+	private String defaultPrefix;
 	private String token;
+	private long botId;
 	private long ownerId;
 	private int shards;
-	private String defaultPrefix;
 	
-	public DiscordInfo(String botname, long botId, String token, long ownerId, int shards) {
+	public DiscordInfo(String botname, String defaultprefix, String token, long botId, long ownerId, int shards) {
 		this.botname = botname;
 		this.botId = botId;
 		this.token = token;
 		this.ownerId = ownerId;
 		this.shards = shards;
+		this.defaultPrefix = defaultprefix;
 	}
 	public String getBotname() {
 		return botname;

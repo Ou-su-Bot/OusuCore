@@ -25,7 +25,7 @@ public interface PluginManager {
 	Plugin getPluginByBotId(long id);
 	Plugin getPluginByBotId(String id);
 	void registerCommands(Command command, OusuPlugin plugin);
-	void registerEvents(ListenerAdapter events, OusuPlugin plugin);
+	void registerEvents(ListenerAdapter listener, OusuPlugin plugin);
 	
 	void disablePlugin(Plugin plugin);
 	void enablePlugin(Plugin plugin);

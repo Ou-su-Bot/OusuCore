@@ -51,6 +51,7 @@ public abstract class OusuPlugin {
 		}
 			
 		System.out.println("Todas as shards foram carregadas.");
+		FieldUtils.writeField(plugin, "shardManager", shmanager, true);
 		FieldUtils.writeField(plugin, "running", true, true);
 	}
 	

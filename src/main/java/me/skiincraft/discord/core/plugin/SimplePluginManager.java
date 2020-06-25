@@ -20,6 +20,7 @@ import com.google.gson.JsonParser;
 
 import me.skiincraft.discord.core.commands.Command;
 import me.skiincraft.discord.core.exception.BotConfigNotFoundException;
+import me.skiincraft.discord.core.exception.IncorrectListenerException;
 import me.skiincraft.discord.core.objects.DiscordInfo;
 import me.skiincraft.discord.core.objects.PluginConfig;
 import me.skiincraft.discord.core.objects.PluginData;
@@ -79,8 +80,9 @@ public class SimplePluginManager implements PluginManager {
 			
 			return new PluginConfig(new DiscordInfo(
 					object.get("BotName").getAsString(),
-					objectdiscord.get("BotId").getAsLong(),
+					objectdiscord.get("DefaultPrefix").getAsString(),
 					objectdiscord.get("Token").getAsString(),
+					objectdiscord.get("BotId").getAsLong(),
 					object.get("OwnerId").getAsLong(),
 					objectdiscord.get("Shards").getAsInt()),
 					object.get("BotName").getAsString(),
@@ -138,7 +140,6 @@ public class SimplePluginManager implements PluginManager {
 				continue;
 			}
 		}
-			
 		Plugin[] plugins = new Plugin[plugin.size()];
 		plugin.toArray(plugins);
 		
@@ -151,8 +152,11 @@ public class SimplePluginManager implements PluginManager {
 	}
 
 	@Override
-	public void registerEvents(ListenerAdapter events, OusuPlugin plugin) {
-		//TODO
+	public void registerEvents(ListenerAdapter listener, OusuPlugin plugin) {
+		if (plugin.getPlugin().isRunning() == true) {
+			throw new IncorrectListenerException("Evento registrado após o inicio do bot.");
+		}
+		plugin.getPlugin().addListener(listener);
 	}
 
 	@Override

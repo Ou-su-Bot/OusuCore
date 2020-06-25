@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
+
+import me.skiincraft.discord.core.database.GuildDB;
 import me.skiincraft.discord.core.plugin.Plugin;
-import me.skiincraft.discord.core.sqlite.GuildsDB;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -48,7 +49,7 @@ public class CommandAdapter extends ListenerAdapter {
 		//plugin = PluginManager.getPluginManager().getPluginByBotId(e.getJDA().getSelfUser().getIdLong());
 		ArrayList<Command> commands = plugin.getCommands();
 
-		prefix = new GuildsDB(plugin, e.getGuild()).get("prefix");
+		prefix = new GuildDB(plugin, e.getGuild()).get("prefix");
 		
 		if (getCommand(commands, args[0].substring(prefix.length())) == null) {
 			if (getCommandByAliase(commands, args[0].substring(prefix.length())) == null) {

@@ -2,6 +2,7 @@ package me.skiincraft.discord.core.commands;
 
 import java.util.List;
 
+import me.skiincraft.discord.core.multilanguage.LanguageManager;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -18,8 +19,8 @@ public abstract class Command {
 		this.usage = usage;
 	}
 	
-	public final String getCommandDescription(String name) {
-		return name;
+	public String getCommandDescription(LanguageManager language) {
+		return language.getString("CommandDescription", name.toUpperCase() +"_DESCRIPTION");
 	}
 	
 	public ChannelContext response() {

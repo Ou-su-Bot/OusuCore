@@ -1,7 +1,7 @@
 package me.skiincraft.discord.core.essential;
 
+import me.skiincraft.discord.core.database.GuildDB;
 import me.skiincraft.discord.core.plugin.Plugin;
-import me.skiincraft.discord.core.sqlite.GuildsDB;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -16,13 +16,13 @@ public class DatabaseEvents extends ListenerAdapter {
 	
 	@Override
 	public void onGuildJoin(GuildJoinEvent event) {
-		GuildsDB db = new GuildsDB(plugin, event.getGuild());
+		GuildDB db = new GuildDB(plugin, event.getGuild());
 		db.create();
 	}
 	
 	@Override
 	public void onGuildLeave(GuildLeaveEvent event) {
-		GuildsDB db = new GuildsDB(plugin, event.getGuild());
+		GuildDB db = new GuildDB(plugin, event.getGuild());
 		if (db.exists()) {
 			db.delete();	
 		}
