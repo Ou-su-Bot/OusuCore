@@ -7,6 +7,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 
 import me.skiincraft.discord.core.database.GuildDB;
 import me.skiincraft.discord.core.plugin.Plugin;
+import me.skiincraft.discord.core.utils.StringUtils;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -94,7 +95,7 @@ public class CommandAdapter extends ListenerAdapter {
 					} catch (IllegalAccessException e) {
 						e.printStackTrace();
 					}
-				command.execute(userId, args, channel);
+				command.execute(userId, StringUtils.removeString(args, 0), channel);
 				
 				Thread.currentThread().interrupt();
 			}

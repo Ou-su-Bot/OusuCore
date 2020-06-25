@@ -22,10 +22,12 @@ public abstract class Database {
 		super();
 		this.plugin = plugin;
 		this.sqlite = plugin.getSQLite();
-		dblocal = dbObject();
 	}
 	
 	public DBObject getDbLocal() {
+		if (dblocal == null) {
+			dblocal = dbObject();	
+		}
 		return dblocal;
 	}
 	public void setDbLocal(DBObject obj) {
