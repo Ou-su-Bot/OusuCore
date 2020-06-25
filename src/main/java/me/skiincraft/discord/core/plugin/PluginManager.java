@@ -20,7 +20,6 @@ public interface PluginManager {
 	PluginConfig getPluginConfig(String path, String jarfile) throws FileNotFoundException;
 	PluginConfig getPluginConfig(File file);
 	PluginData getPluginData(String botname, String bot_main, String filename) throws BotConfigNotFoundException;
-	@Deprecated
 	Plugin[] getPlugins(File path);
 	Plugin getPluginByBotId(long id);
 	Plugin getPluginByBotId(String id);
