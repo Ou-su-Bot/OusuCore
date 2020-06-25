@@ -1,6 +1,6 @@
 
 plugins {
-    id 'java'
+    id 'java-library'
     id 'application'
 }
 
@@ -13,20 +13,20 @@ repositories {
 }
 
 dependencies {
-    compile 'org.discordbots:DBL-Java-Library:2.0.1'
-    compile "net.dv8tion:JDA:4.1.1_101"
-    compile (name:'mysql-connector', ext:'jar')
-    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.2'
-    compile group: 'com.github.kevinsawicki', name: 'http-request', version: '5.3'
-    compile group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
-    compile group: 'org.ocpsoft.prettytime', name: 'prettytime', version: '4.0.0.Final'
-    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.20.0'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
+    api 'org.discordbots:DBL-Java-Library:2.0.1'
+    api "net.dv8tion:JDA:4.1.1_101"
+    api (name:'mysql-connector', ext:'jar')
+    api group: 'com.google.code.gson', name: 'gson', version: '2.8.2'
+    api group: 'com.github.kevinsawicki', name: 'http-request', version: '5.3'
+    api group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
+    api group: 'org.ocpsoft.prettytime', name: 'prettytime', version: '4.0.0.Final'
+    api group: 'org.xerial', name: 'sqlite-jdbc', version: '3.20.0'
+    api group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
+    api group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
     
     
 }
 
 application {
-    mainClassName = 'me.skiincraft.discord.core.App'
+    mainClassName = 'me.skiincraft.discord.core.OusuCore'
 }
