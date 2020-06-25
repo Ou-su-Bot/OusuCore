@@ -28,6 +28,11 @@ dependencies {
     //compile (name:'Paladins-API', ext:'jar')
 }
 
+
+application {
+    mainClassName = 'me.skiincraft.discord.core.OusuCore'
+}
+
 compileJava {
     classpath = sourceSets.main.compileClasspath
     options.encoding = 'UTF-8'
@@ -43,8 +48,4 @@ artifacts {
 
 shadowJar{
     archiveFileName = "Ousu-Core.jar"
-}
-
-application {
-    mainClassName = 'me.skiincraft.discord.core.OusuCore'
 }

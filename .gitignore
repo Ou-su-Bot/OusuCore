@@ -3,3 +3,4 @@
 build
 /bots/
 /bin/
+/HeroStats_sqlite.db
