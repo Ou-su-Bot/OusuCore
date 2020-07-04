@@ -92,7 +92,12 @@ public class StringUtils {
 	public static String arrayToString2(int num, String[] str) {
 		StringBuffer buffer = new StringBuffer();
 		for (int i = num; i < str.length; i++) {
+			if (str[i] == str[str.length-1]) {
+				buffer.append(str[i]);
+				break;
+			}
 			buffer.append(str[i] + " ");
+			
 		}
 		return buffer.toString();
 	}

@@ -1,5 +1,6 @@
 package me.skiincraft.discord.core.apis;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -12,6 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -107,6 +110,21 @@ public class ImageBuilder {
 		graphic.setFont(new Font("Arial", Font.PLAIN, fontSize));
 		graphic.drawString(string, x, y);
 	}
+	public void addStringBox(String string, int x, int y, int w, Font font) {
+		graphic.setFont(font);
+		
+		List<String> strings = new ArrayList<>();
+		int index = 0;
+		while (index < string.length()) {
+		    strings.add(string.substring(index, Math.min(index + w, string.length())));
+		    index += w;
+		}
+		
+		for (String string2 : strings) {
+			addCentralizedString(string2, x, y, font);
+			y += graphic.getFontMetrics().getAscent() + graphic.getFontMetrics().getDescent();
+		}
+	}
 
 	public void addString(String string, int x, int y, Font font) {
 		graphic.setFont(font);
@@ -174,6 +192,12 @@ public class ImageBuilder {
 	}
 
 	public Image build() {
+		graphic.dispose();
+
+		return base;
+	}
+	
+	public BufferedImage buildImage() {
 		graphic.dispose();
 
 		return base;

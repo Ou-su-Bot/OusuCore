@@ -9,10 +9,10 @@ import java.net.URL;
 import java.util.Locale;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import me.skiincraft.discord.core.plugin.OusuPlugin;
 import me.skiincraft.discord.core.plugin.Plugin;
 import me.skiincraft.discord.core.utils.FileUtils;
 
@@ -52,6 +52,10 @@ public class LanguageManager {
 	private JsonObject object;
 	private JsonArray array;
 	private String langfile;
+	
+	public LanguageManager(OusuPlugin plugin, Language lang) {
+		new LanguageManager(plugin.getPlugin(), lang);
+	}
 
 	public LanguageManager(Plugin plugin, Language lang) {
 		this.lang = lang;
@@ -74,22 +78,57 @@ public class LanguageManager {
 	}
 	
 	public String getString(String property, String key) {
-		JsonElement ob = object.get(property).getAsJsonObject().get(key);
-		if (ob == null) {
-			JsonArray newarray = array;
+		if (!object.has(property)) {
 			JsonObject newobject = new JsonObject();
-			if (newarray.get(0).getAsJsonObject().get(property) == null) {
-				newobject.addProperty(key, "ADD TO HERE");
-				newarray.get(0).getAsJsonObject().add(property, newobject);
-			} else {
-				newarray.get(0).getAsJsonObject().get(property).getAsJsonObject().addProperty(key, "ADD TO HERE");
-			}
-			
-			FileUtils.writeWithGson(new File(langfile.substring(5)), newarray);
-			return property+"."+key;
-		} else {
-			return ob.getAsString();
+			newobject.addProperty(key, "notfoundtranslate: " + property + "."+ key);
+			array.get(0).getAsJsonObject().add(property, newobject);
+			FileUtils.writeWithGson(new File(langfile.substring(5)), array);
 		}
+		JsonObject ob = object.get(property).getAsJsonObject();
+		
+		if (!ob.has(key)) {
+			JsonArray newarray = array;
+			newarray.get(0).getAsJsonObject().get(property).getAsJsonObject().addProperty(key, "notfoundtranslate: " + property + "."+ key);
+			FileUtils.writeWithGson(new File(langfile.substring(5)), newarray);
+			return " "+property+"."+key;
+		}
+			return " " + ob.get(key).getAsString();
+	}
+	
+	public String[] getStrings(String property, String key) {
+		if (!object.has(property)) {
+			JsonObject newobject = new JsonObject();
+			newobject.addProperty(key, "notfoundtranslate: " + property + "."+ key);
+			array.get(0).getAsJsonObject().add(property, newobject);
+			FileUtils.writeWithGson(new File(langfile.substring(5)), array);
+		}
+		JsonObject ob = object.get(property).getAsJsonObject();
+		
+		if (!ob.has(key)) {
+			JsonArray newarray = array;
+			newarray.get(0).getAsJsonObject().get(property).getAsJsonObject().addProperty(key, "notfoundtranslate: " + property + "."+ key);
+			FileUtils.writeWithGson(new File(langfile.substring(5)), newarray);
+			return new String[]{" "+property+"."+key};
+		}
+			return ob.get(key).getAsString().replace("{l}", ";").split(";");
+	}
+	
+	public String getString(Class<?> property, String key) {
+		if (!object.has(property.getSimpleName())) {
+			JsonObject newobject = new JsonObject();
+			newobject.addProperty(key, "notfoundtranslate: " + property + "."+ key);
+			array.get(0).getAsJsonObject().add(property.getSimpleName(), newobject);
+			FileUtils.writeWithGson(new File(langfile.substring(5)), array);
+		}
+		JsonObject ob = object.get(property.getSimpleName()).getAsJsonObject();
+		
+		if (!ob.has(key)) {
+			JsonArray newarray = array;
+			newarray.get(0).getAsJsonObject().get(property.getSimpleName()).getAsJsonObject().addProperty(key, "notfoundtranslate: " + property.getSimpleName() + "."+ key);
+			FileUtils.writeWithGson(new File(langfile.substring(5)), newarray);
+			return " "+property.getSimpleName()+"."+key;
+		}
+			return " " + ob.get(key).getAsString();
 	}
 	
 	public static JsonArray jsonTemplate() {

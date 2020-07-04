@@ -84,6 +84,10 @@ public abstract class ChannelContext {
 	public void reply(String message) {
 		getTextChannel().sendMessage(message).queue();
 	}
+	
+	public void reply(EmbedBuilder message) {
+		getTextChannel().sendMessage(message.build()).queue();
+	}
 
 	/**
 	 * 

@@ -109,6 +109,18 @@ public class Plugin {
 	public File getPluginPath() {
 		return new File("bots\\" + discord.getBotname() + "\\");
 	}
+	
+	public File getFontPath() {
+		return new File("bots\\" + discord.getBotname() + "\\fonts\\");
+	}
+	
+	public File getAssetsPath() {
+		return new File("bots\\" + discord.getBotname() + "\\assets\\");
+	}
+	
+	public File getLanguagePath() {
+		return new File("bots\\" + discord.getBotname() + "\\language\\");
+	}
 
 	
 	protected final void startPlugin() throws InstantiationException, IllegalAccessException,
@@ -125,7 +137,9 @@ public class Plugin {
 		instancePlugin.onLoad();
 		
 		// Criar pasta local do bot.
-		new File(getPluginPath().getAbsolutePath()  + "/language").mkdirs();
+		getAssetsPath().mkdirs();
+		getLanguagePath().mkdirs();
+		getFontPath().mkdirs();
 		
 		// Criar aquivos de tradução
 		for (Language lang:Language.values()) {

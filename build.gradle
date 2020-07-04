@@ -6,6 +6,9 @@ plugins {
 repositories {
     jcenter()
     maven { url 'https://jitpack.io' }
+    flatDir {
+      dirs 'libs'
+    }
 }
 
 dependencies {
@@ -18,7 +21,10 @@ dependencies {
     implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.20.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
-    implementation 'com.github.Cristian-Sknz:Paladins-Wrapper:-SNAPSHOT'
+    implementation (name:'mysql-connector', ext:'jar');
+    implementation group: 'org.jfree', name: 'jcommon', version: '1.0.24'
+    
+    //implementation 'com.github.Cristian-Sknz:Paladins-Wrapper:-SNAPSHOT'
     testImplementation 'junit:junit:4.13'
 }
 /*

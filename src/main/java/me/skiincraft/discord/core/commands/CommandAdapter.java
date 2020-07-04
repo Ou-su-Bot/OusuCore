@@ -55,7 +55,11 @@ public class CommandAdapter extends ListenerAdapter {
 		if (getCommand(commands, args[0].substring(prefix.length())) == null) {
 			if (getCommandByAliase(commands, args[0].substring(prefix.length())) == null) {
 				return false;	
+			} else {
+				command = getCommandByAliase(commands, args[0].substring(prefix.length()));
 			}
+		} else {
+			command = getCommand(commands, args[0].substring(prefix.length()));
 		}
 		
 		if (!args[0].toLowerCase().startsWith(prefix.toLowerCase())) {
@@ -65,8 +69,6 @@ public class CommandAdapter extends ListenerAdapter {
 		if (commands.size() == 0) {
 			return false;
 		}
-		
-		command = commands.get(0);
 		
 		userId = e.getAuthor();
 		channel = e.getChannel();
@@ -85,6 +87,7 @@ public class CommandAdapter extends ListenerAdapter {
 			public void run() {
 				channel.sendTyping().queue();
 					try {
+						FieldUtils.writeField(command, "plugin", plugin, true);
 						FieldUtils.writeField(command, "context", new ChannelContext() {
 							
 							@Override

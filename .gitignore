@@ -4,3 +4,5 @@ build
 /bots/
 /bin/
 /HeroStats_sqlite.db
+/Thumbs.db
+/texto.png
