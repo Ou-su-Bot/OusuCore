@@ -192,4 +192,13 @@ public class SimplePluginManager implements PluginManager {
 		return getPluginByBotId(Long.valueOf(id));
 	}
 
+	public void restartPlugin(Plugin plugin) {
+		try {
+			plugin.restartPlugin();
+		} catch (InstantiationException | IllegalAccessException | NoSuchFieldException | SecurityException
+				| BotConfigNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

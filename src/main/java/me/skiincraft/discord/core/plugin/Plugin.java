@@ -4,16 +4,21 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 import me.skiincraft.discord.core.commands.Command;
 import me.skiincraft.discord.core.commands.CommandAdapter;
+import me.skiincraft.discord.core.essential.DatabaseEvents;
 import me.skiincraft.discord.core.exception.BotConfigNotFoundException;
 import me.skiincraft.discord.core.exception.PluginRunningException;
 import me.skiincraft.discord.core.multilanguage.LanguageManager;
 import me.skiincraft.discord.core.multilanguage.LanguageManager.Language;
 import me.skiincraft.discord.core.objects.DataBaseInfo;
 import me.skiincraft.discord.core.objects.DiscordInfo;
+import me.skiincraft.discord.core.reactions.Reaction;
 import me.skiincraft.discord.core.sqlite.SQLite;
 import me.skiincraft.discord.core.utils.FileUtils;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -27,8 +32,10 @@ public class Plugin {
 	private DiscordInfo discord;
 	private boolean sqlitedatabase;
 	private PluginManager pluginManager;
+	
 	private boolean running;
 	private boolean instantiated;
+	private ThreadGroup threadGroup;
 	
 	private Class<? extends OusuPlugin> pluginMainClass;
 	private static OusuPlugin instancePlugin;
@@ -39,7 +46,7 @@ public class Plugin {
 	private DataBaseInfo databaseinfo;
 	
 	private static ArrayList<ListenerAdapter> events = new ArrayList<>();
-	private static ArrayList<Command> commands = new ArrayList<>();	
+	private static ArrayList<Command> commands = new ArrayList<>();
 	
 	public Plugin(Class<? extends OusuPlugin> mainclass, DiscordInfo discord, PluginManager pm) {
 		this.pluginMainClass = mainclass;
@@ -54,7 +61,7 @@ public class Plugin {
 	public SQLite getSQLiteDatabase() {
 		return SQLiteDatabase;
 	}
-
+	
 	public ShardManager getShardManager() {
 		return shardManager;
 	}
@@ -121,9 +128,12 @@ public class Plugin {
 	public File getLanguagePath() {
 		return new File("bots\\" + discord.getBotname() + "\\language\\");
 	}
-
 	
-	protected final void startPlugin() throws InstantiationException, IllegalAccessException,
+	public ThreadGroup getThreadGroup() {
+		return threadGroup;
+	}
+	
+	protected synchronized final void startPlugin() throws InstantiationException, IllegalAccessException,
 			BotConfigNotFoundException, NoSuchFieldException, SecurityException {
 		if (isRunning()) {
 			throw new PluginRunningException("Plugin já esta rodando.");
@@ -132,6 +142,7 @@ public class Plugin {
 
 		instancePlugin = (OusuPlugin) getPluginMainClass().newInstance();
 		ThreadGroup thispluginthreads = new ThreadGroup(getDiscordInfo().getBotname() + "-Threads");
+		threadGroup = thispluginthreads;
 
 		// Chamar metodo load do bot.
 		instancePlugin.onLoad();
@@ -162,13 +173,11 @@ public class Plugin {
 		if (discord == null) {
 			throw new BotConfigNotFoundException("Configurações do discord estão nula(s)");
 		}
-
 		
 		shardbuilder.setToken(discord.getToken());
+		SQLiteDatabase = new SQLite(this);
 		shardbuilder.addEventListeners(new CommandAdapter(this));
-		for (ListenerAdapter e : events) {
-			shardbuilder.addEventListeners(e);
-		}
+		shardbuilder.addEventListeners(new DatabaseEvents(this));
 		shardbuilder.setDisabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE));
 
 		shardbuilder.setChunkingFilter(ChunkingFilter.NONE);
@@ -176,8 +185,6 @@ public class Plugin {
 
 		pluginManager.getPlugins().add(this);
 		FieldUtils.writeField(instancePlugin, "builder", shardbuilder, true);
-		
-		SQLiteDatabase = new SQLite(this);
 		
 		getSQLiteDatabase().abrir();
 		getSQLiteDatabase().setup();
@@ -188,30 +195,29 @@ public class Plugin {
 		t.start();
 	}
 	
+	protected final void restartPlugin() throws InstantiationException, IllegalAccessException, NoSuchFieldException, SecurityException, BotConfigNotFoundException {
+		if (!isRunning()){
+			return;
+		}
+		stopPlugin();
+		startPlugin();
+	}
+	
 	@SuppressWarnings("deprecation")
 	protected final void stopPlugin() {
 		if (!isRunning()) {
 			return;
 		}
-		
-		if (shardManager == null) {
-			return;
-		}
 		if (!isInstantiated()) {
 			return;
 		}
-		instancePlugin.onDisable();
-		ThreadGroup threadgroup = Thread.currentThread().getThreadGroup();
-		String threadgp = Thread.currentThread().getThreadGroup().getName();
-		if (threadgp.equalsIgnoreCase(getDiscordInfo().getBotname() + "-Threads")) {
-			shardManager.shutdown();
-			try {
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			threadgroup.stop();
+		if (shardManager == null) {
+			return;
 		}
+		
+		instancePlugin.onDisable();
+		shardManager.shutdown();
+		threadGroup.stop();
 	}
 
 }

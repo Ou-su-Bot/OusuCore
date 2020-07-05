@@ -26,6 +26,7 @@ public interface PluginManager {
 	void registerCommands(Command command, OusuPlugin plugin);
 	void registerEvents(ListenerAdapter listener, OusuPlugin plugin);
 	
+	void restartPlugin(Plugin plugin);
 	void disablePlugin(Plugin plugin);
 	void enablePlugin(Plugin plugin);
 	

@@ -216,8 +216,8 @@ public abstract class ChannelContext {
 		this.replyQueue(message, consumer, null, 12);
 	}
 	
-	public void replyQueue(MessageEmbed message, InputStreamFile file) {
-		this.replyQueue(message, null, file, 12);
+	public void replyQueue(MessageEmbed message, InputStreamFile file, Consumer<Message> consumer) {
+		this.replyQueue(message, consumer, file, 12);
 	}
 	
 	public void reply(MessageEmbed message) {

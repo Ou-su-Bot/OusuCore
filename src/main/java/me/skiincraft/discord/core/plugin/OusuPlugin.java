@@ -9,6 +9,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 
 import me.skiincraft.discord.core.exception.OusuPluginNotLoadedException;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 
@@ -53,6 +54,9 @@ public abstract class OusuPlugin {
 		System.out.println("Todas as shards foram carregadas.");
 		FieldUtils.writeField(plugin, "shardManager", shmanager, true);
 		FieldUtils.writeField(plugin, "running", true, true);
+		for (ListenerAdapter e : plugin.getEvents()) {
+			shmanager.addEventListener(e);
+		}
 	}
 	
 	public final ShardManager getShardManager() {
