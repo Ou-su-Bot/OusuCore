@@ -7,7 +7,7 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 
-import me.skiincraft.discord.core.exception.OusuPluginNotLoadedException;
+import me.skiincraft.discord.core.exception.LoadingException;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
@@ -18,15 +18,14 @@ public abstract class OusuPlugin {
 	private Plugin plugin;
 	private ShardManager shmanager;
 	private DefaultShardManagerBuilder builder;
-	
-	
+
 	public void onLoad() {
 		
 	}
 	
 	public void onEnable() {
 		ResourceBundle bundle = ResourceBundle.getBundle("messages", new Locale("pt", "BR"));
-		throw new OusuPluginNotLoadedException(bundle.getString("notloaded"), bundle.getString("notloaded.reason"));
+		throw new LoadingException(bundle.getString("notloaded"), bundle.getString("notloaded.reason"));
 	}
 	
 	public void onDisable() {

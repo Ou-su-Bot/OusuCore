@@ -9,8 +9,9 @@ import java.io.InputStreamReader;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.google.gson.JsonArray;
@@ -19,7 +20,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import me.skiincraft.discord.core.commands.Command;
-import me.skiincraft.discord.core.exception.BotConfigNotFoundException;
+import me.skiincraft.discord.core.exception.ConfigurationNotFound;
 import me.skiincraft.discord.core.exception.IncorrectListenerException;
 import me.skiincraft.discord.core.objects.DiscordInfo;
 import me.skiincraft.discord.core.objects.PluginConfig;
@@ -31,14 +32,14 @@ public class SimplePluginManager implements PluginManager {
 	private static ArrayList<Plugin> plugins = new ArrayList<Plugin>();
 	
 	@Override
-	public ArrayList<Plugin> getPlugins() {
+	public ArrayList<Plugin> getLoadedPlugins() {
 		return plugins;
 	}
 
 	@Override
-	public Plugin getPlugin(String plugin) {
-		for (Plugin plug : getPlugins()) {
-			if (plug.getDiscordInfo().getBotname().equalsIgnoreCase(plugin)) {
+	public Plugin getLoadedPlugin(String pluginname) {
+		for (Plugin plug : getLoadedPlugins()) {
+			if (plug.getDiscordInfo().getBotname().equalsIgnoreCase(pluginname)) {
 				return plug;
 			}
 		}
@@ -46,8 +47,8 @@ public class SimplePluginManager implements PluginManager {
 	}
 
 	@Override
-	public boolean hasPlugin(String plugin) {
-		for (Plugin plug : getPlugins()) {
+	public boolean existsLoadedPlugin(String plugin) {
+		for (Plugin plug : getLoadedPlugins()) {
 			if (plug.getDiscordInfo().getBotname().equalsIgnoreCase(plugin)) {
 				return true;
 			}
@@ -73,10 +74,15 @@ public class SimplePluginManager implements PluginManager {
 			JarURLConnection conn = (JarURLConnection) inputUrl.openConnection();
 			InputStream stream = conn.getInputStream();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+			
 			JsonElement ele = new JsonParser().parse(reader);
 			JsonArray array = ele.getAsJsonArray();
 			JsonObject object = array.get(0).getAsJsonObject();
 			JsonObject objectdiscord = object.get("DiscordInfo").getAsJsonObject();
+			
+			stream.close();
+			conn.setDefaultUseCaches(false);
+			conn.setUseCaches(false);
 			
 			return new PluginConfig(new DiscordInfo(
 					object.get("BotName").getAsString(),
@@ -107,24 +113,34 @@ public class SimplePluginManager implements PluginManager {
 	}
 
 	@Override
-	public PluginData getPluginData(String botname, String bot_main, String filename) throws BotConfigNotFoundException {
+	public PluginData getPluginData(String botname, String bot_main, String filename) throws ConfigurationNotFound {
 		return new PluginData(botname, bot_main, filename);
 	}
 
 	@Override
-	public Plugin[] getPlugins(File path) {
-		File[] files = new File(path.getName()).listFiles();
-		List<File> filelist = Arrays.asList(files);
+	public Plugin[] getPlugins(Path path) {
+		System.out.println("Começando.");
+		List<File> filelist = new ArrayList<>();
+		try {
+			Files.newDirectoryStream(path).forEach(p ->{
+				if (p.getFileName().toString().contains(".jar")) {
+					System.out.println(p.getFileName());
+					filelist.add(p.toFile());
+				}
+			});
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 		
 		List<String> pluginsname = new ArrayList<>();
 		List<String> pluginpath = new ArrayList<>();
 		filelist.forEach(f ->{
-			if (f.getName().contains(".jar")) {
 				pluginsname.add(f.getName());
 				pluginpath.add(f.getAbsolutePath().replace(f.getName(), ""));
-			}
+				System.out.println(f.getAbsoluteFile());
 		});
 		
+		System.out.println(pluginsname.size());
 		if (pluginsname.size() == 0) {
 			return new Plugin[0];
 		}
@@ -133,10 +149,11 @@ public class SimplePluginManager implements PluginManager {
 			try {
 			PluginConfig config = getPluginConfig(pluginpath.get(i), pluginsname.get(i));
 			PluginData data;
-			data  = new PluginData(config.getBotname(), config.getBot_main(), pluginsname.get(i).replace(".jar", "") + ".jar");
+			System.out.println(config.getBot_main());
+			data  = new PluginData(config.getBotname(), config.getBot_main(), filelist.get(0));
 			plugin.add(new Plugin(data.getMainclass().asSubclass(OusuPlugin.class), config.getDiscordInfo(), this));
 			} catch (Exception e) {
-				//e.printStackTrace();
+				e.printStackTrace();
 				continue;
 			}
 		}
@@ -168,7 +185,7 @@ public class SimplePluginManager implements PluginManager {
 	public void enablePlugin(Plugin plugin) {
 		try {
 			plugin.startPlugin();
-		} catch (InstantiationException | IllegalAccessException | BotConfigNotFoundException e) {
+		} catch (InstantiationException | IllegalAccessException | ConfigurationNotFound e) {
 			e.printStackTrace();
 		} catch (NoSuchFieldException e) {
 			e.printStackTrace();
@@ -179,7 +196,7 @@ public class SimplePluginManager implements PluginManager {
 
 	@Override
 	public Plugin getPluginByBotId(long id) {
-		for (Plugin plugin : getPlugins()) {
+		for (Plugin plugin : getLoadedPlugins()) {
 			if (plugin.getDiscordInfo().getBotId() == id) {
 				return plugin;	
 			}
@@ -196,7 +213,7 @@ public class SimplePluginManager implements PluginManager {
 		try {
 			plugin.restartPlugin();
 		} catch (InstantiationException | IllegalAccessException | NoSuchFieldException | SecurityException
-				| BotConfigNotFoundException e) {
+				| ConfigurationNotFound e) {
 			e.printStackTrace();
 		}
 	}
