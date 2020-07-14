@@ -5,12 +5,12 @@ import java.util.Random;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 
+import me.skiincraft.discord.core.adaptation.GenericUser;
 import me.skiincraft.discord.core.database.GuildDB;
 import me.skiincraft.discord.core.plugin.Plugin;
 import me.skiincraft.discord.core.utils.StringUtils;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -20,7 +20,6 @@ public class CommandAdapter extends ListenerAdapter {
 	private String[] args;
 	private Plugin plugin;
 	
-	private User userId;
 	private TextChannel channel;
 	@SuppressWarnings("unused")
 	private Guild guild;
@@ -52,6 +51,14 @@ public class CommandAdapter extends ListenerAdapter {
 
 		prefix = new GuildDB(plugin, e.getGuild()).get("prefix");
 		
+		if (args.length == 0) {
+			return false;
+		}
+		
+		if (!(args[0].length() >= prefix.length())) {
+			return false;
+		}
+		
 		if (getCommand(commands, args[0].substring(prefix.length())) == null) {
 			if (getCommandByAliase(commands, args[0].substring(prefix.length())) == null) {
 				return false;	
@@ -70,7 +77,6 @@ public class CommandAdapter extends ListenerAdapter {
 			return false;
 		}
 		
-		userId = e.getAuthor();
 		channel = e.getChannel();
 		guild = e.getGuild();
 		return true;
@@ -85,22 +91,15 @@ public class CommandAdapter extends ListenerAdapter {
 			
 			@Override
 			public void run() {
-				channel.sendTyping().queue();
 					try {
 						FieldUtils.writeField(command, "plugin", plugin, true);
-						FieldUtils.writeField(command, "context", new ChannelContext() {
-							
-							@Override
-							public TextChannel getTextChannel() {
-								return channel;
-							}
-						}, true);
+						FieldUtils.writeField(command, "channel", channel, true);
+						channel.sendTyping().queue();
+						command.execute(new GenericUser(event.getMember(), plugin), StringUtils.removeString(args, 0), channel);
+						Thread.currentThread().interrupt();
 					} catch (IllegalAccessException e) {
 						e.printStackTrace();
 					}
-				command.execute(userId, StringUtils.removeString(args, 0), channel);
-				
-				Thread.currentThread().interrupt();
 			}
 		};
 		Thread commandthread = new Thread(commandrunnable, plugin.getDiscordInfo().getBotname() + "-"+ command.getCommandName() + "Command-" + new Random().nextInt(13));
