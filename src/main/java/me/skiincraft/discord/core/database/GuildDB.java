@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import me.skiincraft.discord.core.plugin.Plugin;
-import me.skiincraft.discord.core.sqlite.DBObject;
 import me.skiincraft.discord.core.sqlite.Database;
+import me.skiincraft.discord.core.sqlobjects.DBObject;
 import net.dv8tion.jda.api.entities.Guild;
 
 public class GuildDB extends Database {

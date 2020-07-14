@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import me.skiincraft.discord.core.plugin.Plugin;
+import me.skiincraft.discord.core.sqlobjects.DBObject;
 import me.skiincraft.discord.core.utils.StringUtils;
 
 public abstract class Database {

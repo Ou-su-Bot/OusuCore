@@ -10,6 +10,9 @@ import java.sql.Statement;
 import java.util.function.Consumer;
 
 import me.skiincraft.discord.core.plugin.Plugin;
+import me.skiincraft.discord.core.sqlobjects.Table;
+import me.skiincraft.discord.core.sqlobjects.TableBuilder;
+import me.skiincraft.discord.core.sqlobjects.TableBuilder.TableValues;
 
 public class SQLite {
 
@@ -171,6 +174,16 @@ public class SQLite {
 	}
 
 	
+	public void createTable(Table table) {
+		executeStatementTask(statement ->{
+			try {
+				statement.execute(table.toString());
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		});
+	}
+	
 	public void createTable(String tablename, String...strings) {
 		executeStatementTask(statement ->{
 				StringBuffer buffer = new StringBuffer();
@@ -198,20 +211,25 @@ public class SQLite {
 			ousu.setDBSQL(false);*/
 			return;
 		}
-			createTable("users",
-					"`userid` VARCHAR(64) NOT NULL",
-					"`username` VARCHAR(64) NOT NULL",
-					"`lastpp` VARCHAR(64) NOT NULL",
-					"`lastscore` VARCHAR(64) NOT NULL");
-			
-			createTable("servidores",
-					"`guildid` VARCHAR(64) NOT NULL",
-					"`nome` VARCHAR(64) NOT NULL",
-					"`membros` INT",
-					"`prefix` VARCHAR(10) NOT NULL",
-					"`adicionado em` VARCHAR(24) NOT NULL",
-					"`language` VARCHAR(24) NOT NULL");
-
-			//ousu.setDBSQL(true);
+		
+		TableBuilder table = new TableBuilder("servidores");
+		table.addColumn("guildid", TableValues.VARCHAR);
+		table.addColumn("nome", TableValues.VARCHAR);
+		table.addColumn("membros", TableValues.INTEGER);
+		table.addColumn("prefix", TableValues.VARCHAR);
+		table.addColumn("adicionado em", TableValues.VARCHAR);
+		table.addColumn("language", TableValues.VARCHAR);
+		
+		createTable(table.build());
+		/*	
+		createTable("servidores",
+				"`guildid` VARCHAR(64) NOT NULL",
+				"`nome` VARCHAR(64) NOT NULL",
+				"`membros` INT",
+				"`prefix` VARCHAR(10) NOT NULL",
+				"`adicionado em` VARCHAR(24) NOT NULL",
+				"`language` VARCHAR(24) NOT NULL");
+				
+			ousu.setDBSQL(true);*/
 	}
 }

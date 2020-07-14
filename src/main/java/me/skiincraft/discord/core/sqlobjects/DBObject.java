@@ -1,4 +1,4 @@
-package me.skiincraft.discord.core.sqlite;
+package me.skiincraft.discord.core.sqlobjects;
 
 public class DBObject {
 
