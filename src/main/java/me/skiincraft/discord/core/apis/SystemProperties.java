@@ -25,7 +25,7 @@ public class SystemProperties {
 
 	    float freeMemory = Runtime.getRuntime().freeMemory() / (float) megabytes;
 	    float maxMemory = Runtime.getRuntime().maxMemory() / (float) megabytes;
-	    float usedMemory = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (float) megabytes;
+	    float usedMemory = (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().freeMemory()) / (float) megabytes;
 	    float totalMemory = Runtime.getRuntime().totalMemory() / (float) megabytes;
 
 		

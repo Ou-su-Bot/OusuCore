@@ -20,7 +20,17 @@ public class CustomFont {
 	}
 	
 	private Plugin plugin;
-
+	
+	/**
+	 * Pegue as fontes personalizadas.
+	 * <br>Essas fontes serão localizadas na pasta do bot: file:bots/yourbot/fonts.
+	 * <br>Somente fontes truetypes;
+	 * 
+	 * @param fontname Nome da fonte.
+	 * @param style Estilo da fonte ex: Font.Plain 
+	 * @param size Tamanho da fonte
+	 * @see Font
+	 */
 	public Font getFont(String fontname, int style, float size) {
 		Font f = null;
 		try {
@@ -33,7 +43,7 @@ public class CustomFont {
 
 			return f;
 		} catch (FontFormatException e) {
-			System.out.println("Foi utilizado um formato incorreto ao criar uma font.");
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

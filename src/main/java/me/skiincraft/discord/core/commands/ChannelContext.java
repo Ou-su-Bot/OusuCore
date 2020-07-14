@@ -16,13 +16,6 @@ public abstract class ChannelContext {
 	
 	public abstract TextChannel getTextChannel();
 	
-	/**
-	 * 
-	 * @param message mensagem ao ser enviada
-	 * @param consumer o que acontecerá depois da mensagem.
-	 * @param tolerancia tolerancia de espera maxima em segundos
-	 * 
-	 */
 	public void replyQueue(String message, Consumer<Message> consumer, InputStreamFile file, int tolerancia) {
 		List<Message> messagelist = new ArrayList<Message>();
 		String name = getClass().getName()
@@ -88,14 +81,7 @@ public abstract class ChannelContext {
 	public void reply(EmbedBuilder message) {
 		getTextChannel().sendMessage(message.build()).queue();
 	}
-
-	/**
-	 * 
-	 * @param message mensagem ao ser enviada
-	 * @param consumer o que acontecerá depois da mensagem.
-	 * @param tolerancia tolerancia de espera maxima em segundos
-	 * 
-	 */
+	
 	public void replyQueue(CharSequence message, Consumer<Message> consumer, InputStreamFile file, int tolerancia) {
 		List<Message> messagelist = new ArrayList<Message>();
 		String name = getClass().getName()
@@ -224,13 +210,6 @@ public abstract class ChannelContext {
 		getTextChannel().sendMessage(message).queue();
 	}
 	
-	/**
-	 * 
-	 * @param message mensagem ao ser enviada
-	 * @param consumer o que acontecerá depois da mensagem.
-	 * @param tolerancia tolerancia de espera maxima em segundos
-	 * 
-	 */
 	public void replyQueue(Message message, Consumer<Message> consumer, InputStreamFile file, int tolerancia) {
 		List<Message> messagelist = new ArrayList<Message>();
 		String name = getClass().getName()

@@ -3,7 +3,12 @@ package me.skiincraft.discord.core.utils;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+
 import java.net.URL;
 import java.util.Iterator;
 
@@ -14,6 +19,31 @@ import me.skiincraft.discord.core.apis.ColorThiefMMCQ.CMap;
 import me.skiincraft.discord.core.apis.ColorThiefMMCQ.DenormalizedVBox;
 
 public class ImageUtils {
+	
+	public static InputStream toInputStream(File imagefile) throws IOException {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		ImageIO.write(ImageIO.read(imagefile), "png", os);
+		return new ByteArrayInputStream(os.toByteArray());
+	}
+	
+	public static InputStream toInputStream(BufferedImage image) throws IOException {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		ImageIO.write(image, "png", os);
+		return new ByteArrayInputStream(os.toByteArray());
+	}
+	
+	public static InputStream toInputStream(URL imageurl) throws IOException {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		ImageIO.write(ImageIO.read(imageurl), "png", os);
+		return new ByteArrayInputStream(os.toByteArray());
+	}
+	
+	public static InputStream toInputStream(String url) throws IOException {
+		return toInputStream(new URL(url));
+	}
+	
+	
+	
 
 	public static Color getPredominatColor(BufferedImage image) {
 		try {

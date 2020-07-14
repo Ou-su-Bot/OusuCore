@@ -17,6 +17,14 @@ public abstract class Reaction extends ListenerAdapter {
 	private ReactionUtil utils;
 	private String emoji;
 	private GuildMessageReactionAddEvent event;
+	public abstract List<ReactionUtil> listHistory();
+	
+	public Reaction(String name) {
+		this.name = name;
+	}
+	
+	public abstract void execute(User user, TextChannel channel, ReactionEmote reactionEmote);
+	
 	
 	public boolean isValidReaction(GuildMessageReactionAddEvent event) {
 		List<ReactionUtil> osuhistorys = listHistory();
@@ -50,15 +58,6 @@ public abstract class Reaction extends ListenerAdapter {
 		}
 		return true;
 	}
-
-	
-	public Reaction(String name) {
-		this.name = name;
-	}
-	
-	public abstract List<ReactionUtil> listHistory();
-	
-	public abstract void execute(User user, TextChannel channel, ReactionEmote reactionEmote);
 	
 	@Override
 	public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
@@ -69,17 +68,17 @@ public abstract class Reaction extends ListenerAdapter {
 		execute(event.getUser(), event.getChannel(), event.getReactionEmote());
 	}
 	
+	public ReactionContext getReactionContext() {
+		Plugin plugin = PluginManager.getPluginManager().getPluginByBotId(event.getMessageId());
+		return new ReactionContext(plugin, event.getChannel(), event.getMessageIdLong());
+	}
+	
 	public GuildMessageReactionAddEvent getEvent() {
 		return event;
 	}
 	
 	public String getName() {
 		return name;
-	}
-	
-	public ReactionContext getReactionContext() {
-		Plugin plugin = PluginManager.getPluginManager().getPluginByBotId(event.getMessageId());
-		return new ReactionContext(plugin, event.getChannel(), event.getMessageIdLong());
 	}
 	
 	public ReactionUtil getUtils() {

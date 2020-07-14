@@ -1,4 +1,4 @@
-package me.skiincraft.discord.core.utils;
+package me.skiincraft.discord.core.classutils;
 
 import java.io.File;
 import java.io.IOException;

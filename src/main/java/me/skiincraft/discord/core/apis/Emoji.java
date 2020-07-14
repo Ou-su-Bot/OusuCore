@@ -32,9 +32,9 @@ import java.util.function.Function;
  * Emojis that begin with a number is preceded by an underscore, namely the
  * following
  * <ul>
- * <li>{@link com.github.breadmoirai.Emoji#_8BALL}</li>
- * <li>{@link com.github.breadmoirai.Emoji#_100}</li>
- * <li>{@link com.github.breadmoirai.Emoji#_1234}</li>
+ * <li>{@link me.skiincraft.discord.core.apis.Emoji#_8BALL}</li>
+ * <li>{@link me.skiincraft.discord.core.apis.Emoji#_100}</li>
+ * <li>{@link me.skiincraft.discord.core.apis.Emoji#_1234}</li>
  * </ul>
  */
 public enum Emoji {

@@ -12,9 +12,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import me.skiincraft.discord.core.database.GuildDB;
 import me.skiincraft.discord.core.plugin.OusuPlugin;
 import me.skiincraft.discord.core.plugin.Plugin;
 import me.skiincraft.discord.core.utils.FileUtils;
+import net.dv8tion.jda.api.entities.Guild;
 
 public class LanguageManager {
 
@@ -46,12 +48,20 @@ public class LanguageManager {
 		public String getCountrycode() {
 			return countrycode;
 		}
+		
+		public static Language getGuildLanguage(Plugin plugin, Guild guild) {
+			return Language.valueOf(new GuildDB(plugin, guild).get("language"));	
+		}
 	}
 	
 	private Language lang;
 	private JsonObject object;
 	private JsonArray array;
 	private String langfile;
+	
+	public LanguageManager(Plugin plugin, Guild guild) {
+		new LanguageManager(plugin, Language.getGuildLanguage(plugin, guild));
+	}
 	
 	public LanguageManager(OusuPlugin plugin, Language lang) {
 		new LanguageManager(plugin.getPlugin(), lang);
@@ -60,7 +70,7 @@ public class LanguageManager {
 	public LanguageManager(Plugin plugin, Language lang) {
 		this.lang = lang;
 		try {
-			langfile = "file:" + plugin.getPluginPath().getAbsolutePath()  + "\\language\\" + lang.getFileName();
+			langfile = "file:" + plugin.getPluginPath().getAbsolutePath()  + "/language/" + lang.getFileName();
 			InputStream in = new URL(langfile).openStream();
 
 			BufferedReader reader = new BufferedReader(new InputStreamReader(in));

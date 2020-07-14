@@ -1,6 +1,7 @@
 plugins {
-    id 'java-library'
-    //id 'application'
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
 }
 
 repositories {
@@ -23,9 +24,9 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
     implementation (name:'mysql-connector', ext:'jar');
     implementation group: 'org.jfree', name: 'jcommon', version: '1.0.24'
-    
-    //implementation 'com.github.Cristian-Sknz:Paladins-Wrapper:-SNAPSHOT'
-    testImplementation 'junit:junit:4.13'
+    implementation 'com.github.Cristian-Sknz:Paladins-Wrapper:v0.0.3'
+    //compile group: 'org.openjfx', name: 'javafx', version: '15-ea+7', ext: 'pom'
+
 }
 /*
 application {

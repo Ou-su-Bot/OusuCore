@@ -18,8 +18,6 @@ public class ReactionContext {
 		this.channel = channel;
 		this.messageId = messageId;
 	}
-	
-	
 
 	public TextChannel getChannel() {
 		return channel;

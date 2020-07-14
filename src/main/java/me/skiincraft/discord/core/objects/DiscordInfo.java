@@ -34,6 +34,7 @@ public class DiscordInfo {
 	}
 	
 	public String getDefaultPrefix() {
+		new OubedBuilder(null, "");
 		return defaultPrefix;
 	}
 

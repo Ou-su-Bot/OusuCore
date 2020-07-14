@@ -1,6 +1,6 @@
 package me.skiincraft.discord.core.exception;
 
-public class OusuPluginNotLoadedException extends RuntimeException {
+public class LoadingException extends RuntimeException {
 
 	/**
 	 * 
@@ -10,7 +10,7 @@ public class OusuPluginNotLoadedException extends RuntimeException {
 	private String message;
 	private String reason;
 	
-	public OusuPluginNotLoadedException(String message, String reason) {
+	public LoadingException(String message, String reason) {
 		this.message = message;
 		this.reason = reason;
 	}
