@@ -9,20 +9,20 @@ import me.skiincraft.discord.core.exception.ConfigurationNotFound;
 
 public class PluginData {
 	
-	private String botname;
-	private String bot_main;
-	private String filename;
+	private String botName;
+	private String botMain;
+	private String fileName;
 	
-	private Class<?> mainclass;
+	private Class<?> mainClass;
 	
 	public PluginData(String botname, String bot_main, String filename) throws ConfigurationNotFound {
-		this.botname = botname;
-		this.bot_main = bot_main;
-		this.filename = filename;
+		this.botName = botname;
+		this.botMain = bot_main;
+		this.fileName = filename;
 		
 		try {
 			String main = bot_main;
-			mainclass = Class.forName(main, true,
+			mainClass = Class.forName(main, true,
 					new URLClassLoader(new URL[] {new URL("file:bots\\" + filename.replace(".jar", "") + ".jar")}));
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -33,14 +33,14 @@ public class PluginData {
 		}
 	}
 	
-	public PluginData(String botname, String bot_main, File file) throws ConfigurationNotFound {
-		this.botname = botname;
-		this.bot_main = bot_main;
-		this.filename = file.getName();
+	public PluginData(String botname, String botMain, File file) throws ConfigurationNotFound {
+		this.botName = botname;
+		this.botMain = botMain;
+		this.fileName = file.getName();
 		
 		try {
-			String main = bot_main;
-			mainclass = Class.forName(main, true,
+			String main = botMain;
+			mainClass = Class.forName(main, true,
 					new URLClassLoader(new URL[] {new URL("file:" + file.getAbsoluteFile().toString())}));
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -51,20 +51,20 @@ public class PluginData {
 		}
 	}
 	
-	public String getBotname() {
-		return botname;
+	public String getBotName() {
+		return botName;
 	}
 
-	public String getBot_main() {
-		return bot_main;
+	public String getBotMain() {
+		return botMain;
 	}
 
 	public String getFilename() {
-		return filename;
+		return fileName;
 	}
 
 	public Class<?> getMainclass() {
-		return mainclass;
+		return mainClass;
 	}
 	
 	

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import me.skiincraft.discord.core.plugin.Plugin;
+import me.skiincraft.discord.core.plugin.PluginManager;
 import me.skiincraft.discord.core.sqlite.Database;
 import me.skiincraft.discord.core.sqlobjects.DBObject;
 import net.dv8tion.jda.api.entities.Guild;
@@ -15,8 +15,8 @@ public class GuildDB extends Database {
 
 	private Guild guild;
 	
-	public GuildDB(Plugin plugin, Guild guild) {
-		super(plugin);
+	public GuildDB(Guild guild) {
+		super(PluginManager.getPluginManager().getPlugin());
 		this.guild = guild;
 	}
 

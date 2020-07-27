@@ -19,18 +19,14 @@ public abstract class OusuPlugin {
 	private ShardManager shmanager;
 	private DefaultShardManagerBuilder builder;
 
-	public void onLoad() {
-		
-	}
+	public void onLoad() {}
 	
 	public void onEnable() {
 		ResourceBundle bundle = ResourceBundle.getBundle("messages", new Locale("pt", "BR"));
 		throw new LoadingException(bundle.getString("notloaded"), bundle.getString("notloaded.reason"));
 	}
 	
-	public void onDisable() {
-		
-	}
+	public void onDisable() {}
 	
 	public final void startbot() throws LoginException, IllegalArgumentException, IllegalAccessException {
 		try {

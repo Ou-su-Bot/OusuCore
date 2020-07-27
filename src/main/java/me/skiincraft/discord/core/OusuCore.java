@@ -3,11 +3,18 @@ package me.skiincraft.discord.core;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
-import me.skiincraft.discord.core.plugin.Plugin;
+import org.apache.commons.lang3.reflect.MethodUtils;
+
+import me.skiincraft.discord.core.event.EventManager;
+import me.skiincraft.discord.core.file.ConfigurationProperties;
+import me.skiincraft.discord.core.impl.PluginManagerImpl;
+import me.skiincraft.discord.core.plugin.PluginInit;
 import me.skiincraft.discord.core.plugin.PluginManager;
 import me.skiincraft.discord.core.view.OusuViewer;
 
@@ -18,23 +25,67 @@ public class OusuCore {
 	public static final int EXIT_RESTART = 2;
 	public static final int EXIT_ERROR = 3;
 	
-	public static PluginManager pluginManager;
-	public static List<ThreadGroup> threadgroups = new ArrayList<>();
-	
+	private static PluginManager pluginManager;
+	private static OusuViewer ousuViewer;
 	private static String[] jvmArguments;
-	public static final String[] arguments = jvmArguments;
 	
-	public static void main(String[] args) throws IOException {
-		jvmArguments = args;
-		//start();
-		//OusuViewer.start(args);
+	static void createPath(String... uri) throws IOException {
+		for (String i : uri) {
+			if (!Paths.get(i).toFile().exists()) {
+				Files.createDirectories(Paths.get(i));
+			}
+		}
 	}
 	
-	public static void start() {
-		OusuViewer.start(jvmArguments, () -> {
-			//pluginManager = new SimplePluginManager();
-			//loadPlugins();
-		});
+	public static void main(String[] args) throws IOException {
+		/* 
+		 * Creating paths.
+		 */
+		createPath("bots", "dependency", "logs");
+		
+		/* 
+		 * Creating "configuration files"
+		 */
+		ConfigurationProperties config = new ConfigurationProperties();
+		Properties properties = config.getProperties();
+		
+		jvmArguments = args;
+		/* 
+		 * Creating task to run on the JavaFX Thread
+		 */
+		Runnable runnable = () -> {
+			pluginManager = new PluginManagerImpl(new PluginInit());
+			pluginManager.loadPlugin(Paths.get("bots"));
+			pluginManager.enablePlugin();
+		};
+		ousuViewer = new OusuViewer(runnable, jvmArguments);
+		/* 
+		 * Checking if the interface is active in the configurations
+		 */
+		String interfaceValue = (properties.containsKey("interface")) ? properties.getProperty("interface")
+				: null;
+		if (interfaceValue == null || !isBoolean(interfaceValue)) {
+			System.out.println(properties.keySet().stream().collect(Collectors.toList()));
+			System.out.println("Há opções invalidas no config.properties");
+			return;
+		}
+		
+		/* 
+		 * Running JavaFX application
+		 */
+		if (Boolean.valueOf(interfaceValue) == true) {
+			start(runnable);
+		} else {
+			runnable.run();
+		}
+	}
+	
+	private static void start(Runnable runnable) {
+		try {
+			MethodUtils.invokeMethod(ousuViewer, true, "launchViewer");
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -67,20 +118,26 @@ public class OusuCore {
 	 *
 	 */
 	public static void exit(int exitcode) {
-		List<Plugin> allplugins = pluginManager.getLoadedPlugins();
-		for (Plugin plugin : allplugins) {
-			pluginManager.disablePlugin(plugin);
-		}
-		
-		
+		pluginManager.disablePlugin();
 	}
 	
-	private static void loadPlugins() {
-		Plugin[] plugins = pluginManager.getPlugins(Paths.get("bots"));
-		for (Plugin plugin : plugins) {
-			pluginManager.enablePlugin(plugin);
+	private static boolean isBoolean(String string) {
+		if (string.equalsIgnoreCase("true") || string.equalsIgnoreCase("false")) {
+			return true;
 		}
+		return false;
 	}
 	
+	public static OusuViewer getOusuViewer() {
+		return ousuViewer;
+	}
 
+	public static EventManager getEventManager() {
+		return getPluginManager().getEventManager();
+	}
+	
+	public static PluginManager getPluginManager() {
+		return pluginManager;
+	}
+	
 }

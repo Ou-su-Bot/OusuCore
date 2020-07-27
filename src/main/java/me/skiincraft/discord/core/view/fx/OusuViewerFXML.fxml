@@ -22,7 +22,7 @@
       <TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="@../css/tabpane.css" tabClosingPolicy="UNAVAILABLE">
          <tabs>
             <Tab closable="false" disable="true" text="OK" />
-            <Tab fx:id="ousuTab1" closable="false" onSelectionChanged="#optionButton" style="-fx-cursor: HAND;" text="Home">
+            <Tab fx:id="ousuTab1" closable="false" disable="true" onSelectionChanged="#optionButton" style="-fx-cursor: HAND;" text="Home">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: f3f3f3;">
                      <children>
@@ -104,7 +104,8 @@
                               <TextField fx:id="searchField" layoutX="4.0" layoutY="2.0" onKeyPressed="#searchFieldEvent" prefHeight="27.0" prefWidth="388.0" promptText="Guild Search" style="-fx-border-color: #00b6eb; -fx-border-radius: 2;" />
                               <ListView fx:id="searchList" layoutX="4.0" layoutY="29.0" prefHeight="96.0" prefWidth="436.0" />
                               <Label layoutX="196.0" layoutY="109.0" text="OusuCore" textAlignment="CENTER" />
-                              <Button fx:id="guildSearchDetails" layoutX="388.0" layoutY="2.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="52.0" style="-fx-background-color: #00b6eb;" text="Details" />
+                              <Button fx:id="guildSearchDetails" layoutX="388.0" layoutY="2.0" mnemonicParsing="false" onAction="#detailsAction" prefHeight="27.0" prefWidth="52.0" style="-fx-background-color: #00b6eb;" text="Details" />
+                              <Text fx:id="listSize" layoutX="417.0" layoutY="122.0" strokeType="OUTSIDE" strokeWidth="0.0" text="222" textAlignment="RIGHT" />
                            </children>
                         </AnchorPane>
                         <AnchorPane layoutX="462.0" layoutY="205.0" prefHeight="133.0" prefWidth="135.0" />
@@ -137,6 +138,7 @@
           </Menu>
         </menus>
       </MenuBar>
+      <Button fx:id="refreshButton" layoutX="549.0" layoutY="10.0" mnemonicParsing="false" onAction="#refreshViewer" prefHeight="39.0" prefWidth="37.0" visible="false" />
       <ImageView fx:id="ousulogo" fitHeight="39.0" fitWidth="37.0" layoutX="6.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" smooth="false">
          <cursor>
             <Cursor fx:constant="DEFAULT" />

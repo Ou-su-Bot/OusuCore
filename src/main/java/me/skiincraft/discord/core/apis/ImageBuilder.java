@@ -97,6 +97,10 @@ public class ImageBuilder {
 		this.drawImage(image, x, y, size, Alignment.Center);
 	}
 	
+	public void drawImage(InputStream image, int x, int y, Dimension size) throws IOException {
+		this.drawImage(ImageIO.read(image), x, y, size, Alignment.Center);
+	}
+	
 	public void drawImage(File image, int x, int y, Dimension size) throws IOException {
 		this.drawImage(ImageIO.read(image), x, y, size, Alignment.Center);
 	}

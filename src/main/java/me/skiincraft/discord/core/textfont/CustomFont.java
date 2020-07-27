@@ -6,17 +6,13 @@ import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
 
-import me.skiincraft.discord.core.plugin.OusuPlugin;
 import me.skiincraft.discord.core.plugin.Plugin;
+import me.skiincraft.discord.core.plugin.PluginManager;
 
 public class CustomFont {
-
-	public CustomFont(OusuPlugin plugin) {
-		this.plugin = plugin.getPlugin();
-	}
 	
-	public CustomFont(Plugin plugin) {
-		this.plugin = plugin;
+	public CustomFont() {
+		this.plugin = PluginManager.getPluginManager().getPlugin();
 	}
 	
 	private Plugin plugin;

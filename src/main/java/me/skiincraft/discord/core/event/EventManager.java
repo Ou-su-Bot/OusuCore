@@ -6,12 +6,24 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import me.skiincraft.discord.core.plugin.Plugin;
+import me.skiincraft.discord.core.plugin.PluginManager;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+
 public class EventManager {
 
 	private static List<Listener> listeners = new ArrayList<>();
+	private static List<ListenerAdapter> JDAListeners = new ArrayList<>();
 	
-	public EventManager() {
-		
+	public void callEvent(Event event) {
+		Thread thread = new Thread(() -> {
+			call(event);
+		}, event.getClass().getSimpleName());
+		thread.start();
+	}
+	
+	protected List<Listener> getListeners(){
+		return listeners;
 	}
 	
 	public void registerListener(Listener listener) {
@@ -26,11 +38,14 @@ public class EventManager {
 		}		
 	}
 	
-	public void callEvent(Event event) {
-		Thread thread = new Thread(() -> {
-			call(event);
-		}, event.getClass().getSimpleName());
-		thread.start();
+	public void registerListener(ListenerAdapter listener) {
+		if (!JDAListeners.contains(listener)) {
+			JDAListeners.add(listener);
+		}
+	}
+	
+	public Plugin getPlugin() {
+		return PluginManager.getPluginManager().getPlugin();
 	}
 	
 	private void call(Event event) {
@@ -75,6 +90,7 @@ public class EventManager {
 			runnable.run();
 		}
 	}
+	
 
 	abstract class EventRunnable {
 		private EventPriority priority;
@@ -93,6 +109,7 @@ public class EventManager {
 			this.priority = priority;
 		}
 	}
+	
 	
 
 }

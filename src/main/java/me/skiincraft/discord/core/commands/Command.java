@@ -2,20 +2,19 @@ package me.skiincraft.discord.core.commands;
 
 import java.util.List;
 
-import me.skiincraft.discord.core.adaptation.GenericUser;
-import me.skiincraft.discord.core.database.GuildDB;
+import me.skiincraft.discord.core.entity.BotTextChannel;
+import me.skiincraft.discord.core.entity.BotUser;
+import me.skiincraft.discord.core.entity.ChannelInteract;
 import me.skiincraft.discord.core.multilanguage.LanguageManager;
-import me.skiincraft.discord.core.multilanguage.LanguageManager.Language;
 import me.skiincraft.discord.core.plugin.Plugin;
+import me.skiincraft.discord.core.plugin.PluginManager;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-public abstract class Command extends ChannelContext {
+public abstract class Command extends ChannelInteract {
 
 	private String name;
 	private List<String> aliases;
 	private String usage;
-	
-	private Plugin plugin;
 	
 	private TextChannel channel;
 	
@@ -29,7 +28,7 @@ public abstract class Command extends ChannelContext {
 		return language.getString("CommandDescription", name.toUpperCase() +"_DESCRIPTION");
 	}
 	
-	public abstract void execute(GenericUser user, String[] args, TextChannel channel);
+	public abstract void execute(BotUser user, String[] args, BotTextChannel channel);
 
 	public String getCommandName() {
 		return name;
@@ -44,7 +43,7 @@ public abstract class Command extends ChannelContext {
 	}
 	
 	public Plugin getPlugin() {
-		return plugin;
+		return PluginManager.getPluginManager().getPlugin();
 	}
 	
 	public TextChannel getTextChannel() {
@@ -52,8 +51,7 @@ public abstract class Command extends ChannelContext {
 	}
 	
 	public LanguageManager getLanguageManager() {
-		GuildDB db = new GuildDB(plugin, getTextChannel().getGuild());
-		return new LanguageManager(plugin, Language.valueOf(db.get("language")));
+		return new LanguageManager(getTextChannel().getGuild());
 	}
 	
 }

@@ -69,7 +69,7 @@ public abstract class Reaction extends ListenerAdapter {
 	}
 	
 	public ReactionContext getReactionContext() {
-		Plugin plugin = PluginManager.getPluginManager().getPluginByBotId(event.getMessageId());
+		Plugin plugin = PluginManager.getPluginManager().getPlugin();
 		return new ReactionContext(plugin, event.getChannel(), event.getMessageIdLong());
 	}
 	

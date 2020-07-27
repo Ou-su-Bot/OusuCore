@@ -3,27 +3,27 @@ package me.skiincraft.discord.core.objects;
 public class PluginConfig {
 
 	private DiscordInfo discordInfo;
-	private String botname;
-	private String bot_main;
-	private String filename;
+	private String botName;
+	private String botMain;
+	private String fileName;
 
-	public PluginConfig(DiscordInfo discordInfo, String botname, String bot_main, String filename) {
+	public PluginConfig(DiscordInfo discordInfo, String botname, String botMain, String filename) {
 		this.discordInfo = discordInfo;
-		this.botname = botname;
-		this.bot_main = bot_main;
-		this.filename = filename;
+		this.botName = botname;
+		this.botMain = botMain;
+		this.fileName = filename;
 	}
 
-	public String getBotname() {
-		return botname;
+	public String getBotName() {
+		return botName;
 	}
 
-	public String getBot_main() {
-		return bot_main;
+	public String getBotMain() {
+		return botMain;
 	}
 
-	public String getFilename() {
-		return filename;
+	public String getFileName() {
+		return fileName;
 	}
 
 	public DiscordInfo getDiscordInfo() {

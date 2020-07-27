@@ -38,11 +38,13 @@ public class ConsoleController implements Initializable {
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		consoleViewer.setText("");
 		Console console = new Console(consoleViewer);
+		new Thread(()-> {
 		sys = new PrintStream(console, true);
 		System.setOut(sys);
 		System.setErr(sys);
 		
 		System.err.flush();System.out.flush();
+		}).run();
 		ConsoleController.console = console;
 	}
 	
@@ -70,8 +72,10 @@ public class ConsoleController implements Initializable {
 	}
 	
 	private void executeCommand() {
+		Platform.runLater(()-> {
 		ConsoleListener.executeCommand(consoleTextField.getText().split(" "));
 		consoleTextField.setText("");
+		});
 	}
     
     

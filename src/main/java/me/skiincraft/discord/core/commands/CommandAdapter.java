@@ -5,11 +5,11 @@ import java.util.Random;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 
-import me.skiincraft.discord.core.adaptation.GenericUser;
 import me.skiincraft.discord.core.database.GuildDB;
+import me.skiincraft.discord.core.impl.BotTextChannelImpl;
+import me.skiincraft.discord.core.impl.BotUserImpl;
 import me.skiincraft.discord.core.plugin.Plugin;
 import me.skiincraft.discord.core.utils.StringUtils;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -21,9 +21,6 @@ public class CommandAdapter extends ListenerAdapter {
 	private Plugin plugin;
 	
 	private TextChannel channel;
-	@SuppressWarnings("unused")
-	private Guild guild;
-	
 	private Command command;
 
 	public CommandAdapter(Plugin plugin) {
@@ -46,10 +43,11 @@ public class CommandAdapter extends ListenerAdapter {
 		if (e.getAuthor().isFake()) {
 			return false;
 		}
+		
 		//plugin = PluginManager.getPluginManager().getPluginByBotId(e.getJDA().getSelfUser().getIdLong());
 		ArrayList<Command> commands = plugin.getCommands();
 
-		prefix = new GuildDB(plugin, e.getGuild()).get("prefix");
+		prefix = new GuildDB(e.getGuild()).get("prefix");
 		
 		if (args.length == 0) {
 			return false;
@@ -68,7 +66,6 @@ public class CommandAdapter extends ListenerAdapter {
 		} else {
 			command = getCommand(commands, args[0].substring(prefix.length()));
 		}
-		
 		if (!args[0].toLowerCase().startsWith(prefix.toLowerCase())) {
 			return false;
 		}
@@ -78,7 +75,6 @@ public class CommandAdapter extends ListenerAdapter {
 		}
 		
 		channel = e.getChannel();
-		guild = e.getGuild();
 		return true;
 	}
 	
@@ -92,10 +88,10 @@ public class CommandAdapter extends ListenerAdapter {
 			@Override
 			public void run() {
 					try {
-						FieldUtils.writeField(command, "plugin", plugin, true);
+						//FieldUtils.writeField(command, "plugin", plugin, true);
 						FieldUtils.writeField(command, "channel", channel, true);
 						channel.sendTyping().queue();
-						command.execute(new GenericUser(event.getMember(), plugin), StringUtils.removeString(args, 0), channel);
+						command.execute(new BotUserImpl(event.getMember()), StringUtils.removeString(args, 0), new BotTextChannelImpl(channel, event.getMember(), event.getMessage()));
 						Thread.currentThread().interrupt();
 					} catch (IllegalAccessException e) {
 						e.printStackTrace();
