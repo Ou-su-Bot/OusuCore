@@ -8,6 +8,10 @@ import java.util.regex.Pattern;
 
 public class StringUtils {
 
+	public static boolean containsEqualsIgnoreCase(String str, String searchStr) {
+		return org.apache.commons.lang3.StringUtils.containsIgnoreCase(str, searchStr);
+	}
+	
 	
 	public static String insertBuild(String...strings) {
 		StringBuffer buffer = new StringBuffer();

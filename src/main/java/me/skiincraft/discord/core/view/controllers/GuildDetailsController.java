@@ -134,6 +134,9 @@ public class GuildDetailsController implements Initializable {
 		
 		voiceFactory();
 		textFactory();
+		okButton.setOnAction(action -> {
+			
+		});
 	}
 	
 	private void voiceFactory() {

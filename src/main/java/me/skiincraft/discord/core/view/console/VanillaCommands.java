@@ -1,11 +1,11 @@
 package me.skiincraft.discord.core.view.console;
 
-import me.skiincraft.discord.core.view.console.commands.ExitCommand;
+import me.skiincraft.discord.core.view.console.commands.RestartCommand;
 
 public final class VanillaCommands {
 	
 	public static void registerVanillaCommands() {
-		ConsoleListener.registerCommand(new ExitCommand());
+		ConsoleListener.registerCommand(new RestartCommand());
 	}
 	
 }

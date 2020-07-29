@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 public class TableBuilder {
 	
 	private String tablename;
+	private boolean idAutoIncrement = true;
 	private List<String> keys = new ArrayList<>();
 	private List<TableValues> values = new ArrayList<>();
 	
@@ -46,5 +47,13 @@ public class TableBuilder {
 	
 	public Table build() {
 		return new Table(this);
+	}
+
+	public boolean isIdAutoIncrement() {
+		return idAutoIncrement;
+	}
+
+	public void setIdAutoIncrement(boolean idAutoIncrement) {
+		this.idAutoIncrement = idAutoIncrement;
 	}
 }

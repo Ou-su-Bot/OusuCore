@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -16,6 +19,7 @@ import me.skiincraft.discord.core.file.ConfigurationProperties;
 import me.skiincraft.discord.core.impl.PluginManagerImpl;
 import me.skiincraft.discord.core.plugin.PluginInit;
 import me.skiincraft.discord.core.plugin.PluginManager;
+import me.skiincraft.discord.core.utils.IntegerUtils;
 import me.skiincraft.discord.core.view.OusuViewer;
 
 public class OusuCore {
@@ -57,18 +61,61 @@ public class OusuCore {
 			pluginManager = new PluginManagerImpl(new PluginInit());
 			pluginManager.loadPlugin(Paths.get("bots"));
 			pluginManager.enablePlugin();
+			
+			String restartValue = (properties.containsKey("auto-restart")) ? properties.getProperty("auto-restart")
+					: null;
+
+			if (restartValue == null || !isBoolean(restartValue)) {
+				System.out.println(properties.keySet().stream().collect(Collectors.toList()));
+				System.out.println("Há opções invalidas no config.properties");
+				return;
+			} else {
+				if (Boolean.valueOf(restartValue) == true) {
+					new Thread(() -> {
+						System.out.println("Reiniciando em 1h");
+						long restarttime = (properties.containsKey("restart-time"))
+								? (IntegerUtils.isNumeric(properties.getProperty("restart-time")))
+										? Long.valueOf(properties.getProperty("restart-time"))
+										: 60L
+								: 60L;
+						try {
+							Thread.sleep(restarttime * (60 * 1000));
+							restart(jvmArguments);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}).start();
+				}
+			}
 		};
-		ousuViewer = new OusuViewer(runnable, jvmArguments);
+		
 		/* 
 		 * Checking if the interface is active in the configurations
 		 */
 		String interfaceValue = (properties.containsKey("interface")) ? properties.getProperty("interface")
 				: null;
+		
 		if (interfaceValue == null || !isBoolean(interfaceValue)) {
 			System.out.println(properties.keySet().stream().collect(Collectors.toList()));
 			System.out.println("Há opções invalidas no config.properties");
 			return;
 		}
+		
+		/*
+		 * Loading Dependencies
+		 */
+		Files.newDirectoryStream(Paths.get("dependency")).forEach(path ->{
+			try {
+				if (path.toFile().getName().contains(".jar")) {
+					addURL(path.toFile());
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		});
 		
 		/* 
 		 * Running JavaFX application
@@ -82,12 +129,16 @@ public class OusuCore {
 	
 	private static void start(Runnable runnable) {
 		try {
+			ousuViewer = new OusuViewer(runnable, jvmArguments);
 			MethodUtils.invokeMethod(ousuViewer, true, "launchViewer");
 		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	public static void restart() throws IOException {
+		restart(jvmArguments);
+	}
 	
 	public static void restart(String[] args) throws IOException {
 		StringBuffer command = new StringBuffer();
@@ -139,5 +190,22 @@ public class OusuCore {
 	public static PluginManager getPluginManager() {
 		return pluginManager;
 	}
+	
+	private static void addURL(File jar) throws Exception {
+		URL url = jar.toURI().toURL();
+		Method method = URLClassLoader.class.getDeclaredMethod("addURL",
+				new Class[] { URL.class });
+		method.setAccessible(true); /* promote the method to public access */
+		//;
+		method.invoke(Thread.currentThread().getContextClassLoader(), new Object[] { url });
+		/* old method
+		  URLClassLoader classLoader
+		         = (URLClassLoader) ClassLoader.getSystemClassLoader().getClass();
+		  Class<URLClassLoader> clazz= URLClassLoader.class;
+
+		  Method method= clazz.getDeclaredMethod("addURL", new Class[] { URL.class });
+		  method.setAccessible(true);
+		  method.invoke(classLoader, new Object[] { url });*/
+		}
 	
 }

@@ -51,8 +51,19 @@ public abstract class ChannelInteract {
 	}
 	
 	public void reply(ContentMessage message) {
-		getTextChannel().sendMessage(message.getMessage()).addFile(message.getInputStream(), null)
-				.queue(eventConsumer());
+		String name = "c0r3-" + new Random().nextInt(400);
+		if (message.isEmbedMessage()) {
+			EmbedBuilder embedMessage = new EmbedBuilder(message.getMessageEmbed());
+			embedMessage.setImage("attachment://" + name + message.getInputExtension());
+			System.out.println("Messagem embed");
+			getTextChannel().sendMessage(embedMessage.build())
+					.addFile(message.getInputStream(), name + message.getInputExtension())
+					.queue(eventConsumer());
+		} else {
+			getTextChannel().sendMessage(message.getMessage())
+					.addFile(message.getInputStream(), name + message.getInputExtension())
+					.queue(eventConsumer());
+		}
 	}
 	
 	public void reply(String message) {
@@ -82,7 +93,7 @@ public abstract class ChannelInteract {
 		String name = "c0r3-" + new Random().nextInt(400);
 		if (message.isEmbedMessage()) {
 			EmbedBuilder embedMessage = new EmbedBuilder(message.getMessageEmbed());
-			embedMessage.setImage("attachment://" + name);
+			embedMessage.setImage("attachment://" + name + message.getInputExtension());
 			getTextChannel().sendMessage(embedMessage.build())
 					.addFile(message.getInputStream(), name + message.getInputExtension())
 					.queue(eventConsumer(messageAfter));

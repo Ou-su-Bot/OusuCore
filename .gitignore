@@ -6,3 +6,6 @@ build
 /HeroStats_sqlite.db
 /Thumbs.db
 /texto.png
+.settings/org.eclipse.buildship.core.prefs
+dependency/paladins.jar
+.settings/org.eclipse.buildship.core.prefs

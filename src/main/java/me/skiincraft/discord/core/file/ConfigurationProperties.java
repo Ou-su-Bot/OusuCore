@@ -34,6 +34,11 @@ public class ConfigurationProperties {
 				e.printStackTrace();
 			}
 		}
+		try {
+			properties.load(new FileInputStream(file));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public Properties getProperties() {
