@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import me.skiincraft.discord.core.commands.Command;
+import me.skiincraft.discord.core.configuration.Command;
 import me.skiincraft.discord.core.event.Listener;
 import me.skiincraft.discord.core.exception.ConfigurationNotFound;
 import me.skiincraft.discord.core.objects.PluginConfig;

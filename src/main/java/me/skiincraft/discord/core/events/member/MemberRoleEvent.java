@@ -2,7 +2,7 @@ package me.skiincraft.discord.core.events.member;
 
 import java.util.List;
 
-import me.skiincraft.discord.core.events.enums.RoleEventType;
+import me.skiincraft.discord.core.events.enums.EventType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -11,24 +11,24 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleRemoveEvent;
 
 public class MemberRoleEvent extends MemberEvent {
 
-	private RoleEventType eventType;
+	private EventType eventType;
 	private Guild guild;
 	private Member member;
 	private List<Role> roles;
 	
 	public MemberRoleEvent(GuildMemberRoleAddEvent e) {
-		eventType = RoleEventType.ADD;
+		eventType = EventType.ADD;
 		guild = e.getGuild();
 		member = e.getMember();
 	}
 	
 	public MemberRoleEvent(GuildMemberRoleRemoveEvent e) {
-		eventType = RoleEventType.REMOVE;
+		eventType = EventType.REMOVE;
 		guild = e.getGuild();
 		member = e.getMember();
 	}
 	
-	public RoleEventType getEventType() {
+	public EventType getEventType() {
 		return eventType;
 	}
 	

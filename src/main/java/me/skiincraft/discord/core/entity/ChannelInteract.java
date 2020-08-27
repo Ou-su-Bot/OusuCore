@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 public abstract class ChannelInteract {
 	
@@ -23,7 +24,8 @@ public abstract class ChannelInteract {
 		return con ->{
 			PluginManager.getPluginManager().getEventManager()
 			.callEvent(new BotSendMessage((TextChannel) con.getChannel(), con, con.getJDA().getSelfUser()));
-			if (messageList != null)messageList.add(con);
+			
+			if (messageList != null) messageList.add(con);
 		};
 	}
 	private Thread queueThread(List<Message> messages, Consumer<Message> consumer) {
@@ -51,11 +53,10 @@ public abstract class ChannelInteract {
 	}
 	
 	public void reply(ContentMessage message) {
-		String name = "c0r3-" + new Random().nextInt(400);
+		String name = message.getInputName() == null ? "c0r3-" + new Random().nextInt(400) : message.getInputName();
 		if (message.isEmbedMessage()) {
 			EmbedBuilder embedMessage = new EmbedBuilder(message.getMessageEmbed());
 			embedMessage.setImage("attachment://" + name + message.getInputExtension());
-			System.out.println("Messagem embed");
 			getTextChannel().sendMessage(embedMessage.build())
 					.addFile(message.getInputStream(), name + message.getInputExtension())
 					.queue(eventConsumer());
@@ -76,8 +77,12 @@ public abstract class ChannelInteract {
 	
 	public void reply(Message message, Consumer<Message> afterSucefull) {
 		List<Message> messageAfter = new ArrayList<>();
-		getTextChannel().sendMessage(message).queue(eventConsumer(messageAfter));
-		queueThread(messageAfter, afterSucefull);
+		MessageAction action = getTextChannel().sendMessage(message);
+		action.queue(eventConsumer(messageAfter));
+		
+		Thread queue = queueThread(messageAfter, afterSucefull);
+		
+		queue.run();
 	}
 	
 	public void reply(String message, Consumer<Message> afterSucefull) {
@@ -90,7 +95,7 @@ public abstract class ChannelInteract {
 	
 	public void reply(ContentMessage message, Consumer<Message> afterSucefull) {
 		List<Message> messageAfter = new ArrayList<>();
-		String name = "c0r3-" + new Random().nextInt(400);
+		String name = message.getInputName() == null ? "c0r3-" + new Random().nextInt(400) : message.getInputName();
 		if (message.isEmbedMessage()) {
 			EmbedBuilder embedMessage = new EmbedBuilder(message.getMessageEmbed());
 			embedMessage.setImage("attachment://" + name + message.getInputExtension());
@@ -103,7 +108,7 @@ public abstract class ChannelInteract {
 					.queue(eventConsumer(messageAfter));
 		}
 		
-		queueThread(messageAfter, afterSucefull);
+		queueThread(messageAfter, afterSucefull).run();
 	}
 
 }

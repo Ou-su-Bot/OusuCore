@@ -33,7 +33,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
 import me.skiincraft.discord.core.OusuCore;
-import me.skiincraft.discord.core.apis.ImageBuilder;
+import me.skiincraft.discord.core.utils.ImageBuilder;
 import me.skiincraft.discord.core.view.OusuViewer;
 import me.skiincraft.discord.core.view.editor.ViewContent;
 import me.skiincraft.discord.core.view.images.OusuImages;

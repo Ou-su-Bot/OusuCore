@@ -3,18 +3,15 @@ package me.skiincraft.discord.core.reactions;
 import java.util.Arrays;
 import java.util.List;
 
-import me.skiincraft.discord.core.plugin.Plugin;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 public class ReactionContext {
 	
-	private Plugin plugin;
 	private TextChannel channel;
 	private long messageId;
 
-	public ReactionContext(Plugin plugin, TextChannel channel, long messageId) {
-		this.plugin = plugin;
+	public ReactionContext(TextChannel channel, long messageId) {
 		this.channel = channel;
 		this.messageId = messageId;
 	}
@@ -41,6 +38,7 @@ public class ReactionContext {
 		if (v >= embeds.size()) {
 			return;
 		}
+		obj.setOrdem(v);
 		channel.editMessageById(messageId, embeds.get(v).build()).queue();
 	}
 	
@@ -55,14 +53,9 @@ public class ReactionContext {
 			v = 0;
 			return;
 		} else {
-			v += 1;
+			v -= 1;
 		}
-		
+		obj.setOrdem(v);
 		channel.editMessageById(messageId, embeds.get(v).build()).queue();
 	}
-	
-	public Plugin getPlugin() {
-		return plugin;
-	}
-	
 }

@@ -2,8 +2,6 @@ package me.skiincraft.discord.core.reactions;
 
 import java.util.List;
 
-import me.skiincraft.discord.core.plugin.Plugin;
-import me.skiincraft.discord.core.plugin.PluginManager;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
@@ -17,6 +15,7 @@ public abstract class Reaction extends ListenerAdapter {
 	private ReactionUtil utils;
 	private String emoji;
 	private GuildMessageReactionAddEvent event;
+	private ReactionContext reactionContext;
 	public abstract List<ReactionUtil> listHistory();
 	
 	public Reaction(String name) {
@@ -28,7 +27,6 @@ public abstract class Reaction extends ListenerAdapter {
 	
 	public boolean isValidReaction(GuildMessageReactionAddEvent event) {
 		List<ReactionUtil> osuhistorys = listHistory();
-
 		if (event.getUser().isBot()) {
 			return false;
 		}
@@ -64,13 +62,8 @@ public abstract class Reaction extends ListenerAdapter {
 		if (!isValidReaction(event)) {
 			return;
 		}
-		event.getMessageId();
+		reactionContext = new ReactionContext(event.getChannel(), event.getMessageIdLong());
 		execute(event.getUser(), event.getChannel(), event.getReactionEmote());
-	}
-	
-	public ReactionContext getReactionContext() {
-		Plugin plugin = PluginManager.getPluginManager().getPlugin();
-		return new ReactionContext(plugin, event.getChannel(), event.getMessageIdLong());
 	}
 	
 	public GuildMessageReactionAddEvent getEvent() {
@@ -79,6 +72,10 @@ public abstract class Reaction extends ListenerAdapter {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public ReactionContext getContext() {
+		return reactionContext;
 	}
 	
 	public ReactionUtil getUtils() {

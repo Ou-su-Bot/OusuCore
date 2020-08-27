@@ -9,8 +9,11 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 public class ContentMessage {
 	
 	private Message message;
+	
 	private InputStream inputStream;
+	private String inputName;
 	private String inputExtension;
+	
 	
 	public ContentMessage(String string, InputStream inputStream, String inputExtension) {
 		this.message = new MessageBuilder(string).build();
@@ -42,5 +45,14 @@ public class ContentMessage {
 	
 	public String getInputExtension() {
 		return inputExtension;
+	}
+	
+	public String getInputName() {
+		return inputName;
+	}
+	
+	public ContentMessage setInputName(String inputName) {
+		this.inputName = inputName;
+		return this;
 	}
 }

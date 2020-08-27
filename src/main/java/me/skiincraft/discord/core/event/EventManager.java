@@ -22,6 +22,10 @@ public class EventManager {
 		thread.start();
 	}
 	
+	public List<ListenerAdapter> getListenerAdapters(){
+		return JDAListeners;
+	}
+	
 	protected List<Listener> getListeners(){
 		return listeners;
 	}
@@ -62,7 +66,7 @@ public class EventManager {
 					continue;
 				}
 				// Check if method parameter extends Event
-				if (method.getParameters()[0].getType().getSuperclass() != event.getClass().getSuperclass()) {
+				if (method.getParameterTypes()[0] != event.getClass()) {
 					continue;
 				}
 				//I create custom runnable from this.
@@ -78,6 +82,11 @@ public class EventManager {
 				});
 			}
 		});
+		
+		if (runPriority.size() == 0) {
+			return;
+		}
+		
 		//Sort for run by priority
 		runPriority.sort(new Comparator<EventRunnable>() {
 			public int compare(EventRunnable o1, EventRunnable o2) {

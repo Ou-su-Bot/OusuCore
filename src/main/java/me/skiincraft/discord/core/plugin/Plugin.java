@@ -12,18 +12,18 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 
 import com.google.gson.GsonBuilder;
 
-import me.skiincraft.discord.core.commands.Command;
-import me.skiincraft.discord.core.commands.CommandAdapter;
+import me.skiincraft.discord.core.OusuCore;
+import me.skiincraft.discord.core.configuration.Command;
+import me.skiincraft.discord.core.configuration.LanguageManager;
+import me.skiincraft.discord.core.configuration.LanguageManager.Language;
 import me.skiincraft.discord.core.event.EventManager;
-import me.skiincraft.discord.core.events.Adapter;
 import me.skiincraft.discord.core.exception.ConfigurationNotFound;
 import me.skiincraft.discord.core.exception.PluginRunningException;
-import me.skiincraft.discord.core.multilanguage.Language;
-import me.skiincraft.discord.core.multilanguage.LanguageManager;
+import me.skiincraft.discord.core.jda.CommandAdapter;
+import me.skiincraft.discord.core.jda.ListenerAdaptation;
 import me.skiincraft.discord.core.objects.DiscordInfo;
 import me.skiincraft.discord.core.sqlite.SQLite;
 import me.skiincraft.discord.core.view.objects.ViewerUpdater;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
@@ -46,7 +46,6 @@ public class Plugin {
 	private SQLite sqLite;
 	private DiscordInfo discord;	
 
-	private static ArrayList<ListenerAdapter> events = new ArrayList<>();
 	private static ArrayList<Command> commands = new ArrayList<>();
 
 	public Plugin(OusuPlugin mainclass, DiscordInfo discord, PluginManager pm) {
@@ -103,7 +102,8 @@ public class Plugin {
 		shardbuilder.setToken(discord.getToken());
 		sqLite = new SQLite(this);
 		shardbuilder.addEventListeners(new CommandAdapter(this));
-		shardbuilder.addEventListeners(new Adapter(this));
+		shardbuilder.addEventListeners(new ListenerAdaptation(this));
+		
 		shardbuilder.setDisabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE));
 
 		shardbuilder.setChunkingFilter(ChunkingFilter.NONE);
@@ -115,8 +115,10 @@ public class Plugin {
 		getSQLiteDatabase().setup();
 
 		Thread t = new Thread(thispluginthreads, () -> {
-			Timer timer = new Timer();
-			timer.schedule(new ViewerUpdater(timer), 1000, TimeUnit.SECONDS.toMillis(5));
+			if (OusuCore.hasInterface()) {
+				Timer timer = new Timer();
+				timer.schedule(new ViewerUpdater(timer), 1000, TimeUnit.SECONDS.toMillis(5));
+			}
 			instancePlugin.onEnable();
 		}, "[" + discord.getBotname() + "-Main]");
 		t.start();
@@ -163,10 +165,6 @@ public class Plugin {
 
 	public ArrayList<Command> getCommands() {
 		return commands;
-	}
-
-	public ArrayList<ListenerAdapter> getEvents() {
-		return events;
 	}
 
 	public SQLite getSQLite() {

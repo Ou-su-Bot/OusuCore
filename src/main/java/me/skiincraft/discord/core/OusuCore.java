@@ -14,13 +14,16 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
 
+import me.skiincraft.discord.core.configuration.PropertieConfig;
 import me.skiincraft.discord.core.event.EventManager;
-import me.skiincraft.discord.core.file.ConfigurationProperties;
 import me.skiincraft.discord.core.impl.PluginManagerImpl;
 import me.skiincraft.discord.core.plugin.PluginInit;
 import me.skiincraft.discord.core.plugin.PluginManager;
 import me.skiincraft.discord.core.utils.IntegerUtils;
 import me.skiincraft.discord.core.view.OusuViewer;
+
+import net.dv8tion.jda.api.sharding.DefaultShardManager;
+import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 
 public class OusuCore {
 	
@@ -32,6 +35,12 @@ public class OusuCore {
 	private static PluginManager pluginManager;
 	private static OusuViewer ousuViewer;
 	private static String[] jvmArguments;
+	
+	private static boolean viewInterface;
+	
+	public static boolean hasInterface() {
+		return viewInterface;
+	}
 	
 	static void createPath(String... uri) throws IOException {
 		for (String i : uri) {
@@ -50,7 +59,7 @@ public class OusuCore {
 		/* 
 		 * Creating "configuration files"
 		 */
-		ConfigurationProperties config = new ConfigurationProperties();
+		PropertieConfig config = new PropertieConfig();
 		Properties properties = config.getProperties();
 		
 		jvmArguments = args;
@@ -72,14 +81,14 @@ public class OusuCore {
 			} else {
 				if (Boolean.valueOf(restartValue) == true) {
 					new Thread(() -> {
-						System.out.println("Reiniciando em 1h");
 						long restarttime = (properties.containsKey("restart-time"))
 								? (IntegerUtils.isNumeric(properties.getProperty("restart-time")))
 										? Long.valueOf(properties.getProperty("restart-time"))
 										: 60L
 								: 60L;
 						try {
-							Thread.sleep(restarttime * (60 * 1000));
+							System.out.println("Programado para reiniciar");
+							Thread.sleep(restarttime * (60 * 1000L));
 							restart(jvmArguments);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
@@ -120,6 +129,8 @@ public class OusuCore {
 		/* 
 		 * Running JavaFX application
 		 */
+		
+		viewInterface = Boolean.valueOf(interfaceValue);
 		if (Boolean.valueOf(interfaceValue) == true) {
 			start(runnable);
 		} else {

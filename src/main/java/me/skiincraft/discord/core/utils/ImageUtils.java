@@ -15,9 +15,8 @@ import java.util.Iterator;
 
 import javax.imageio.ImageIO;
 
-import me.skiincraft.discord.core.apis.ColorThiefMMCQ;
-import me.skiincraft.discord.core.apis.ColorThiefMMCQ.CMap;
-import me.skiincraft.discord.core.apis.ColorThiefMMCQ.DenormalizedVBox;
+import me.skiincraft.discord.core.utils.ColorT.CMap;
+import me.skiincraft.discord.core.utils.ColorT.DenormalizedVBox;
 import me.skiincraft.discord.core.view.OusuViewer;
 
 public class ImageUtils {
@@ -73,7 +72,7 @@ public class ImageUtils {
 
 			CMap result;
 
-			result = ColorThiefMMCQ.computeMap(img, 3);
+			result = ColorT.computeMap(img, 3);
 
 			Iterator<DenormalizedVBox> boxes = result.getBoxes().iterator();
 

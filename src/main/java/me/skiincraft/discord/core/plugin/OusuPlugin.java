@@ -1,5 +1,6 @@
 package me.skiincraft.discord.core.plugin;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -30,6 +31,9 @@ public abstract class OusuPlugin {
 	
 	public final void startbot() throws LoginException, IllegalArgumentException, IllegalAccessException {
 		try {
+			List<ListenerAdapter> lista = plugin.getEventManager().getListenerAdapters();
+			lista.forEach(o -> builder.addEventListeners(o));
+			
 			this.shmanager = builder.build();
 		} catch (LoginException | IllegalArgumentException e) {
 			FieldUtils.writeField(plugin, "running", false, true);
@@ -49,9 +53,7 @@ public abstract class OusuPlugin {
 		System.out.println("Todas as shards foram carregadas.");
 		FieldUtils.writeField(plugin, "shardManager", shmanager, true);
 		FieldUtils.writeField(plugin, "running", true, true);
-		for (ListenerAdapter e : plugin.getEvents()) {
-			shmanager.addEventListener(e);
-		}
+
 	}
 	
 	public final ShardManager getShardManager() {

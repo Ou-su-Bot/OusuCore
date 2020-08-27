@@ -1,15 +1,13 @@
 package me.skiincraft.discord.core.events.bot;
 
-import me.skiincraft.discord.core.entity.BotTextChannel;
-import me.skiincraft.discord.core.entity.BotUser;
-import me.skiincraft.discord.core.events.enums.ReactionEventType;
-import me.skiincraft.discord.core.utils.Channels;
+import me.skiincraft.discord.core.events.enums.EventType;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.SelfUser;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
@@ -27,10 +25,10 @@ public class BotReactionEvent extends BotEvent {
 	private String emoji;
 	private Message message;
 	private String messageId;
-	private BotUser user;
+	private User user;
 	private Guild guild;
-	private BotTextChannel botTextChannel;
-	private ReactionEventType eventType;
+	private TextChannel textChannel;
+	private EventType eventType;
 	
 	public BotReactionEvent(GuildMessageReactionAddEvent e) {
 		ReactionEmote reaction = e.getReactionEmote();
@@ -40,10 +38,10 @@ public class BotReactionEvent extends BotEvent {
 				? e.getChannel().getHistory().getMessageById(e.getMessageId())
 				: null;
 		messageId = e.getMessageId();
-		user = Channels.toBotUser(e.getMember());
+		user = e.getMember().getUser();
 		guild = e.getGuild();
-		botTextChannel = Channels.toBotChannel(e.getChannel());
-		eventType = ReactionEventType.ADD;
+		textChannel = e.getChannel();
+		eventType = EventType.ADD;
 	}
 	
 	public BotReactionEvent(GuildMessageReactionRemoveEvent e) {
@@ -54,27 +52,23 @@ public class BotReactionEvent extends BotEvent {
 				? e.getChannel().getHistory().getMessageById(e.getMessageId())
 				: null;
 		messageId = e.getMessageId();
-		user = Channels.toBotUser(e.getMember());
+		user = e.getMember().getUser();
 		guild = e.getGuild();
-		botTextChannel = Channels.toBotChannel(e.getChannel());
-		eventType = ReactionEventType.REMOVE;
+		textChannel = e.getChannel();
+		eventType = EventType.REMOVE;
 	}
 	
 	public BotReactionEvent(Emote emote, String emoji, Message message, String messageId, User user, Guild guild,
-			BotTextChannel botTextChannel, ReactionEventType eventType) {
+			TextChannel botTextChannel, EventType eventType) {
 		this.emote = emote;
 		this.emoji = emoji;
 		this.message = message;
 		this.messageId = messageId;
-		this.user = Channels.toBotUser(user);
+		this.user = user;
 		this.guild = guild;
-		this.botTextChannel = botTextChannel;
+		this.textChannel = botTextChannel;
 		this.eventType = eventType;
 		this.selfUser = guild.getJDA().getSelfUser();
-	}
-	
-	public BotTextChannel getBotTextChannel() {
-		return botTextChannel;
 	}
 	
 	public String getEmoji() {
@@ -83,7 +77,7 @@ public class BotReactionEvent extends BotEvent {
 	public Emote getEmote() {
 		return emote;
 	}
-	public ReactionEventType getEventType() {
+	public EventType getEventType() {
 		return eventType;
 	}
 	public Guild getGuild() {
@@ -95,9 +89,15 @@ public class BotReactionEvent extends BotEvent {
 	public String getMessageId() {
 		return messageId;
 	}
-	public BotUser getUser() {
+	
+	public TextChannel getTextChannel() {
+		return textChannel;
+	}
+	
+	public User getUser() {
 		return user;
 	}
+	
 	public SelfUser getSelfUser() {
 		return selfUser;
 	}

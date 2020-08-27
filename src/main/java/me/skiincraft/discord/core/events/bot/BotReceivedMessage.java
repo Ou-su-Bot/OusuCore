@@ -1,11 +1,9 @@
 package me.skiincraft.discord.core.events.bot;
 
-import me.skiincraft.discord.core.entity.BotPrivChannel;
-import me.skiincraft.discord.core.entity.BotTextChannel;
 import me.skiincraft.discord.core.entity.ChannelInteract;
-import me.skiincraft.discord.core.utils.Channels;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -19,8 +17,8 @@ import net.dv8tion.jda.api.entities.TextChannel;
 public class BotReceivedMessage extends BotEvent {
 	
 	private Guild guild;
-	private BotTextChannel botTextChannel;
-	private BotPrivChannel botPrivChannel;
+	private TextChannel textChannel;
+	private PrivateChannel privChannel;
 	private String prefixUsed;
 	private Message message;
 	private ChannelInteract interact;
@@ -28,8 +26,13 @@ public class BotReceivedMessage extends BotEvent {
 	
 	public BotReceivedMessage(TextChannel channel, Message message, String prefixUsed) {
 		this.prefixUsed = prefixUsed;
-		this.interact = Channels.toChannelInteract(channel);
-		this.botTextChannel = Channels.toBotChannel(channel);
+		this.interact = new ChannelInteract() {
+			protected MessageChannel getTextChannel() {
+				return channel;
+			}
+		};
+		
+		this.textChannel = channel;
 		this.message = message;
 		this.guild = channel.getGuild();
 	}
@@ -37,17 +40,17 @@ public class BotReceivedMessage extends BotEvent {
 	public BotReceivedMessage(PrivateChannel channel, Message message, String prefixUsed) {
 		this.prefixUsed = prefixUsed;
 		this.interact = null; //Channels.toChannelInteract(channel);
-		this.botPrivChannel = Channels.toBotChannel(channel);
+		this.privChannel = channel;
 		this.message = message;
 		this.guild = null;
 	}
 	
-	public BotPrivChannel getBotPrivChannel() {
-		return botPrivChannel;
+	public PrivateChannel getPrivChannel() {
+		return privChannel;
 	}
 	
-	public BotTextChannel getBotTextChannel() {
-		return botTextChannel;
+	public TextChannel getTextChannel() {
+		return textChannel;
 	}
 	
 	public Guild getGuild() {
@@ -67,11 +70,11 @@ public class BotReceivedMessage extends BotEvent {
 	}
 	
 	public boolean isPrivateMessage() {
-		return botTextChannel == null;
+		return textChannel == null;
 	}
 
 	public SelfUser getSelfUser() {
-		return getBotTextChannel().getJda().getSelfUser();
+		return getTextChannel().getJDA().getSelfUser();
 	}
 	
 

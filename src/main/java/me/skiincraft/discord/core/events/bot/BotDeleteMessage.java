@@ -1,8 +1,5 @@
 package me.skiincraft.discord.core.events.bot;
 
-import me.skiincraft.discord.core.entity.BotPrivChannel;
-import me.skiincraft.discord.core.entity.BotTextChannel;
-import me.skiincraft.discord.core.utils.Channels;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -18,28 +15,21 @@ public class BotDeleteMessage extends BotEvent {
 	
 	private Message deletedMessage;
 	private long messageId;
-	private BotTextChannel botTextChannel;
+	private TextChannel textChannel;
 	private Guild guild;
 	private SelfUser selfUser;
-	
-	public BotDeleteMessage(Message deletedMessage, BotTextChannel textChannel, Guild guild) {
-		this.deletedMessage = deletedMessage;
-		this.messageId = deletedMessage.getIdLong();
-		this.botTextChannel = textChannel;
-		this.guild = guild;
-		this.selfUser = guild.getJDA().getSelfUser();
-	}
 	
 	public BotDeleteMessage(Message deletedMessage, TextChannel textChannel, Guild guild) {
 		this.deletedMessage = deletedMessage;
 		this.messageId = deletedMessage.getIdLong();
-		this.botTextChannel = Channels.toBotChannel(textChannel);
+		this.textChannel = textChannel;
 		this.guild = guild;
 		this.selfUser = guild.getJDA().getSelfUser();
 	}
 	
-	public BotTextChannel getBotTextChannel() {
-		return botTextChannel;
+	
+	public TextChannel getBotTextChannel() {
+		return textChannel;
 	}
 	
 	public Message getDeletedMessage() {

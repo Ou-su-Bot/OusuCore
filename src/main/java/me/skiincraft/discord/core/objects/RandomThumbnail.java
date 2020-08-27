@@ -19,6 +19,9 @@ public class RandomThumbnail {
 	}
 	
 	public String getRandomThumbnail() {
+		if (urls.length == 1) {
+			return urls[0];
+		}
 		return urls[new Random().nextInt(urls.length-1)];
 	}
 	
