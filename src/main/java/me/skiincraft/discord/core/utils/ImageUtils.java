@@ -8,35 +8,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Iterator;
 
 import javax.imageio.ImageIO;
 
 import me.skiincraft.discord.core.utils.ColorT.CMap;
 import me.skiincraft.discord.core.utils.ColorT.DenormalizedVBox;
-import me.skiincraft.discord.core.view.OusuViewer;
 
 public class ImageUtils {
-	
-	public static BufferedImage getDiscordAssets(String link) {
-		try {
-			URL url = null;
-			try {url = new URL(link);}
-			catch (MalformedURLException e) {
-				return ImageIO.read(OusuViewer.class.getResourceAsStream("no_bot_image.png"));
-			}
-			
-			URLConnection con = url.openConnection();
-			con.addRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
-			return ImageIO.read(con.getInputStream());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 	
 	public static InputStream toInputStream(File imagefile) throws IOException {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();

@@ -5,14 +5,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLTimeoutException;
 import java.sql.Statement;
 import java.util.function.Consumer;
 
 import me.skiincraft.discord.core.plugin.Plugin;
 import me.skiincraft.discord.core.sqlobjects.Table;
-import me.skiincraft.discord.core.sqlobjects.TableBuilder;
-import me.skiincraft.discord.core.sqlobjects.TableBuilder.TableValues;
+import me.skiincraft.discord.core.sqlobjects.Table.Column;
 
 public class SQLite {
 
@@ -21,64 +19,75 @@ public class SQLite {
 	private PreparedStatement preparedStatement;
 	
 	private Plugin plugin;
-
-	public Connection getConnection() {
-		return connection;
-	}
-
-	public Statement getStatement() {
-		return statement;
-	}
-
+	
 	public SQLite(Plugin main) {
 		this.plugin = main;
 	}
 
-	public synchronized void abrir() {
+	public synchronized boolean connect() {
 		try {
-			if (connection != null) {
+			if (this.connection != null) {
 				if (!connection.isClosed()) {
-					return;
+					System.out.println("Conexão com banco de dados já esta estabelecida!");
+					return true;
 				}
 			}
-			//new File("banco_de_dados").mkdirs();
-			Class.forName("com.mysql.jdbc.Driver"); //Driver
-			String url = "jdbc:sqlite:" + plugin.getDiscordInfo().getBotname() +"_sqlite.db";
+			
+			Class.forName("com.mysql.jdbc.Driver");
+			String url = "jdbc:sqlite:" + plugin.getName() +"_sqlite.db";
 			
 			this.connection = DriverManager.getConnection(url);
 			this.statement = connection.createStatement();
 			
 			System.out.println("Conexão com banco de dados estabelecida com sucesso.");
-			return;
+			return true;
 		} catch (ClassNotFoundException exception) {
 			exception.printStackTrace();
 			System.out.println("Driver JDBC não foi encontrado.");
-			return;
-		} catch (SQLTimeoutException exception) {
-			exception.printStackTrace();
-			System.out.println("Tempo de conexão excedido");
-			return;
+			return false;
 		} catch (SQLException exception) {
 			exception.printStackTrace();
 			System.out.println("SQLException: Alguma operação com banco de dados falhou.");
-			return;
+			return false;
 		}
 	}
 
-	public synchronized void close() {
+	public synchronized boolean stop() {
 		if (this.connection == null) {
-			return;
+			return true;
 		}
 		try {
 			this.connection.close();
 			if (this.statement != null) {
 				this.statement.close();
 			}
-			return;
+			return true;
 		} catch (SQLException exception) {
 			exception.printStackTrace();
-			return;
+			return false;
 		}
+	}
+	
+	public synchronized boolean existsTable(String tableName) {
+		if (connection == null) {
+			connect();
+		}
+        try {
+        	ResultSet rs = connection.getMetaData().getTables(null, null, tableName, null);
+            while (rs.next()) { 
+                String tName = rs.getString("TABLE_NAME");
+                if (tName != null && tName.equals(tableName)) {
+                	return true;
+                }
+            }
+        } catch (SQLException e) {
+        	e.printStackTrace();
+		}
+        return false;
+    }
+	
+	public synchronized boolean existsTable(Table table) {
+		return existsTable(table.getTableName());
 	}
 	
 	public synchronized void executeStatementTask(Consumer<Statement> statement) {
@@ -129,7 +138,7 @@ public class SQLite {
 		}
 	}
 	
-	public Statement getOusuStatement() {
+	public synchronized Statement getOusuStatement() {
 		if (statement != null && connection != null) {
 			try {
 				if (statement.isClosed()) {
@@ -142,11 +151,11 @@ public class SQLite {
 			}
 			return statement;	
 		}
-		abrir();
+		connect();
 		return statement;
 	}
 	
-	public PreparedStatement getOusuPreparedStatement(String query) {
+	public synchronized PreparedStatement getOusuPreparedStatement(String query) {
 		if (connection != null) {
 			try {
 				if (preparedStatement.isClosed()) {
@@ -159,7 +168,7 @@ public class SQLite {
 			}
 			return preparedStatement;	
 		}
-		abrir();
+		connect();
 		return preparedStatement;
 	}
 
@@ -172,31 +181,23 @@ public class SQLite {
 			}
 		});
 	}
-
 	
 	public void createTable(Table table) {
 		executeStatementTask(statement ->{
-			try {
-				statement.execute(table.toString());
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		});
-	}
-	
-	public void createTable(String tablename, String...strings) {
-		executeStatementTask(statement ->{
-				StringBuffer buffer = new StringBuffer();
-				buffer.append("CREATE TABLE IF NOT EXISTS ");
-				buffer.append("`" + tablename + "` ");
-				buffer.append("(ID INTEGER PRIMARY KEY AUTOINCREMENT, ");
-				for (int i = 0; i < strings.length; i++) {
-					buffer.append(strings[i]);
-					if (i != strings.length -1) {
-						buffer.append(", ");
-					}
+			StringBuffer buffer = new StringBuffer();
+			buffer.append("CREATE TABLE IF NOT EXISTS ");
+			buffer.append("" + table.getTableName() + " ");
+			buffer.append("(ID INTEGER PRIMARY KEY AUTOINCREMENT, ");
+			
+			int tb = 0;
+			for (Column column :table.columns()) {
+				tb++;
+				buffer.append(column.toString());
+				if (tb != table.columns().size()) {
+					buffer.append(", ");
 				}
-				buffer.append(");");
+			}
+			buffer.append(");");
 				try {
 					statement.execute(buffer.toString());
 				} catch (SQLException e) {
@@ -204,32 +205,16 @@ public class SQLite {
 				}
 		});
 	}
-
-	public synchronized void setup() {
-		if (this.connection == null || this.statement == null) {
-			/*ousu.logger("Conexão ou Statement estão nulos.", Level.SEVERE);
-			ousu.setDBSQL(false);*/
-			return;
-		}
-		
-		TableBuilder table = new TableBuilder("servidores");
-		table.addColumn("guildid", TableValues.VARCHAR);
-		table.addColumn("nome", TableValues.VARCHAR);
-		table.addColumn("membros", TableValues.INTEGER);
-		table.addColumn("prefix", TableValues.VARCHAR);
-		table.addColumn("adicionado em", TableValues.VARCHAR);
-		table.addColumn("language", TableValues.VARCHAR);
-		
-		createTable(table.build());
-		/*	
-		createTable("servidores",
-				"`guildid` VARCHAR(64) NOT NULL",
-				"`nome` VARCHAR(64) NOT NULL",
-				"`membros` INT",
-				"`prefix` VARCHAR(10) NOT NULL",
-				"`adicionado em` VARCHAR(24) NOT NULL",
-				"`language` VARCHAR(24) NOT NULL");
-				
-			ousu.setDBSQL(true);*/
+	
+	public Connection getConnection() {
+		return connection;
+	}
+	
+	public Statement getStatement() {
+		return statement;
+	}
+	
+	public Plugin getPlugin() {
+		return plugin;
 	}
 }

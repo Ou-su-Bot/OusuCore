@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import me.skiincraft.discord.core.OusuCore;
 import me.skiincraft.discord.core.plugin.Plugin;
-import me.skiincraft.discord.core.plugin.PluginManager;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class EventManager {
@@ -49,7 +49,7 @@ public class EventManager {
 	}
 	
 	public Plugin getPlugin() {
-		return PluginManager.getPluginManager().getPlugin();
+		return OusuCore.getPluginManager().getPlugin();
 	}
 	
 	private void call(Event event) {
@@ -118,7 +118,4 @@ public class EventManager {
 			this.priority = priority;
 		}
 	}
-	
-	
-
 }

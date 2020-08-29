@@ -5,7 +5,7 @@ import java.util.Random;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 
-import me.skiincraft.discord.core.configuration.Command;
+import me.skiincraft.discord.core.command.Command;
 import me.skiincraft.discord.core.configuration.GuildDB;
 import me.skiincraft.discord.core.plugin.Plugin;
 import me.skiincraft.discord.core.utils.StringUtils;
@@ -44,7 +44,7 @@ public class CommandAdapter extends ListenerAdapter {
 		}
 		
 		//plugin = PluginManager.getPluginManager().getPluginByBotId(e.getJDA().getSelfUser().getIdLong());
-		ArrayList<Command> commands = plugin.getCommands();
+		ArrayList<Command> commands = plugin.getCommandManager().getCommands();
 
 		prefix = new GuildDB(e.getGuild()).get("prefix");
 		
@@ -105,7 +105,7 @@ public class CommandAdapter extends ListenerAdapter {
 					}
 			}
 		};
-		Thread commandthread = new Thread(commandrunnable, plugin.getDiscordInfo().getBotname() + "-"+ command.getCommandName() + "Command-" + new Random().nextInt(13));
+		Thread commandthread = new Thread(commandrunnable, plugin.getName() + "-"+ command.getCommandName() + "Command-" + new Random().nextInt(13));
 		commandthread.start();
 	}
 }

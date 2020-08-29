@@ -3,27 +3,19 @@ package me.skiincraft.discord.core;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.reflect.MethodUtils;
-
 import me.skiincraft.discord.core.configuration.PropertieConfig;
-import me.skiincraft.discord.core.event.EventManager;
 import me.skiincraft.discord.core.impl.PluginManagerImpl;
-import me.skiincraft.discord.core.plugin.PluginInit;
 import me.skiincraft.discord.core.plugin.PluginManager;
+import me.skiincraft.discord.core.utils.CoreUtils;
 import me.skiincraft.discord.core.utils.IntegerUtils;
-import me.skiincraft.discord.core.view.OusuViewer;
-
-import net.dv8tion.jda.api.sharding.DefaultShardManager;
-import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 
 public class OusuCore {
 	
@@ -31,54 +23,40 @@ public class OusuCore {
 	public static final int EXIT_SECURE = 1;
 	public static final int EXIT_RESTART = 2;
 	public static final int EXIT_ERROR = 3;
+	public static String[] args;
 	
 	private static PluginManager pluginManager;
-	private static OusuViewer ousuViewer;
-	private static String[] jvmArguments;
-	
-	private static boolean viewInterface;
-	
-	public static boolean hasInterface() {
-		return viewInterface;
-	}
-	
-	static void createPath(String... uri) throws IOException {
-		for (String i : uri) {
-			if (!Paths.get(i).toFile().exists()) {
-				Files.createDirectories(Paths.get(i));
-			}
-		}
-	}
 	
 	public static void main(String[] args) throws IOException {
 		/* 
-		 * Creating paths.
+		 * TODO Criando pastas.
 		 */
-		createPath("bots", "dependency", "logs");
+		CoreUtils.createPath("bots", "library", "dependency", "logs");
 		
 		/* 
-		 * Creating "configuration files"
+		 * TODO Criando arquivo de configuração
 		 */
 		PropertieConfig config = new PropertieConfig();
 		Properties properties = config.getProperties();
 		
-		jvmArguments = args;
-		/* 
-		 * Creating task to run on the JavaFX Thread
+		/*
+		 * TODO Preparando plugin manager (bot manager)
 		 */
-		Runnable runnable = () -> {
-			pluginManager = new PluginManagerImpl(new PluginInit());
-			pluginManager.loadPlugin(Paths.get("bots"));
-			pluginManager.enablePlugin();
+		Runnable runnable = new Runnable() {
 			
-			String restartValue = (properties.containsKey("auto-restart")) ? properties.getProperty("auto-restart")
-					: null;
+			public void run() {
+				OusuCore.args = args;
+				pluginManager = new PluginManagerImpl();
+				pluginManager.startPlugin();
+				String restartValue = (properties.containsKey("auto-restart")) ? properties.getProperty("auto-restart")
+						: null;
 
-			if (restartValue == null || !isBoolean(restartValue)) {
-				System.out.println(properties.keySet().stream().collect(Collectors.toList()));
-				System.out.println("Há opções invalidas no config.properties");
-				return;
-			} else {
+				if (restartValue == null || !isBoolean(restartValue)) {
+					System.out.println(properties.keySet().stream().collect(Collectors.toList()));
+					System.out.println("Há opções invalidas no config.properties");
+					return;
+				}
+
 				if (Boolean.valueOf(restartValue) == true) {
 					new Thread(() -> {
 						long restarttime = (properties.containsKey("restart-time"))
@@ -89,10 +67,8 @@ public class OusuCore {
 						try {
 							System.out.println("Programado para reiniciar");
 							Thread.sleep(restarttime * (60 * 1000L));
-							restart(jvmArguments);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
+							restart(args);
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}).start();
@@ -100,55 +76,61 @@ public class OusuCore {
 			}
 		};
 		
-		/* 
-		 * Checking if the interface is active in the configurations
+		/*
+		 * TODO Loading Library
 		 */
-		String interfaceValue = (properties.containsKey("interface")) ? properties.getProperty("interface")
-				: null;
+		boolean isJda = false;
+		try {
+			isJda = loadLibrary();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 		
-		if (interfaceValue == null || !isBoolean(interfaceValue)) {
-			System.out.println(properties.keySet().stream().collect(Collectors.toList()));
-			System.out.println("Há opções invalidas no config.properties");
-			return;
+		if (!isJda) {
+			throw new IOException("Não foi possivel carregas as bibiliotecas, JDA não localizado.");
 		}
 		
 		/*
 		 * Loading Dependencies
 		 */
-		Files.newDirectoryStream(Paths.get("dependency")).forEach(path ->{
+		try {
+			loadDependency();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		runnable.run();
+	}
+	
+	private static boolean loadLibrary() throws Exception {
+		for (Path path : Files.newDirectoryStream(Paths.get("library"))) {
 			try {
 				if (path.toFile().getName().contains(".jar")) {
-					addURL(path.toFile());
+					URLClassLoader c = new URLClassLoader(new URL[] { path.toFile().toURI().toURL() });
+					if (c.findResource("net/dv8tion/jda") != null) {
+						CoreUtils.addClassPathURL(path.toFile());
+						System.out.println("Library: JDA loaded.");
+						c.close();return true;
+						
+					}
+					c.close();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
-		});
-		
-		/* 
-		 * Running JavaFX application
-		 */
-		
-		viewInterface = Boolean.valueOf(interfaceValue);
-		if (Boolean.valueOf(interfaceValue) == true) {
-			start(runnable);
-		} else {
-			runnable.run();
 		}
+		return false;
 	}
 	
-	private static void start(Runnable runnable) {
-		try {
-			ousuViewer = new OusuViewer(runnable, jvmArguments);
-			MethodUtils.invokeMethod(ousuViewer, true, "launchViewer");
-		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-			e.printStackTrace();
+	private static void loadDependency() throws Exception {
+		for (Path path : Files.newDirectoryStream(Paths.get("dependency"))) {
+			if (path.toFile().getName().contains(".jar")) {
+				CoreUtils.addClassPathURL(path.toFile());
+			}
 		}
 	}
 	
 	public static void restart() throws IOException {
-		restart(jvmArguments);
+		restart(args);
 	}
 	
 	public static void restart(String[] args) throws IOException {
@@ -173,15 +155,15 @@ public class OusuCore {
 		Runtime.getRuntime().exec(command.toString());
 		System.exit(EXIT_RESTART);
 	}
-	
-	/**
-	 * OusuCore.
-	 * @param exitcode is {@link OusuCore} exitcode
-	 *
-	 */
+
 	public static void exit(int exitcode) {
-		pluginManager.disablePlugin();
+		//pluginManager.disablePlugin();
 	}
+	
+	public static PluginManager getPluginManager() {
+		return pluginManager;
+	}
+	
 	
 	private static boolean isBoolean(String string) {
 		if (string.equalsIgnoreCase("true") || string.equalsIgnoreCase("false")) {
@@ -189,34 +171,4 @@ public class OusuCore {
 		}
 		return false;
 	}
-	
-	public static OusuViewer getOusuViewer() {
-		return ousuViewer;
-	}
-
-	public static EventManager getEventManager() {
-		return getPluginManager().getEventManager();
-	}
-	
-	public static PluginManager getPluginManager() {
-		return pluginManager;
-	}
-	
-	private static void addURL(File jar) throws Exception {
-		URL url = jar.toURI().toURL();
-		Method method = URLClassLoader.class.getDeclaredMethod("addURL",
-				new Class[] { URL.class });
-		method.setAccessible(true); /* promote the method to public access */
-		//;
-		method.invoke(Thread.currentThread().getContextClassLoader(), new Object[] { url });
-		/* old method
-		  URLClassLoader classLoader
-		         = (URLClassLoader) ClassLoader.getSystemClassLoader().getClass();
-		  Class<URLClassLoader> clazz= URLClassLoader.class;
-
-		  Method method= clazz.getDeclaredMethod("addURL", new Class[] { URL.class });
-		  method.setAccessible(true);
-		  method.invoke(classLoader, new Object[] { url });*/
-		}
-	
 }

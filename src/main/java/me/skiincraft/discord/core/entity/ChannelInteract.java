@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 
+import me.skiincraft.discord.core.OusuCore;
 import me.skiincraft.discord.core.events.bot.BotSendMessage;
-import me.skiincraft.discord.core.plugin.PluginManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -22,7 +22,7 @@ public abstract class ChannelInteract {
 	private Consumer<Message> eventConsumer(){return eventConsumer(null);};
 	private Consumer<Message> eventConsumer(List<Message> messageList){
 		return con ->{
-			PluginManager.getPluginManager().getEventManager()
+			OusuCore.getPluginManager().getPlugin().getEventManager()
 			.callEvent(new BotSendMessage((TextChannel) con.getChannel(), con, con.getJDA().getSelfUser()));
 			
 			if (messageList != null) messageList.add(con);

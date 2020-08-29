@@ -7,14 +7,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.util.Locale;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import me.skiincraft.discord.core.plugin.PluginManager;
+import me.skiincraft.discord.core.OusuCore;
 import net.dv8tion.jda.api.entities.Guild;
 
 public class LanguageManager {
@@ -28,10 +27,10 @@ public class LanguageManager {
 		this(Language.getGuildLanguage(guild));
 	}
 
-	public LanguageManager(Language lang) {
-		this.lang = lang;
+	public LanguageManager(Language language) {
+		this.lang = language;
 		try {
-			langfile = "file:" + PluginManager.getPluginManager().getPlugin().getPluginPath().getAbsolutePath()  + "/language/" + lang.getFileName();
+			langfile = "file:" + OusuCore.getPluginManager().getPlugin().getPluginPath().getAbsolutePath()  + "/language/" + lang.getLanguageCode() + "_" + lang.getCountryCode() + ".json";
 			InputStream in = new URL(langfile).openStream();
 			
 			JsonArray arr = new JsonParser().parse(new InputStreamReader(in)).getAsJsonArray();
@@ -128,40 +127,4 @@ public class LanguageManager {
 		a.add(ob1);
 		return a;
 	}
-	
-	public enum Language {
-		Portuguese("PT_BR.json", "BR", new Locale("pt", "BR")),
-		English("EN_US.json", "EN", new Locale("en", "US"));
-
-		private String fileName;
-		private String countrycode;
-		private Locale locale;
-
-		Language(String fileName, String countrycode, Locale locale) {
-			this.fileName = fileName;
-			this.countrycode = countrycode;
-			this.locale = locale;
-		}
-
-		public Locale getLocale() {
-			return locale;
-		}
-
-		public String getFileName() {
-			return fileName;
-		}
-
-		public String getLanguageCode() {
-			return fileName.replace(".json", "").replace("_", "-");
-		}
-
-		public String getCountrycode() {
-			return countrycode;
-		}
-
-		public static Language getGuildLanguage(Guild guild) {
-			return Language.valueOf(new GuildDB(guild).get("language"));
-		}
-	}
-
 }

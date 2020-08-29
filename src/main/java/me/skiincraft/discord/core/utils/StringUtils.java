@@ -27,6 +27,34 @@ public class StringUtils {
 		return buffer.toString();
 	}
 	
+	public static String selectBuild(List<String> strings) {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append(" (");
+		
+		for (int i = 0; i < strings.size(); i++) {
+			buffer.append("'" + strings.get(i) +"'");
+			if (i != strings.size()-1) {
+				buffer.append(", ");
+			}
+		}
+		buffer.append(")");
+		return buffer.toString();
+	}
+	
+	public static String insertBuild(List<String> strings) {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append(" (");
+		
+		for (int i = 0; i < strings.size(); i++) {
+			buffer.append("`" + strings.get(i) +"`");
+			if (i != strings.size()-1) {
+				buffer.append(", ");
+			}
+		}
+		buffer.append(")");
+		return buffer.toString();
+	}
+	
 	public static String selectBuild(String...strings) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(" (");

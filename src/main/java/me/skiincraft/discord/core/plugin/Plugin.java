@@ -5,25 +5,25 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.Timer;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.Map;
+
+import javax.security.auth.login.LoginException;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 import com.google.gson.GsonBuilder;
 
-import me.skiincraft.discord.core.OusuCore;
-import me.skiincraft.discord.core.configuration.Command;
+import me.skiincraft.discord.core.command.CommandManager;
+import me.skiincraft.discord.core.configuration.Language;
 import me.skiincraft.discord.core.configuration.LanguageManager;
-import me.skiincraft.discord.core.configuration.LanguageManager.Language;
 import me.skiincraft.discord.core.event.EventManager;
 import me.skiincraft.discord.core.exception.ConfigurationNotFound;
-import me.skiincraft.discord.core.exception.PluginRunningException;
 import me.skiincraft.discord.core.jda.CommandAdapter;
 import me.skiincraft.discord.core.jda.ListenerAdaptation;
-import me.skiincraft.discord.core.objects.DiscordInfo;
 import me.skiincraft.discord.core.sqlite.SQLite;
-import me.skiincraft.discord.core.view.objects.ViewerUpdater;
+
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
@@ -31,186 +31,160 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 public class Plugin {
 
-	private String name;
-	private ThreadGroup threadGroup;
-	
+	private SQLite sqlite;
+	private EventManager eventManager;
+	private CommandManager commandManager;
 	private PluginManager pluginManager;
 	private ShardManager shardManager;
-	private EventManager eventManager;
 	
-	private boolean running;
-	private boolean instantiated;
 	
+	private Map<String, Object> pluginConfiguration;
+	private ThreadGroup threadGroup;
 	private OusuPlugin instancePlugin;
+	
+	private List<Language> languages;
 
-	private SQLite sqLite;
-	private DiscordInfo discord;	
-
-	private static ArrayList<Command> commands = new ArrayList<>();
-
-	public Plugin(OusuPlugin mainclass, DiscordInfo discord, PluginManager pm) {
+	public Plugin(OusuPlugin mainclass, Map<String, Object> configuration, PluginManager pm) {
 		this.instancePlugin = mainclass;
-		this.name = discord.getBotname();
-		this.discord = discord;
+		this.pluginConfiguration = configuration;
 		this.pluginManager = pm;
 		this.eventManager = new EventManager();
+		this.commandManager = new CommandManager();
+		this.sqlite = new SQLite(this);
+		this.languages = new ArrayList<>();
 	}
-
-	public synchronized final void startPlugin() throws InstantiationException, IllegalAccessException,
-			ConfigurationNotFound, NoSuchFieldException, SecurityException {
-		if (isRunning()) {
-			throw new PluginRunningException("Plugin já esta rodando.");
-		}
-		
-		System.out.println(name + " - Loading Bot");
-
-		ThreadGroup thispluginthreads = new ThreadGroup(getDiscordInfo().getBotname() + "-Threads");
-		threadGroup = thispluginthreads;
-
-		// Chamar metodo load do bot.
-		instancePlugin.onLoad();
-
-		// Criar pasta local do bot.
+	
+	private void loads() {
 		getAssetsPath().mkdirs();
 		getLanguagePath().mkdirs();
 		getFontPath().mkdirs();
+	}
 
-		// Criar aquivos de tradução
-		for (Language lang : Language.values()) {
-			File translatefile = new File(getPluginPath().getAbsolutePath() + "/language/" + lang.getFileName());
-			if (!translatefile.exists()) {
-				try {
-					translatefile.createNewFile();
-					FileWriter writer = new FileWriter(translatefile);
-					writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(LanguageManager.jsonTemplate()));
-					writer.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
-		}
+	@SuppressWarnings("unchecked")
+	public synchronized final void startPlugin() throws InstantiationException, IllegalAccessException,
+			ConfigurationNotFound, NoSuchFieldException, SecurityException {
+		System.out.println(getName() + " - Loading Bot");
+		loads();
+		
+		threadGroup = new ThreadGroup(getName() + "-Threads");
 
+		// Chamar metodo load do bot.
+		sqlite = new SQLite(this);
+		instancePlugin.onLoad();
 		// Mudar field privado plugin
 		FieldUtils.writeField(instancePlugin, "plugin", this, true);
 
 		DefaultShardManagerBuilder shardbuilder = new DefaultShardManagerBuilder();
 
-		if (discord == null) {
-			throw new ConfigurationNotFound("Configurações do discord estão nula(s)");
-		}
-
-		shardbuilder.setToken(discord.getToken());
-		sqLite = new SQLite(this);
+		Map<String, Object> dmap = (Map<String, Object>) pluginConfiguration.get("discord");
+		
+		shardbuilder.setToken(dmap.get("token").toString());
 		shardbuilder.addEventListeners(new CommandAdapter(this));
 		shardbuilder.addEventListeners(new ListenerAdaptation(this));
 		
 		shardbuilder.setDisabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE));
 
 		shardbuilder.setChunkingFilter(ChunkingFilter.NONE);
-		shardbuilder.setShardsTotal(discord.getTotalShards());
-
-		FieldUtils.writeField(instancePlugin, "builder", shardbuilder, true);
-
-		getSQLiteDatabase().abrir();
-		getSQLiteDatabase().setup();
-
-		Thread t = new Thread(thispluginthreads, () -> {
-			if (OusuCore.hasInterface()) {
-				Timer timer = new Timer();
-				timer.schedule(new ViewerUpdater(timer), 1000, TimeUnit.SECONDS.toMillis(5));
+		shardbuilder.setShardsTotal(1);
+		
+		try {
+			this.shardManager = shardbuilder.build();
+		} catch (LoginException | IllegalArgumentException e) {
+			e.printStackTrace();
+			return;
+		}
+		System.out.println("Esperando todas as shards carregarem...");
+		for (JDA jda : shardManager.getShards()) {
+			try {
+				jda.awaitReady();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				return;
 			}
+		}
+			
+		System.out.println("Todas as shards foram carregadas.");
+
+		Thread t = new Thread(getThreadGroup(), () -> {
 			instancePlugin.onEnable();
-		}, "[" + discord.getBotname() + "-Main]");
+			try {
+				FieldUtils.writeField(instancePlugin, "shardmanager", shardManager, true);
+				FieldUtils.writeField(instancePlugin, "plugin", this, true);
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+			
+			// Criar aquivos de tradução
+			for (Language lang : languages) {
+				File translatefile = new File(getPluginPath().getAbsolutePath() + "/language/" + lang.getLanguageCode() + "_" + lang.getCountryCode() + ".json");
+				if (!translatefile.exists()) {
+					try {
+						translatefile.createNewFile();
+						FileWriter writer = new FileWriter(translatefile);
+						writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(LanguageManager.jsonTemplate()));
+						writer.close();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		}, "[" + getName() + "-Main]");
 		t.start();
 	}
 
-	public final void restartPlugin() throws InstantiationException, IllegalAccessException, NoSuchFieldException,
-			SecurityException, ConfigurationNotFound {
-		if (!isRunning()) {
-			return;
-		}
-		stopPlugin();
-		startPlugin();
-	}
-
-	@SuppressWarnings("deprecation")
-	public
-	final void stopPlugin() {
-		if (!isRunning()) {
-			return;
-		}
-		if (!isInstantiated()) {
-			return;
-		}
-		if (shardManager == null) {
-			return;
-		}
-
-		instancePlugin.onDisable();
-		shardManager.shutdown();
-		threadGroup.stop();
-	}
-	
-	public String getName() {
-		return name;
-	}
-
-	public SQLite getSQLiteDatabase() {
-		return sqLite;
-	}
 
 	public ShardManager getShardManager() {
 		return shardManager;
 	}
-
-	public ArrayList<Command> getCommands() {
-		return commands;
-	}
-
+	
 	public SQLite getSQLite() {
-		return sqLite;
+		return sqlite;
+	}
+	
+	public CommandManager getCommandManager() {
+		return commandManager;
 	}
 	
 	public EventManager getEventManager() {
 		return eventManager;
 	}
 
-	public void addCommand(Command command) {
-		commands.add(command);
-	}
-
-	public boolean isRunning() {
-		return running;
-	}
-
-	public DiscordInfo getDiscordInfo() {
-		return discord;
-	}
-
 	public PluginManager getPluginManager() {
 		return pluginManager;
 	}
-
-	public boolean isInstantiated() {
-		return instantiated;
+	
+	public String getName() {
+		return pluginConfiguration.get("botname").toString();
 	}
 
 	public File getPluginPath() {
-		return new File("bots/" + discord.getBotname() + "/");
+		return new File("bots/" + getName() + "/");
 	}
 
 	public File getFontPath() {
-		return new File("bots/" + discord.getBotname() + "/fonts/");
+		return new File("bots/" + getName() + "/fonts/");
 	}
 
 	public File getAssetsPath() {
-		return new File("bots/" + discord.getBotname() + "/assets/");
+		return new File("bots/" + getName() + "/assets/");
 	}
 
 	public File getLanguagePath() {
-		return new File("bots/" + discord.getBotname() + "/language/");
+		return new File("bots/" + getName() + "/language/");
+	}
+	
+	public List<Language> getLanguages() {
+		return languages;
+	}
+	
+	public void addLanguage(Language language) {
+		languages.add(language);
 	}
 
+	public Map<String, Object> getPluginConfiguration() {
+		return pluginConfiguration;
+	}
+	
 	public ThreadGroup getThreadGroup() {
 		return threadGroup;
 	}

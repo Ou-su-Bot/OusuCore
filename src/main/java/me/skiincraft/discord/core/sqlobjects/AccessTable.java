@@ -1,11 +1,11 @@
 package me.skiincraft.discord.core.sqlobjects;
 
-public class DBObject {
+public class AccessTable {
 
 	private String where;
 	private String from;
 	
-	public DBObject(String where, String from) {
+	public AccessTable(String where, String from) {
 		this.where = where;
 		this.from = from;
 	}

@@ -1,33 +1,30 @@
 package me.skiincraft.discord.core.configuration;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import me.skiincraft.discord.core.plugin.PluginManager;
-import me.skiincraft.discord.core.sqlite.Database;
-import me.skiincraft.discord.core.sqlobjects.DBObject;
+import me.skiincraft.discord.core.OusuCore;
+import me.skiincraft.discord.core.sqlobjects.AccessTable;
+import me.skiincraft.discord.core.sqlobjects.Table;
+import me.skiincraft.discord.core.sqlobjects.Table.Column.ColumnType;
+
 import net.dv8tion.jda.api.entities.Guild;
 
-public class GuildDB extends Database {
+public class GuildDB extends Table {
 
 	private Guild guild;
-	
 	public GuildDB(Guild guild) {
-		super(PluginManager.getPluginManager().getPlugin());
+		super("servidores", OusuCore.getPluginManager().getPlugin());
 		this.guild = guild;
 	}
 
 	@Override
-	public DBObject dbObject() {
-		return new DBObject("guildid", guild.getId());
-	}
-	
-	@Override
-	public String databaseName() {
-		return "servidores";
+	public AccessTable accessTable() {
+		return new AccessTable("guildid", guild.getId());
 	}
 
 	private String generatelang() {
@@ -38,24 +35,22 @@ public class GuildDB extends Database {
 			return "English";
 		}
 		return "English";
-	}
-	
-	@Override
-	public Map<String, String> tableValues() {
-		Map<String, String> table = new HashMap<String, String>();
-		table.put("guildid", guild.getId());
-		table.put("nome", guild.getName()
-				.replace("'", "")
-		        .replace("`", "")
-		        .replace("´", ""));
-		
-		table.put("membros", "" + guild.getMemberCount());
-		table.put("prefix", getPlugin().getDiscordInfo().getDefaultPrefix());
+	}	
+
+	public List<Column> columns() {
+		List<Column> columns = new ArrayList<>();
+		@SuppressWarnings("unchecked")
+		Map<String, Object> object = (Map<String, Object>) getPlugin().getPluginConfiguration().get("discord");
 		Date newDate = new Date(TimeUnit.SECONDS.toMillis(guild.getSelfMember().getTimeJoined().toEpochSecond()));
 		String simple = new SimpleDateFormat("dd/MM/yyyy - HH:mm").format(newDate);
-		table.put("adicionado em", simple);
-		table.put("language", generatelang());
 		
-		return table;
+		columns.add(new Column("guildid", ColumnType.VARCHAR, 60, guild.getId()));
+		columns.add(new Column("nome", ColumnType.VARCHAR, 60, guild.getName()));
+		columns.add(new Column("membro", ColumnType.VARCHAR, 60, guild.getMemberCount()));
+		columns.add(new Column("prefix", ColumnType.VARCHAR, 10, object.get("defaultprefix")));
+		columns.add(new Column("adicionado em", ColumnType.VARCHAR, 15, simple));
+		columns.add(new Column("language", ColumnType.VARCHAR, 15, generatelang()));
+		
+		return columns;
 	}
 }
