@@ -1,4 +1,4 @@
-package me.skiincraft.discord.core.entity;
+package me.skiincraft.discord.core.command;
 
 import java.io.InputStream;
 

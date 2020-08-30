@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.collections4.IteratorUtils;
 
-import me.skiincraft.discord.core.exception.ConfigurationNotFound;
 import me.skiincraft.discord.core.plugin.OusuPlugin;
 import me.skiincraft.discord.core.plugin.Plugin;
 import me.skiincraft.discord.core.plugin.PluginLoader;
@@ -55,7 +54,7 @@ public class PluginManagerImpl implements PluginManager {
 				e.printStackTrace();
 			}
 			getPlugin().startPlugin();
-		} catch (IOException | InstantiationException | IllegalAccessException | NoSuchFieldException | SecurityException | ConfigurationNotFound e) {
+		} catch (IOException | InstantiationException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
 			e.printStackTrace();
 		}
 	}

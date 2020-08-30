@@ -2,6 +2,7 @@ package me.skiincraft.discord.core.jda;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 
@@ -31,7 +32,17 @@ public class CommandAdapter extends ListenerAdapter {
 	}
 	
 	public Command getCommandByAliase(final ArrayList<Command> list, final String name){
-		return list.stream().filter(o -> o.getAliases().stream().anyMatch(name::equalsIgnoreCase)).findAny().orElse(null);
+		return list.stream()
+				.filter(c -> {
+					if (c.getAliases() == null) {
+						return false;
+					}
+					Stream<String> aliases = c.getAliases().stream().filter(o -> o.equalsIgnoreCase(name));
+					if (aliases.count() != 0) {
+						return true;
+					}
+			return false;
+		}).findFirst().orElse(null);
 	}
 	
 	private boolean isValidCommand(GuildMessageReceivedEvent e) {
@@ -60,18 +71,13 @@ public class CommandAdapter extends ListenerAdapter {
 			return false;
 		}
 		
-		/*
-		 * if (!(args[0].length() >= prefix.length())) { return false; }
-		 */
+		command = getCommand(commands, args[0].substring(prefix.length()));
+		if (command == null) {
+			command = getCommandByAliase(commands, args[0].substring(prefix.length()));
+		}
 		
-		if (getCommand(commands, args[0].substring(prefix.length())) == null) {
-			if (getCommandByAliase(commands, args[0].substring(prefix.length())) == null) {
-				return false;	
-			} else {
-				command = getCommandByAliase(commands, args[0].substring(prefix.length()));
-			}
-		} else {
-			command = getCommand(commands, args[0].substring(prefix.length()));
+		if (command == null) {
+			return false;
 		}
 		
 		if (!args[0].toLowerCase().startsWith(prefix.toLowerCase())) {

@@ -4,7 +4,6 @@ import java.util.List;
 
 import me.skiincraft.discord.core.OusuCore;
 import me.skiincraft.discord.core.configuration.LanguageManager;
-import me.skiincraft.discord.core.entity.ChannelInteract;
 import me.skiincraft.discord.core.plugin.Plugin;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;

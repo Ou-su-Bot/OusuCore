@@ -1,6 +1,7 @@
 package me.skiincraft.discord.core.events.bot;
 
-import me.skiincraft.discord.core.entity.ChannelInteract;
+import me.skiincraft.discord.core.command.ChannelInteract;
+
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.SelfUser;

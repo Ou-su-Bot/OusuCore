@@ -18,7 +18,6 @@ import me.skiincraft.discord.core.command.CommandManager;
 import me.skiincraft.discord.core.configuration.Language;
 import me.skiincraft.discord.core.configuration.LanguageManager;
 import me.skiincraft.discord.core.event.EventManager;
-import me.skiincraft.discord.core.exception.ConfigurationNotFound;
 import me.skiincraft.discord.core.jda.CommandAdapter;
 import me.skiincraft.discord.core.jda.ListenerAdaptation;
 import me.skiincraft.discord.core.sqlite.SQLite;
@@ -61,8 +60,7 @@ public class Plugin {
 	}
 
 	@SuppressWarnings("unchecked")
-	public synchronized final void startPlugin() throws InstantiationException, IllegalAccessException,
-			ConfigurationNotFound, NoSuchFieldException, SecurityException {
+	public synchronized final void startPlugin() throws InstantiationException, IllegalAccessException,	NoSuchFieldException, SecurityException {
 		System.out.println(getName() + " - Loading Bot");
 		loads();
 		
@@ -131,8 +129,7 @@ public class Plugin {
 		}, "[" + getName() + "-Main]");
 		t.start();
 	}
-
-
+	
 	public ShardManager getShardManager() {
 		return shardManager;
 	}
