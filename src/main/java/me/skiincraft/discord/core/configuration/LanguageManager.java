@@ -81,7 +81,7 @@ public class LanguageManager {
 			return " "+property+"."+key;
 		}
 			try {
-				return " " + new String(ob.get(key).getAsString().getBytes(), "UTF-8");
+				return " " + new String(ob.get(key).getAsString().getBytes(), "UTF-8").replace("{l}", "\n");
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}

@@ -46,7 +46,7 @@ public class StringUtils {
 		buffer.append(" (");
 		
 		for (int i = 0; i < strings.size(); i++) {
-			buffer.append("`" + strings.get(i) +"`");
+			buffer.append("\"" + strings.get(i) +"\"");
 			if (i != strings.size()-1) {
 				buffer.append(", ");
 			}

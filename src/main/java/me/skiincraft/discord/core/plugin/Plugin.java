@@ -22,7 +22,6 @@ import me.skiincraft.discord.core.jda.CommandAdapter;
 import me.skiincraft.discord.core.jda.ListenerAdaptation;
 import me.skiincraft.discord.core.sqlite.SQLite;
 
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
@@ -83,7 +82,7 @@ public class Plugin {
 		shardbuilder.setDisabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE));
 
 		shardbuilder.setChunkingFilter(ChunkingFilter.NONE);
-		shardbuilder.setShardsTotal(1);
+		shardbuilder.setShardsTotal(Integer.valueOf(dmap.get("shards").toString()));
 		
 		try {
 			this.shardManager = shardbuilder.build();
@@ -92,19 +91,10 @@ public class Plugin {
 			return;
 		}
 		System.out.println("Esperando todas as shards carregarem...");
-		for (JDA jda : shardManager.getShards()) {
-			try {
-				jda.awaitReady();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				return;
-			}
-		}
-			
-		System.out.println("Todas as shards foram carregadas.");
 
 		Thread t = new Thread(getThreadGroup(), () -> {
 			instancePlugin.onEnable();
+			System.out.println("Carregando on Enable");
 			try {
 				FieldUtils.writeField(instancePlugin, "shardmanager", shardManager, true);
 				FieldUtils.writeField(instancePlugin, "plugin", this, true);

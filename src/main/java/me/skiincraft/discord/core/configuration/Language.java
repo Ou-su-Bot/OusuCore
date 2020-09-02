@@ -47,7 +47,7 @@ public final class Language {
 		Plugin plugin = OusuCore.getPluginManager().getPlugin();
 		GuildDB db = new GuildDB(guild);
 		
-		return plugin.getLanguages().stream().filter(l-> l.getLanguageName() == db.get("language")).findAny().orElse(getDefaultLanguage());
+		return plugin.getLanguages().stream().filter(l-> l.getLanguageName().equalsIgnoreCase(db.get("language"))).findAny().orElse(getDefaultLanguage());
 	}
 	
 }

@@ -45,7 +45,7 @@ public class GuildDB extends Table {
 		String simple = new SimpleDateFormat("dd/MM/yyyy - HH:mm").format(newDate);
 		
 		columns.add(new Column("guildid", ColumnType.VARCHAR, 60, guild.getId()));
-		columns.add(new Column("nome", ColumnType.VARCHAR, 60, guild.getName()));
+		columns.add(new Column("nome", ColumnType.VARCHAR, 60, guild.getName().replace("'", "").replace("´", "").replace("`", "")));
 		columns.add(new Column("membro", ColumnType.VARCHAR, 60, guild.getMemberCount()));
 		columns.add(new Column("prefix", ColumnType.VARCHAR, 10, object.get("defaultprefix")));
 		columns.add(new Column("adicionado em", ColumnType.VARCHAR, 15, simple));

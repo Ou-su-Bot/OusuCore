@@ -1,5 +1,8 @@
 package me.skiincraft.discord.core;
 
+import java.awt.BorderLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -11,11 +14,15 @@ import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import javax.swing.JFrame;
+
 import me.skiincraft.discord.core.configuration.PropertieConfig;
 import me.skiincraft.discord.core.impl.PluginManagerImpl;
 import me.skiincraft.discord.core.plugin.PluginManager;
 import me.skiincraft.discord.core.utils.CoreUtils;
 import me.skiincraft.discord.core.utils.IntegerUtils;
+
+import net.msdh.jtconsole.JTConsole;
 
 public class OusuCore {
 	
@@ -28,9 +35,11 @@ public class OusuCore {
 	private static PluginManager pluginManager;
 	
 	public static void main(String[] args) throws IOException {
+		openConsole();
 		/* 
 		 * TODO Criando pastas.
 		 */
+		
 		CoreUtils.createPath("bots", "library", "dependency", "logs");
 		
 		/* 
@@ -164,6 +173,27 @@ public class OusuCore {
 		return pluginManager;
 	}
 	
+	
+	
+	private static void openConsole() {
+    	JTConsole jc = new JTConsole(60,20);
+    	jc.setCursorVisible(true);
+    	jc.captureStdOut();
+    	
+        JFrame frame = new JFrame("OusuCore - Console");
+        frame.setSize(400, 400);
+    	frame.setLayout(new BorderLayout());
+		frame.add(jc, BorderLayout.CENTER);
+	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	    frame.addWindowListener(new WindowAdapter() {
+	    	public void windowClosed(WindowEvent e) {
+	    		System.exit(OusuCore.EXIT_RESTART);
+	    	}
+		});
+		frame.setResizable(false);
+		frame.pack();
+		frame.setVisible(true);
+	}
 	
 	private static boolean isBoolean(String string) {
 		if (string.equalsIgnoreCase("true") || string.equalsIgnoreCase("false")) {

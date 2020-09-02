@@ -69,9 +69,9 @@ public abstract class Table {
 		
 		sqlite.executeStatementTask(statement -> {
 			try {
-				statement.execute("INSERT INTO `" + tableName + "`" + insert + " VALUES" + value + ";");
+				statement.execute("INSERT INTO \"" + tableName + "\"" + insert + " VALUES" + value + ";");
 			} catch (SQLException e){
-				System.out.println("INSERT INTO `" + tableName + "`" + insert + " VALUES" + value + ";");
+				System.out.println("INSERT INTO \"" + tableName + "\"" + insert + " VALUES" + value + ";");
 				e.printStackTrace();
 				//TODO
 			}

@@ -62,7 +62,7 @@ public class PluginLoader {
 	public Class<?> getPluginMain() {
 		Map<String, Object> configuration = getPluginConfiguration();
 		try {
-			Class<?> clazz = Class.forName((String) configuration.get("main"), true, new URLClassLoader(new URL[] {new URL("file:bots\\" + filename.replace(".jar", "") + ".jar")}));
+			Class<?> clazz = Class.forName((String) configuration.get("main"), true, new URLClassLoader(new URL[] {new URL("file:bots/" + filename.replace(".jar", "") + ".jar")}));
 			if (clazz.getSuperclass() != OusuPlugin.class) {
 				throw new ClassNotFoundException("Esta classe indicada não extende OusuPlugin.");
 			}
