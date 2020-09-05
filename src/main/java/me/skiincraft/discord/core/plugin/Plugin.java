@@ -15,6 +15,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import com.google.gson.GsonBuilder;
 
 import me.skiincraft.discord.core.command.CommandManager;
+import me.skiincraft.discord.core.common.EvalCommand;
 import me.skiincraft.discord.core.configuration.Language;
 import me.skiincraft.discord.core.configuration.LanguageManager;
 import me.skiincraft.discord.core.event.EventManager;
@@ -78,7 +79,7 @@ public class Plugin {
 		shardbuilder.setToken(dmap.get("token").toString());
 		shardbuilder.addEventListeners(new CommandAdapter(this));
 		shardbuilder.addEventListeners(new ListenerAdaptation(this));
-		
+		commandManager.registerCommand(new EvalCommand());
 		shardbuilder.setDisabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE));
 
 		shardbuilder.setChunkingFilter(ChunkingFilter.NONE);
