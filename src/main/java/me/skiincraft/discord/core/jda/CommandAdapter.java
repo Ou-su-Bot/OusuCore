@@ -53,6 +53,9 @@ public class CommandAdapter extends ListenerAdapter {
 		if (e.getAuthor().isFake()) {
 			return false;
 		}
+		if (!e.getChannel().canTalk()) {
+			return false;
+		}
 		
 		//plugin = PluginManager.getPluginManager().getPluginByBotId(e.getJDA().getSelfUser().getIdLong());
 		ArrayList<Command> commands = plugin.getCommandManager().getCommands();
