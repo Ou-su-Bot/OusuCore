@@ -51,6 +51,7 @@ public class PresenceUpdater {
 			}
 			presenceUpdater.shardManager
 					.setActivity(Activity.of(messages.get(ordem).getType(), keyReplace(messages.get(ordem).getName())));
+			ordem++;
 		}
 
 		public PresenceUpdater getPresenceUpdater() {
