@@ -60,8 +60,6 @@ public abstract class Table {
 		if (exists()) {
 			return;
 		}
-		
-		
 		List<Column> table = columns();
 		
 		String value = StringUtils.selectBuild(table.stream().map(m -> m.getObject().toString()).collect(Collectors.toList()));
@@ -94,7 +92,7 @@ public abstract class Table {
 				buffer.append("`" + where +"` = '" + from + "';");
 				ResultSet result = statement.executeQuery(buffer.toString());
 				
-				booleans.add((result.next()) ? result.getString("guildid") != null
+				booleans.add((result.next()) ? result.getString(where) != null
 						: false);
 			} catch (SQLException e) {
 				booleans.add(false);
@@ -194,6 +192,7 @@ public abstract class Table {
 		if (!exists()) {
 			create();
 		}
+		
 		plugin.getSQLite().executeStatementTask(statement ->{
 			try {
 				statement.execute("UPDATE `" + tableName + "` SET `" + column + "` = '" + value + "' WHERE `" + where +"` = '" + from + "';");
