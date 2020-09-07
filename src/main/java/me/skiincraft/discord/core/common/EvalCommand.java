@@ -6,6 +6,9 @@ import me.skiincraft.discord.core.OusuCore;
 import me.skiincraft.discord.core.command.Command;
 import me.skiincraft.discord.core.utils.StringUtils;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import groovy.lang.GroovyShell;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -14,6 +17,7 @@ public class EvalCommand extends Command {
 	
 	private static String imports; 
 	private final GroovyShell shell;
+	private final Gson gson;
 
 	public EvalCommand() {
 		super("evaluate", Arrays.asList("eval", "testar"), "eval {code}");
@@ -23,7 +27,7 @@ public class EvalCommand extends Command {
 				+ "import net.dv8tion.jda.*\n"
 				+ "import me.skiincraft.discord.*\n"
 				+ "import com.google.gson.*\n";
-		
+		gson = new GsonBuilder().setPrettyPrinting().create();
 		shell = new GroovyShell();
 	}
 
@@ -42,10 +46,12 @@ public class EvalCommand extends Command {
             shell.setProperty("jda", channel.getJDA());
             shell.setProperty("guild", channel.getGuild());
             shell.setProperty("member", channel.getGuild().getMember(user));
+            shell.setProperty("plugin", OusuCore.getPluginManager().getPlugin());
+            shell.setProperty("gson", gson);
+            
 
             String script = imports + StringUtils.arrayToString2(0, args).split("\\s+", 2)[0];
             Object saida = shell.evaluate(script);
-            
             reply("`" + (saida == null ? "Não foi possivel fazer este teste :(\n" +StringUtils.arrayToString2(0, args).split("\\s+", 2)[0]: saida.toString()) +"`");
         }
         catch (Exception e) {
