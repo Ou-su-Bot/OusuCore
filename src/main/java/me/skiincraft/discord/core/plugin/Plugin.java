@@ -3,10 +3,7 @@ package me.skiincraft.discord.core.plugin;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.security.auth.login.LoginException;
 
@@ -29,19 +26,18 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 public class Plugin {
+	
+	private final EventManager eventManager;
+	private final CommandManager commandManager;
+	private final PluginManager pluginManager;
 
-	private SQLite sqlite;
-	private EventManager eventManager;
-	private CommandManager commandManager;
-	private PluginManager pluginManager;
-	private ShardManager shardManager;
-	
-	
-	private Map<String, Object> pluginConfiguration;
+	private final OusuPlugin instancePlugin;
+	private final Map<String, Object> pluginConfiguration;
+	private final List<Language> languages;
+
 	private ThreadGroup threadGroup;
-	private OusuPlugin instancePlugin;
-	
-	private List<Language> languages;
+	private ShardManager shardManager;
+	private SQLite sqlite;
 
 	public Plugin(OusuPlugin mainclass, Map<String, Object> configuration, PluginManager pm) {
 		this.instancePlugin = mainclass;
@@ -54,13 +50,13 @@ public class Plugin {
 	}
 	
 	private void loads() {
-		getAssetsPath().mkdirs();
-		getLanguagePath().mkdirs();
-		getFontPath().mkdirs();
+		for (File file : Arrays.asList(getLanguagePath(), getFontPath(), getAssetsPath())) {
+			file.mkdirs();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public synchronized final void startPlugin() throws InstantiationException, IllegalAccessException,	NoSuchFieldException, SecurityException {
+	public synchronized final void startPlugin() throws IllegalAccessException, SecurityException {
 		System.out.println(getName() + " - Loading Bot");
 		loads();
 		
@@ -72,18 +68,16 @@ public class Plugin {
 		// Mudar field privado plugin
 		FieldUtils.writeField(instancePlugin, "plugin", this, true);
 
-		DefaultShardManagerBuilder shardbuilder = new DefaultShardManagerBuilder();
-
 		Map<String, Object> dmap = (Map<String, Object>) pluginConfiguration.get("discord");
-		
-		shardbuilder.setToken(dmap.get("token").toString());
+		DefaultShardManagerBuilder shardbuilder = DefaultShardManagerBuilder.createDefault(dmap.get("token").toString());
+
 		shardbuilder.addEventListeners(new CommandAdapter(this));
 		shardbuilder.addEventListeners(new ListenerAdaptation(this));
 		commandManager.registerCommand(new EvalCommand());
-		shardbuilder.setDisabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE));
+		shardbuilder.disableCache(CacheFlag.VOICE_STATE);
 
 		shardbuilder.setChunkingFilter(ChunkingFilter.NONE);
-		shardbuilder.setShardsTotal(Integer.valueOf(dmap.get("shards").toString()));
+		shardbuilder.setShardsTotal(Integer.parseInt(dmap.get("shards").toString()));
 		
 		try {
 			this.shardManager = shardbuilder.build();
