@@ -54,7 +54,7 @@ public class PluginManagerImpl implements PluginManager {
 				e.printStackTrace();
 			}
 			getPlugin().startPlugin();
-		} catch (IOException | InstantiationException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+		} catch (IOException | IllegalAccessException | SecurityException e) {
 			e.printStackTrace();
 		}
 	}
