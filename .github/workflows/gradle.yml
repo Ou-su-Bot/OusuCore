@@ -23,8 +23,6 @@ jobs:
     
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-    - name: Build with Gradle
-      run: ./gradlew build
 
     - name: Build with Gradle
       run: "./gradlew build -Dgithub.build.id=$GITHUB_RUN_ID -Dbuild.number=$GITHUB_RUN_NUMBER -Dgit.branch=$GITHUB_REF -Dcommit.hash=$GITHUB_SHA -Dcompiled.at=${{ steps.current-time.outputs.time }}"
@@ -34,4 +32,4 @@ jobs:
       name: "Upload Core"
       with:
         name: OusuCore
-        path: build/libs/ousucore-all.jar
+        path: build/libs/OusuCore-all.jar
