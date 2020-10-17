@@ -34,4 +34,4 @@ jobs:
       name: "Upload Core"
       with:
         name: OusuCore
-        path: build/libs/ousucore-*.jar
+        path: build/libs/ousucore-all.jar
