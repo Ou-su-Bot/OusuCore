@@ -2,12 +2,7 @@ package me.skiincraft.discord.core.jda;
 
 import me.skiincraft.discord.core.configuration.GuildDB;
 import me.skiincraft.discord.core.event.EventManager;
-import me.skiincraft.discord.core.events.bot.BotJoinEvent;
-import me.skiincraft.discord.core.events.bot.BotLeaveEvent;
-import me.skiincraft.discord.core.events.bot.BotReactionEvent;
-import me.skiincraft.discord.core.events.bot.BotReadyGuildEvent;
-import me.skiincraft.discord.core.events.bot.BotReceivedMessage;
-import me.skiincraft.discord.core.events.bot.BotUpdateNameEvent;
+import me.skiincraft.discord.core.events.bot.*;
 import me.skiincraft.discord.core.events.member.MemberJoinEvent;
 import me.skiincraft.discord.core.events.member.MemberLeaveEvent;
 import me.skiincraft.discord.core.events.member.MemberRoleEvent;
@@ -32,198 +27,195 @@ import net.dv8tion.jda.api.events.self.SelfUpdateNameEvent;
 import net.dv8tion.jda.api.events.user.UserActivityEndEvent;
 import net.dv8tion.jda.api.events.user.UserActivityStartEvent;
 import net.dv8tion.jda.api.events.user.UserTypingEvent;
-import net.dv8tion.jda.api.events.user.update.UserUpdateActivityOrderEvent;
-import net.dv8tion.jda.api.events.user.update.UserUpdateAvatarEvent;
-import net.dv8tion.jda.api.events.user.update.UserUpdateDiscriminatorEvent;
-import net.dv8tion.jda.api.events.user.update.UserUpdateNameEvent;
-import net.dv8tion.jda.api.events.user.update.UserUpdateOnlineStatusEvent;
+import net.dv8tion.jda.api.events.user.update.*;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
 
 public class ListenerAdaptation extends ListenerAdapter {
-	
-	private Plugin plugin;
-	private EventManager eventManager;
-	
-	public ListenerAdaptation(Plugin plugin) {
-		this.plugin = plugin;
-		this.eventManager = plugin.getEventManager();
-	}
 
-	public void onUserUpdateName(UserUpdateNameEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onUserUpdateName(event);
-		}
-	}
+    private final Plugin plugin;
+    private final EventManager eventManager;
 
-	public void onUserUpdateDiscriminator(UserUpdateDiscriminatorEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onUserUpdateDiscriminator(event);
-		}
-	}
+    public ListenerAdaptation(Plugin plugin) {
+        this.plugin = plugin;
+        this.eventManager = plugin.getEventManager();
+    }
 
-	public void onUserUpdateAvatar(UserUpdateAvatarEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onUserUpdateAvatar(event);
-		}
-	}
+    public void onUserUpdateName(@NotNull UserUpdateNameEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onUserUpdateName(event);
+        }
+    }
 
-	public void onUserUpdateOnlineStatus(UserUpdateOnlineStatusEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onUserUpdateOnlineStatus(event);
-		}
-	}
+    public void onUserUpdateDiscriminator(@NotNull UserUpdateDiscriminatorEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onUserUpdateDiscriminator(event);
+        }
+    }
 
-	public void onUserUpdateActivityOrder(UserUpdateActivityOrderEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onUserUpdateActivityOrder(event);
-		}
-	}
+    public void onUserUpdateAvatar(@NotNull UserUpdateAvatarEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onUserUpdateAvatar(event);
+        }
+    }
 
-	public void onUserTyping(UserTypingEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onUserTyping(event);
-		}
-	}
+    public void onUserUpdateOnlineStatus(@NotNull UserUpdateOnlineStatusEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onUserUpdateOnlineStatus(event);
+        }
+    }
 
-	public void onUserActivityStart(UserActivityStartEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onUserActivityStart(event);
-		}
-	}
+    public void onUserUpdateActivityOrder(@NotNull UserUpdateActivityOrderEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onUserUpdateActivityOrder(event);
+        }
+    }
 
-	public void onUserActivityEnd(UserActivityEndEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onUserActivityEnd(event);
-		}
-	}
+    public void onUserTyping(@NotNull UserTypingEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onUserTyping(event);
+        }
+    }
 
-	public void onSelfUpdateAvatar(SelfUpdateAvatarEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onSelfUpdateAvatar(event);
-		}
-	}
+    public void onUserActivityStart(@NotNull UserActivityStartEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onUserActivityStart(event);
+        }
+    }
 
-	public void onSelfUpdateName(SelfUpdateNameEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onSelfUpdateName(event);
-		}
-		plugin.getEventManager().callEvent(new BotUpdateNameEvent(event));
-	}
+    public void onUserActivityEnd(@NotNull UserActivityEndEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onUserActivityEnd(event);
+        }
+    }
 
-	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onGuildMessageReceived(event);
-		}
-		if (event.isWebhookMessage()) return;
-		if (event.getAuthor().isBot()) return;
-		if (event.getAuthor().isFake()) return;
-		if (event.getMessage().getContentRaw().split(" ")[0].length() < 3) return;
-		
-		GuildDB guildDB = new GuildDB(event.getGuild());
-		String prefix = guildDB.get("prefix").toLowerCase();
-		String[] args = event.getMessage().getContentRaw().split(" ");
-		
-		if (!args[0].toLowerCase().startsWith(prefix)) return;
-		
-		plugin.getEventManager().callEvent(new BotReceivedMessage(event.getChannel(), event.getMessage(), prefix));
-	}
+    public void onSelfUpdateAvatar(@NotNull SelfUpdateAvatarEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onSelfUpdateAvatar(event);
+        }
+    }
 
-	public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onGuildMessageReactionAdd(event);
-		}
-		if (!event.getReaction().isSelf()) return;
-		plugin.getEventManager().callEvent(new BotReactionEvent(event));
-	}
+    public void onSelfUpdateName(@NotNull SelfUpdateNameEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onSelfUpdateName(event);
+        }
+        plugin.getEventManager().callEvent(new BotUpdateNameEvent(event));
+    }
 
-	public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onGuildMessageReactionRemove(event);
-		}
-		if (!event.getReaction().isSelf()) return;
-		plugin.getEventManager().callEvent(new BotReactionEvent(event));
-	}
+    public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onGuildMessageReceived(event);
+        }
+        if (event.isWebhookMessage()) return;
+        if (event.getAuthor().isBot()) return;
+        if (event.getAuthor().isFake()) return;
+        if (event.getMessage().getContentRaw().split(" ")[0].length() < 3) return;
 
-	public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onPrivateMessageReceived(event);
-		}
-		if (event.getAuthor().isBot()) return;
-		if (event.getAuthor().isFake()) return;
-		plugin.getEventManager().callEvent(new BotReceivedMessage(event.getChannel(), event.getMessage(), "ou!"));
-	}
+        GuildDB guildDB = new GuildDB(event.getGuild());
+        String prefix = guildDB.get("prefix").toLowerCase();
+        String[] args = event.getMessage().getContentRaw().split(" ");
 
-	public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onPrivateMessageReactionAdd(event);
-		}
-	}
+        if (!args[0].toLowerCase().startsWith(prefix)) return;
 
-	public void onPrivateMessageReactionRemove(PrivateMessageReactionRemoveEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onPrivateMessageReactionRemove(event);
-		}
-	}
+        plugin.getEventManager().callEvent(new BotReceivedMessage(event.getChannel(), event.getMessage(), prefix));
+    }
 
-	public void onGuildReady(GuildReadyEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onGuildReady(event);
-		}
-		GuildDB db = new GuildDB(event.getGuild());
-		db.create();
-		plugin.getEventManager().callEvent(new BotReadyGuildEvent(event));
-	}
+    public void onGuildMessageReactionAdd(@NotNull GuildMessageReactionAddEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onGuildMessageReactionAdd(event);
+        }
+        if (!event.getReaction().isSelf()) return;
+        plugin.getEventManager().callEvent(new BotReactionEvent(event));
+    }
 
-	public void onGuildJoin(GuildJoinEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onGuildJoin(event);
-		}
-		GuildDB db = new GuildDB(event.getGuild());
-		db.create();
-		plugin.getEventManager().callEvent(new BotJoinEvent(event));
-	}
+    public void onGuildMessageReactionRemove(@NotNull GuildMessageReactionRemoveEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onGuildMessageReactionRemove(event);
+        }
+        if (!event.getReaction().isSelf()) return;
+        plugin.getEventManager().callEvent(new BotReactionEvent(event));
+    }
 
-	public void onGuildLeave(GuildLeaveEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onGuildLeave(event);
-		}
-		GuildDB db = new GuildDB(event.getGuild());
-		db.delete();
-		plugin.getEventManager().callEvent(new BotLeaveEvent(event));
-	}
-	
-	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onGuildMemberJoin(event);
-		}
-		plugin.getEventManager().callEvent(new MemberJoinEvent(event));
-	}
+    public void onPrivateMessageReceived(@NotNull PrivateMessageReceivedEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onPrivateMessageReceived(event);
+        }
+        if (event.getAuthor().isBot()) return;
+        if (event.getAuthor().isFake()) return;
+        plugin.getEventManager().callEvent(new BotReceivedMessage(event.getChannel(), event.getMessage(), "ou!"));
+    }
 
-	public void onGuildMemberLeave(GuildMemberLeaveEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onGuildMemberLeave(event);
-		}
-		plugin.getEventManager().callEvent(new MemberLeaveEvent(event));
-	}
+    public void onPrivateMessageReactionAdd(@NotNull PrivateMessageReactionAddEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onPrivateMessageReactionAdd(event);
+        }
+    }
 
-	public void onGuildMemberRoleAdd(GuildMemberRoleAddEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onGuildMemberRoleAdd(event);
-		}
-		plugin.getEventManager().callEvent(new MemberRoleEvent(event));
-	}
+    public void onPrivateMessageReactionRemove(@NotNull PrivateMessageReactionRemoveEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onPrivateMessageReactionRemove(event);
+        }
+    }
 
-	public void onGuildMemberRoleRemove(GuildMemberRoleRemoveEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onGuildMemberRoleRemove(event);
-		}
-		plugin.getEventManager().callEvent(new MemberRoleEvent(event));
-	}
+    public void onGuildReady(@NotNull GuildReadyEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onGuildReady(event);
+        }
+        GuildDB db = new GuildDB(event.getGuild());
+        db.create();
+        plugin.getEventManager().callEvent(new BotReadyGuildEvent(event));
+    }
 
-	public void onGuildMemberUpdateNickname(GuildMemberUpdateNicknameEvent event) {
-		for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
-			adapter.onGuildMemberUpdateNickname(event);
-		}
-		plugin.getEventManager().callEvent(new MemberUpdateNameEvent(event));
-	}
+    public void onGuildJoin(@NotNull GuildJoinEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onGuildJoin(event);
+        }
+        GuildDB db = new GuildDB(event.getGuild());
+        db.create();
+        plugin.getEventManager().callEvent(new BotJoinEvent(event));
+    }
+
+    public void onGuildLeave(@NotNull GuildLeaveEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onGuildLeave(event);
+        }
+        GuildDB db = new GuildDB(event.getGuild());
+        db.delete();
+        plugin.getEventManager().callEvent(new BotLeaveEvent(event));
+    }
+
+    public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onGuildMemberJoin(event);
+        }
+        plugin.getEventManager().callEvent(new MemberJoinEvent(event));
+    }
+
+    public void onGuildMemberLeave(@NotNull GuildMemberLeaveEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onGuildMemberLeave(event);
+        }
+        plugin.getEventManager().callEvent(new MemberLeaveEvent(event));
+    }
+
+    public void onGuildMemberRoleAdd(@NotNull GuildMemberRoleAddEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onGuildMemberRoleAdd(event);
+        }
+        plugin.getEventManager().callEvent(new MemberRoleEvent(event));
+    }
+
+    public void onGuildMemberRoleRemove(@NotNull GuildMemberRoleRemoveEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onGuildMemberRoleRemove(event);
+        }
+        plugin.getEventManager().callEvent(new MemberRoleEvent(event));
+    }
+
+    public void onGuildMemberUpdateNickname(@NotNull GuildMemberUpdateNicknameEvent event) {
+        for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
+            adapter.onGuildMemberUpdateNickname(event);
+        }
+        plugin.getEventManager().callEvent(new MemberUpdateNameEvent(event));
+    }
 }
