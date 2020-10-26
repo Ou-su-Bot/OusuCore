@@ -20,7 +20,16 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+
     - name: Build with Gradle
-      run: ./gradlew build
+      run: "./gradlew build -Dgithub.build.id=$GITHUB_RUN_ID -Dbuild.number=$GITHUB_RUN_NUMBER -Dgit.branch=$GITHUB_REF -Dcommit.hash=$GITHUB_SHA -Dcompiled.at=${{ steps.current-time.outputs.time }}"
+
+    # Upload Artifacts to GitHub
+    - uses: actions/upload-artifact@v2
+      name: "Upload Core"
+      with:
+        name: OusuCore
+        path: build/libs/OusuCore-all.jar
