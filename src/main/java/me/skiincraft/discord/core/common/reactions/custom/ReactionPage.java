@@ -44,7 +44,8 @@ public class ReactionPage implements Reaction {
         if (object.getEmotes().length == 1){
             if (object.getEmotes()[0].equalsIgnoreCase(emote)) {
                 if (page.intValue() >= embedBuilders.size()) {
-                    message.editMessage(embedBuilders.get(page.getAndSet(1) - 1).build()).queue();
+                    page.set(1);
+                    message.editMessage(embedBuilders.get(0).build()).queue();
                     return true;
                 }
                 message.editMessage(embedBuilders.get(page.incrementAndGet() - 1).build()).queue();
@@ -54,7 +55,8 @@ public class ReactionPage implements Reaction {
 
         if (object.getEmotes()[0].equalsIgnoreCase(emote)){
             if (page.intValue() <= 1){
-                message.editMessage(embedBuilders.get(page.getAndSet(embedBuilders.size()) - 1).build()).queue();
+                page.set(embedBuilders.size());
+                message.editMessage(embedBuilders.get(embedBuilders.size() - 1).build()).queue();
                 return true;
             }
             message.editMessage(embedBuilders.get(page.decrementAndGet() - 1).build()).queue();
@@ -62,7 +64,8 @@ public class ReactionPage implements Reaction {
 
         if (object.getEmotes()[1].equalsIgnoreCase(emote)){
             if (page.intValue() >= embedBuilders.size()){
-                message.editMessage(embedBuilders.get(page.getAndSet(1) - 1).build()).queue();
+                page.set(1);
+                message.editMessage(embedBuilders.get(0).build()).queue();
                 return true;
             }
             message.editMessage(embedBuilders.get(page.incrementAndGet() - 1).build()).queue();

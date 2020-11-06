@@ -31,8 +31,8 @@ public class ReactionSelector implements Reaction {
             if (i >= object.getEmotes().length){
                 break;
             }
-
-            if (object.getEmotes()[i].equalsIgnoreCase(emote)){
+            String objectEmote = (object.getEmotes()[i].contains(":")) ? object.getEmotes()[i].split(":")[0] : object.getEmotes()[i];
+            if (objectEmote.equalsIgnoreCase(emote)){
                 // Se a mensagem for a mesma, só retorna e não muda.
                 if (page.get() == i + 1){
                     return true;
