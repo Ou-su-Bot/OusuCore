@@ -32,6 +32,18 @@ public class CoreUtils {
 		}
 	}
 
+	public static void createPath(String main, String[] uri) {
+		try {
+			for (String i : uri) {
+				if (!Paths.get(main + i).toFile().exists()) {
+					Files.createDirectories(Paths.get(main + i));
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static Gson newGsonPretty(){
 		return new GsonBuilder().serializeNulls().setPrettyPrinting().create();
 	}
