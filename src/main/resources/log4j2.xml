@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
+    <CustomLevels>
+        <CustomLevel name="COMMAND" intLevel="450" />
+    </CustomLevels>
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="[%d{dd-MM-yyyy HH:mm:ss} %-5level]: [%t] - %msg%n"/>

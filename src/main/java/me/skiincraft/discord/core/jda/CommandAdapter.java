@@ -8,6 +8,7 @@ import me.skiincraft.discord.core.events.member.PreCommandEvent;
 import me.skiincraft.discord.core.utils.StringUtils;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -73,8 +74,13 @@ public class CommandAdapter extends ListenerAdapter {
 		}
 
 		new Thread(() -> {
-				event.getChannel().sendTyping().queue();
-				command.execute(event.getMember(), StringUtils.removeString(args, 0), new InteractChannel(event.getChannel()));
+			event.getChannel().sendTyping().queue();
+
+			OusuCore.getLogger().log(Level.getLevel("COMMAND"), String.format("%s executou o comando %s. [%s]",
+					event.getAuthor().getName() + "#" + event.getAuthor().getDiscriminator(),
+					command.getCommandName(), String.join(" ", args)));
+
+			command.execute(event.getMember(), StringUtils.removeString(args, 0), new InteractChannel(event.getChannel()));
 		}, command.getCommandName() + "Command-" + nextInt.getAndIncrement()).start();
 	}
 }
