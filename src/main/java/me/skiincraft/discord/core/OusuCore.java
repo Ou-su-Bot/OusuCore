@@ -8,6 +8,7 @@ import me.skiincraft.discord.core.event.Event;
 import me.skiincraft.discord.core.event.EventManager;
 import me.skiincraft.discord.core.event.Listener;
 import me.skiincraft.discord.core.plugin.OusuPlugin;
+import me.skiincraft.discord.core.prompt.ConsoleApplication;
 import me.skiincraft.discord.core.sqlite.SQLite;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -26,6 +27,8 @@ public final class OusuCore {
     private static OusuPlugin instance;
     private static ShardManager shardManager;
     private static Logger logger;
+
+    private static ConsoleApplication console;
 
     private OusuCore() {}
 
@@ -113,7 +116,14 @@ public final class OusuCore {
         return logger;
     }
 
+    public static ConsoleApplication getConsole() {
+        return console;
+    }
+
     public static void shutdown() {
+        if (!console.isClosed()) {
+            console.close();
+        }
         logger.info("Bot está sendo desativado.");
         instance.onDisable();
         logger.info("Encerrando conexões com JDA");
@@ -156,6 +166,7 @@ public final class OusuCore {
             }
             instance.onEnable();
             logger.info(String.format("%s foi carregado com sucesso!", internalSettings.getBotName()));
+            console = ConsoleApplication.getInstance();
         } catch (Exception e){
             logger.error("Ocorreu um problema ao carregar onEnable, verifique se está atualizado!", e);
         }
