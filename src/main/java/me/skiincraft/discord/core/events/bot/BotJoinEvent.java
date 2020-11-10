@@ -17,8 +17,8 @@ import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
  */
 public class BotJoinEvent extends BotEvent{
 	
-	private Guild guild; 
-	private SelfUser selfUser;
+	private final Guild guild;
+	private final SelfUser selfUser;
 	private Message message;
 	
 	public BotJoinEvent(GuildJoinEvent e) {
@@ -43,7 +43,7 @@ public class BotJoinEvent extends BotEvent{
 		List<TextChannel> channels = guild.getTextChannelCache().asList();
 		for (TextChannel channel:channels) {
 			if (channel.canTalk()) {
-				channel.sendMessage(getJoinMessage());
+				channel.sendMessage(getJoinMessage()).queue();
 				break;
 			}
 		}

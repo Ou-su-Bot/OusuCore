@@ -12,6 +12,8 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 
+import java.util.Objects;
+
 /**
  * Evento de reação a mensagens do bot {@link Guild}.
  * <br>Este evento será chamando alguem reagir a alguma mensagem do bot.
@@ -20,15 +22,15 @@ import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemove
  */
 public class BotReactionEvent extends BotEvent {
 
-	private Emote emote;
+	private final Emote emote;
 	private SelfUser selfUser;
-	private String emoji;
-	private Message message;
-	private String messageId;
-	private User user;
-	private Guild guild;
-	private TextChannel textChannel;
-	private EventType eventType;
+	private final String emoji;
+	private final Message message;
+	private final String messageId;
+	private final User user;
+	private final Guild guild;
+	private final TextChannel textChannel;
+	private final EventType eventType;
 	
 	public BotReactionEvent(GuildMessageReactionAddEvent e) {
 		ReactionEmote reaction = e.getReactionEmote();
@@ -52,7 +54,7 @@ public class BotReactionEvent extends BotEvent {
 				? e.getChannel().getHistory().getMessageById(e.getMessageId())
 				: null;
 		messageId = e.getMessageId();
-		user = e.getMember().getUser();
+		user = Objects.requireNonNull(e.getMember()).getUser();
 		guild = e.getGuild();
 		textChannel = e.getChannel();
 		eventType = EventType.REMOVE;

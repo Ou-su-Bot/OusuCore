@@ -6,20 +6,18 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import me.skiincraft.discord.core.OusuCore;
-import me.skiincraft.discord.core.plugin.Plugin;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class EventManager {
 
-	private static List<Listener> listeners = new ArrayList<>();
-	private static List<ListenerAdapter> JDAListeners = new ArrayList<>();
+	private static EventManager instance;
+	private static final List<Listener> listeners = new ArrayList<>();
+	private static final List<ListenerAdapter> JDAListeners = new ArrayList<>();
+
+	private EventManager(){}
 	
 	public void callEvent(Event event) {
-		Thread thread = new Thread(() -> {
-			call(event);
-		}, event.getClass().getSimpleName());
-		thread.start();
+		new Thread(() -> call(event), event.getClass().getSimpleName()).start();
 	}
 	
 	public List<ListenerAdapter> getListenerAdapters(){
@@ -37,19 +35,13 @@ public class EventManager {
 	}
 	
 	public void unregisterListener(Listener listener) {
-		if (listeners.contains(listener)) {
-			listeners.remove(listener);
-		}		
+		listeners.remove(listener);
 	}
 	
 	public void registerListener(ListenerAdapter listener) {
 		if (!JDAListeners.contains(listener)) {
 			JDAListeners.add(listener);
 		}
-	}
-	
-	public Plugin getPlugin() {
-		return OusuCore.getPluginManager().getPlugin();
 	}
 	
 	private void call(Event event) {
@@ -88,11 +80,7 @@ public class EventManager {
 		}
 		
 		//Sort for run by priority
-		runPriority.sort(new Comparator<EventRunnable>() {
-			public int compare(EventRunnable o1, EventRunnable o2) {
-				return Integer.compare(o1.priority.getIntensity(), o2.priority.getIntensity());
-			}
-		});
+		runPriority.sort(Comparator.comparingInt(o -> o.priority.getIntensity()));
 		
 		//call and run all methods.
 		for (EventRunnable runnable : runPriority) {
@@ -101,7 +89,7 @@ public class EventManager {
 	}
 	
 
-	abstract class EventRunnable {
+	abstract static class EventRunnable {
 		private EventPriority priority;
 
 		public EventRunnable(EventPriority priority) {
@@ -117,5 +105,9 @@ public class EventManager {
 		public void setPriority(EventPriority priority) {
 			this.priority = priority;
 		}
+	}
+
+	public static EventManager getInstance() {
+		return (instance == null) ? instance = new EventManager() : instance;
 	}
 }

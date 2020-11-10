@@ -6,13 +6,13 @@ import net.dv8tion.jda.api.events.self.SelfUpdateNameEvent;
 
 public class BotUpdateNameEvent extends BotEvent {
 
-	private SelfUser selfUser;
-	private String newName;
-	private String oldName;
-	private String newDiscriminator;
-	private String oldDiscriminator;
+	private final SelfUser selfUser;
+	private final String newName;
+	private final String oldName;
+	private final String newDiscriminator;
+	private final String oldDiscriminator;
 	
-	private int eventType;
+	private final int eventType;
 	
 	public BotUpdateNameEvent(SelfUpdateNameEvent e) {
 		this.selfUser = e.getSelfUser();
@@ -49,11 +49,11 @@ public class BotUpdateNameEvent extends BotEvent {
 	}
 	
 	public boolean isDiscriminatorUpdate(){
-		return (eventType == 1) ? true : false;
+		return eventType == 1;
 	}
 	
 	public boolean isNameUpdate(){
-		return (eventType == 0) ? true : false;
+		return eventType == 0;
 	}
 	
 	public SelfUser getSelfUser() {

@@ -13,8 +13,8 @@ import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
  */
 public class BotReadyGuildEvent extends BotEvent {
 	
-	private Guild guild; 
-	private SelfUser selfUser;
+	private final Guild guild;
+	private final SelfUser selfUser;
 	
 	public BotReadyGuildEvent(GuildReadyEvent e) {
 		this.guild = e.getGuild();

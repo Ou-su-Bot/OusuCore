@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Deprecated
 public class StringUtils {
 
 	public static boolean containsEqualsIgnoreCase(String str, String searchStr) {
@@ -14,11 +15,11 @@ public class StringUtils {
 	
 	
 	public static String insertBuild(String...strings) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append(" (");
 		
 		for (int i = 0; i < strings.length; i++) {
-			buffer.append("`" + strings[i] +"`");
+			buffer.append("`").append(strings[i]).append("`");
 			if (i != strings.length-1) {
 				buffer.append(", ");
 			}
@@ -28,11 +29,11 @@ public class StringUtils {
 	}
 	
 	public static String selectBuild(List<String> strings) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append(" (");
 		
 		for (int i = 0; i < strings.size(); i++) {
-			buffer.append("'" + strings.get(i) +"'");
+			buffer.append("'").append(strings.get(i)).append("'");
 			if (i != strings.size()-1) {
 				buffer.append(", ");
 			}
@@ -42,11 +43,11 @@ public class StringUtils {
 	}
 	
 	public static String insertBuild(List<String> strings) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append(" (");
 		
 		for (int i = 0; i < strings.size(); i++) {
-			buffer.append("\"" + strings.get(i) +"\"");
+			buffer.append("\"").append(strings.get(i)).append("\"");
 			if (i != strings.size()-1) {
 				buffer.append(", ");
 			}
@@ -56,11 +57,11 @@ public class StringUtils {
 	}
 	
 	public static String selectBuild(String...strings) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		buffer.append(" (");
 		
 		for (int i = 0; i < strings.length; i++) {
-			buffer.append("'" + strings[i] +"'");
+			buffer.append("'").append(strings[i]).append("'");
 			if (i != strings.length-1) {
 				buffer.append(", ");
 			}
@@ -106,29 +107,25 @@ public class StringUtils {
 		Pattern pattern = Pattern.compile("[a-zA-Z0-9]*");
 		Matcher matcher = pattern.matcher(str);
 
-		if (!matcher.matches()) {
-			return true;
-		} else {
-			return false;
-		}
+		return !matcher.matches();
 	}
 
 	public static String arrayToString(int num, String[] str) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		for (int i = num; i < str.length; i++) {
-			buffer.append(str[i] + "\n");
+			buffer.append(str[i]).append("\n");
 		}
 		return buffer.toString();
 	}
 
 	public static String arrayToString2(int num, String[] str) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		for (int i = num; i < str.length; i++) {
-			if (str[i] == str[str.length-1]) {
+			if (str[i].equals(str[str.length - 1])) {
 				buffer.append(str[i]);
 				break;
 			}
-			buffer.append(str[i] + " ");
+			buffer.append(str[i]).append(" ");
 			
 		}
 		return buffer.toString();
@@ -143,29 +140,29 @@ public class StringUtils {
 	}
 
 	public static String commandMessage(String[] stringarray) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		for (String str : stringarray) {
-			if (str != stringarray[0]) {
-				buffer.append(str + "\n");
+			if (!str.equals(stringarray[0])) {
+				buffer.append(str).append("\n");
 			}
 		}
 		return buffer.toString();
 	}
 
 	public static String commandMessageEmoji(String[] stringarray, String emoji) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		for (String str : stringarray) {
-			if (str != stringarray[0]) {
-				buffer.append(emoji + " " + str + "\n");
+			if (!str.equals(stringarray[0])) {
+				buffer.append(emoji).append(" ").append(str).append("\n");
 			}
 		}
 		return buffer.toString();
 	}
 
 	public static String[] removeString(String[] stringarray, int remove) {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		for (String str : stringarray) {
-			if (stringarray[remove] != str) {
+			if (!stringarray[remove].equals(str)) {
 				list.add(str);
 			}
 		}

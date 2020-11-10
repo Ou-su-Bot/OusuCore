@@ -6,18 +6,13 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-/**
- * Evento ao deletar uma mensagem com o bot
- * <br>Este evento será chamando ao deletar uma mensagem
- * utilizando o {@link BotTextChannel} ou {@link BotPrivChannel}.
- */
 public class BotDeleteMessage extends BotEvent {
 	
-	private Message deletedMessage;
-	private long messageId;
-	private TextChannel textChannel;
-	private Guild guild;
-	private SelfUser selfUser;
+	private final Message deletedMessage;
+	private final long messageId;
+	private final TextChannel textChannel;
+	private final Guild guild;
+	private final SelfUser selfUser;
 	
 	public BotDeleteMessage(Message deletedMessage, TextChannel textChannel, Guild guild) {
 		this.deletedMessage = deletedMessage;

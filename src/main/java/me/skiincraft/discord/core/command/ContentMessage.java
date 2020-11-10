@@ -8,12 +8,11 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 
 public class ContentMessage {
 	
-	private Message message;
+	private final Message message;
 	
-	private InputStream inputStream;
+	private final InputStream inputStream;
 	private String inputName;
-	private String inputExtension;
-	
+	private final String inputExtension;
 	
 	public ContentMessage(String string, InputStream inputStream, String inputExtension) {
 		this.message = new MessageBuilder(string).build();

@@ -1,204 +1,162 @@
 package me.skiincraft.discord.core;
 
-import java.awt.BorderLayout;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Files;
+import me.skiincraft.discord.core.command.Command;
+import me.skiincraft.discord.core.command.CommandManager;
+import me.skiincraft.discord.core.configuration.InternalSettings;
+import me.skiincraft.discord.core.configuration.Language;
+import me.skiincraft.discord.core.event.Event;
+import me.skiincraft.discord.core.event.EventManager;
+import me.skiincraft.discord.core.event.Listener;
+import me.skiincraft.discord.core.plugin.OusuPlugin;
+import me.skiincraft.discord.core.sqlite.SQLite;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.sharding.ShardManager;
+import org.apache.logging.log4j.Logger;
+
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Properties;
-import java.util.stream.Collectors;
+import java.util.List;
 
-import javax.swing.JFrame;
+public final class OusuCore {
 
-import me.skiincraft.discord.core.configuration.PropertieConfig;
-import me.skiincraft.discord.core.impl.PluginManagerImpl;
-import me.skiincraft.discord.core.plugin.PluginManager;
-import me.skiincraft.discord.core.utils.CoreUtils;
-import me.skiincraft.discord.core.utils.IntegerUtils;
+    private static CommandManager commandManager;
+    private static EventManager eventManager;
+    private static OusuPlugin instance;
 
-import net.msdh.jtconsole.JTConsole;
+    private static ShardManager shardManager;
+    private static InternalSettings internalSettings;
+    private static Logger logger;
 
-public class OusuCore {
-	
-	public static final int EXIT_FORCEEXIT = 0;
-	public static final int EXIT_SECURE = 1;
-	public static final int EXIT_RESTART = 2;
-	public static final int EXIT_ERROR = 3;
-	public static String[] args;
-	
-	private static PluginManager pluginManager;
-	
-	public static void main(String[] args) throws IOException {
-		openConsole();
-		/* 
-		 * TODO Criando pastas.
-		 */
-		
-		CoreUtils.createPath("bots", "library", "dependency", "logs");
-		
-		/* 
-		 * TODO Criando arquivo de configuração
-		 */
-		PropertieConfig config = new PropertieConfig();
-		Properties properties = config.getProperties();
-		
-		/*
-		 * TODO Preparando plugin manager (bot manager)
-		 */
-		Runnable runnable = new Runnable() {
-			
-			public void run() {
-				OusuCore.args = args;
-				pluginManager = new PluginManagerImpl();
-				pluginManager.startPlugin();
-				String restartValue = (properties.containsKey("auto-restart")) ? properties.getProperty("auto-restart")
-						: null;
+    private OusuCore() {}
 
-				if (restartValue == null || !isBoolean(restartValue)) {
-					System.out.println(properties.keySet().stream().collect(Collectors.toList()));
-					System.out.println("Há opções invalidas no config.properties");
-					return;
-				}
+    public static ShardManager getShardManager() {
+        return shardManager;
+    }
 
-				if (Boolean.valueOf(restartValue) == true) {
-					new Thread(() -> {
-						long restarttime = (properties.containsKey("restart-time"))
-								? (IntegerUtils.isNumeric(properties.getProperty("restart-time")))
-										? Long.valueOf(properties.getProperty("restart-time"))
-										: 60L
-								: 60L;
-						try {
-							System.out.println("Programado para reiniciar");
-							Thread.sleep(restarttime * (60 * 1000L));
-							restart(args);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}).start();
-				}
-			}
-		};
-		
-		/*
-		 * TODO Loading Library
-		 */
-		boolean isJda = false;
-		try {
-			isJda = loadLibrary();
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-		
-		if (!isJda) {
-			throw new IOException("Não foi possivel carregas as bibiliotecas, JDA não localizado.");
-		}
-		
-		/*
-		 * Loading Dependencies
-		 */
-		try {
-			loadDependency();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		runnable.run();
-	}
-	
-	private static boolean loadLibrary() throws Exception {
-		for (Path path : Files.newDirectoryStream(Paths.get("library"))) {
-			try {
-				if (path.toFile().getName().contains(".jar")) {
-					URLClassLoader c = new URLClassLoader(new URL[] { path.toFile().toURI().toURL() });
-					if (c.findResource("net/dv8tion/jda") != null) {
-						CoreUtils.addClassPathURL(path.toFile());
-						System.out.println("Library: JDA loaded.");
-						c.close();return true;
-						
-					}
-					c.close();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return false;
-	}
-	
-	private static void loadDependency() throws Exception {
-		for (Path path : Files.newDirectoryStream(Paths.get("dependency"))) {
-			if (path.toFile().getName().contains(".jar")) {
-				CoreUtils.addClassPathURL(path.toFile());
-			}
-		}
-	}
-	
-	public static void restart() throws IOException {
-		restart(args);
-	}
-	
-	public static void restart(String[] args) throws IOException {
-		StringBuffer command = new StringBuffer();
-		command.append(System.getProperty("java.home")
-				.concat(File.separator)
-				.concat("bin")
-				.concat(File.separator)
-				.concat("java "));
-		
-		for (String jvmArg : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
-			command.append(jvmArg + " ");
-		}
-		
-		command.append("-cp ").append(ManagementFactory.getRuntimeMXBean().getClassPath()).append(" ");
-		command.append(OusuCore.class.getName()).append(" ");
-		if (args != null) {
-			for (String arg : args) {
-				command.append(arg).append(" ");
-			}
-		}
-		Runtime.getRuntime().exec(command.toString());
-		System.exit(EXIT_RESTART);
-	}
+    public static void addLanguage(Language language){
+        internalSettings.addLanguage(language);
+    }
 
-	public static void exit(int exitcode) {
-		//pluginManager.disablePlugin();
-	}
-	
-	public static PluginManager getPluginManager() {
-		return pluginManager;
-	}
-	
-	
-	
-	private static void openConsole() {
-    	JTConsole jc = new JTConsole(60,20);
-    	jc.setCursorVisible(true);
-    	jc.captureStdOut();
-    	
-        JFrame frame = new JFrame("OusuCore - Console");
-        frame.setSize(400, 400);
-    	frame.setLayout(new BorderLayout());
-		frame.add(jc, BorderLayout.CENTER);
-	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	    frame.addWindowListener(new WindowAdapter() {
-	    	public void windowClosed(WindowEvent e) {
-	    		System.exit(OusuCore.EXIT_RESTART);
-	    	}
-		});
-		frame.setResizable(false);
-		frame.pack();
-		frame.setVisible(true);
-	}
-	
-	private static boolean isBoolean(String string) {
-		if (string.equalsIgnoreCase("true") || string.equalsIgnoreCase("false")) {
-			return true;
-		}
-		return false;
-	}
+    public static void removeLanguage(Language language){
+        internalSettings.removeLanguage(language);
+    }
+
+    public static List<Language> getLanguages(){
+        return internalSettings.getLanguages();
+    }
+
+    public static void registerCommand(Command command) {
+        commandManager.registerCommand(command);
+    }
+
+    public static void unregisterCommand(Command command) {
+        commandManager.registerCommand(command);
+    }
+
+    public static void registerListener(Listener listener) {
+        eventManager.registerListener(listener);
+    }
+
+    public static void registerListener(ListenerAdapter listener) {
+        eventManager.registerListener(listener);
+    }
+
+    public static void unregisterListener(Listener listener) {
+        eventManager.unregisterListener(listener);
+    }
+
+    public static Path getFontPath() {
+        return Paths.get("bots/" + internalSettings.getBotName() + "/fonts/");
+    }
+
+    public static Path getAssetsPath() {
+        return Paths.get("bots/" + internalSettings.getBotName() + "/fonts/");
+    }
+
+    public static Path getLanguagePath() {
+        return Paths.get("bots/" + internalSettings.getBotName() + "/language/");
+    }
+
+    public static Path getBotPath() {
+        return Paths.get("bots/" + internalSettings.getBotName() + "/");
+    }
+
+    public static SQLite getSQLiteDatabase(){
+        return internalSettings.getSQLite();
+    }
+
+    public static InternalSettings getInternalSettings() {
+        return internalSettings;
+    }
+
+    public static CommandManager getCommandManager() {
+        return commandManager;
+    }
+
+    public static EventManager getEventManager() {
+        return eventManager;
+    }
+
+    public static OusuPlugin getInstance() {
+        return instance;
+    }
+
+    public static Path getPluginPath() {
+        return Paths.get("bots/" + internalSettings.getBotName());
+    }
+
+    public static void callEvent(Event event) {
+        eventManager.callEvent(event);
+    }
+
+    public static Logger getLogger() {
+        return logger;
+    }
+
+    public static void shutdown() {
+        logger.info("Bot está sendo desativado.");
+        instance.onDisable();
+        logger.info("Encerrando conexões com JDA");
+        shardManager.shutdown();
+        logger.info("Desativando conexão com o banco de dados");
+        getSQLiteDatabase().stop();
+        System.exit(0);
+    }
+
+    public static void printStackTrace(Throwable throwable) {
+        getLogger().throwing(throwable);
+    }
+
+    public static void inicialize(CommandManager commandManager, EventManager eventManager, OusuPlugin instance, ShardManager shardManager, InternalSettings internalSettings, Logger logger)  {
+        if (OusuCore.commandManager != null){
+            logger.warn("Tentou criar uma instancia OusuCore, mas é possivel somente 1 instancia(s) ativa(s).");
+            return;
+        }
+
+        try {
+            Field field = instance.getClass().getDeclaredField("shardManager");
+            field.setAccessible(true);
+            field.set(instance.getClass(), shardManager);
+
+            OusuCore.commandManager = commandManager;
+            OusuCore.eventManager = eventManager;
+            OusuCore.instance = instance;
+            OusuCore.shardManager = shardManager;
+            OusuCore.internalSettings = internalSettings;
+            OusuCore.logger = logger;
+
+            boolean sqlconnection = getSQLiteDatabase().connect();
+            if (!sqlconnection){
+                System.exit(0);
+            }
+            instance.onEnable();
+            logger.info(String.format("%s foi carregado com sucesso!", internalSettings.getBotName()));
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (Exception e){
+            logger.error("Ocorreu um problema ao carregar onEnable, verifique se está atualizado!");
+            logger.throwing(e);
+        }
+    }
 }

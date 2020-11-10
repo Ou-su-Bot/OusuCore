@@ -1,5 +1,6 @@
 package me.skiincraft.discord.core.jda;
 
+import me.skiincraft.discord.core.OusuCore;
 import me.skiincraft.discord.core.configuration.GuildDB;
 import me.skiincraft.discord.core.event.EventManager;
 import me.skiincraft.discord.core.events.bot.*;
@@ -7,7 +8,6 @@ import me.skiincraft.discord.core.events.member.MemberJoinEvent;
 import me.skiincraft.discord.core.events.member.MemberLeaveEvent;
 import me.skiincraft.discord.core.events.member.MemberRoleEvent;
 import me.skiincraft.discord.core.events.member.MemberUpdateNameEvent;
-import me.skiincraft.discord.core.plugin.Plugin;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
@@ -33,12 +33,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class ListenerAdaptation extends ListenerAdapter {
 
-    private final Plugin plugin;
     private final EventManager eventManager;
 
-    public ListenerAdaptation(Plugin plugin) {
-        this.plugin = plugin;
-        this.eventManager = plugin.getEventManager();
+    public ListenerAdaptation() {
+        this.eventManager = OusuCore.getEventManager();
     }
 
     public void onUserUpdateName(@NotNull UserUpdateNameEvent event) {
@@ -99,7 +97,7 @@ public class ListenerAdaptation extends ListenerAdapter {
         for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
             adapter.onSelfUpdateName(event);
         }
-        plugin.getEventManager().callEvent(new BotUpdateNameEvent(event));
+        eventManager.callEvent(new BotUpdateNameEvent(event));
     }
 
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
@@ -117,7 +115,7 @@ public class ListenerAdaptation extends ListenerAdapter {
 
         if (!args[0].toLowerCase().startsWith(prefix)) return;
 
-        plugin.getEventManager().callEvent(new BotReceivedMessage(event.getChannel(), event.getMessage(), prefix));
+        eventManager.callEvent(new BotReceivedMessage(event.getChannel(), event.getMessage(), prefix));
     }
 
     public void onGuildMessageReactionAdd(@NotNull GuildMessageReactionAddEvent event) {
@@ -125,7 +123,7 @@ public class ListenerAdaptation extends ListenerAdapter {
             adapter.onGuildMessageReactionAdd(event);
         }
         if (!event.getReaction().isSelf()) return;
-        plugin.getEventManager().callEvent(new BotReactionEvent(event));
+        eventManager.callEvent(new BotReactionEvent(event));
     }
 
     public void onGuildMessageReactionRemove(@NotNull GuildMessageReactionRemoveEvent event) {
@@ -133,7 +131,7 @@ public class ListenerAdaptation extends ListenerAdapter {
             adapter.onGuildMessageReactionRemove(event);
         }
         if (!event.getReaction().isSelf()) return;
-        plugin.getEventManager().callEvent(new BotReactionEvent(event));
+        eventManager.callEvent(new BotReactionEvent(event));
     }
 
     public void onPrivateMessageReceived(@NotNull PrivateMessageReceivedEvent event) {
@@ -142,7 +140,7 @@ public class ListenerAdaptation extends ListenerAdapter {
         }
         if (event.getAuthor().isBot()) return;
         if (event.getAuthor().isFake()) return;
-        plugin.getEventManager().callEvent(new BotReceivedMessage(event.getChannel(), event.getMessage(), "ou!"));
+        eventManager.callEvent(new BotReceivedMessage(event.getChannel(), event.getMessage(), "ou!"));
     }
 
     public void onPrivateMessageReactionAdd(@NotNull PrivateMessageReactionAddEvent event) {
@@ -163,7 +161,7 @@ public class ListenerAdaptation extends ListenerAdapter {
         }
         GuildDB db = new GuildDB(event.getGuild());
         db.create();
-        plugin.getEventManager().callEvent(new BotReadyGuildEvent(event));
+        eventManager.callEvent(new BotReadyGuildEvent(event));
     }
 
     public void onGuildJoin(@NotNull GuildJoinEvent event) {
@@ -172,7 +170,7 @@ public class ListenerAdaptation extends ListenerAdapter {
         }
         GuildDB db = new GuildDB(event.getGuild());
         db.create();
-        plugin.getEventManager().callEvent(new BotJoinEvent(event));
+        eventManager.callEvent(new BotJoinEvent(event));
     }
 
     public void onGuildLeave(@NotNull GuildLeaveEvent event) {
@@ -181,41 +179,41 @@ public class ListenerAdaptation extends ListenerAdapter {
         }
         GuildDB db = new GuildDB(event.getGuild());
         db.delete();
-        plugin.getEventManager().callEvent(new BotLeaveEvent(event));
+        eventManager.callEvent(new BotLeaveEvent(event));
     }
 
     public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
         for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
             adapter.onGuildMemberJoin(event);
         }
-        plugin.getEventManager().callEvent(new MemberJoinEvent(event));
+        eventManager.callEvent(new MemberJoinEvent(event));
     }
 
     public void onGuildMemberLeave(@NotNull GuildMemberLeaveEvent event) {
         for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
             adapter.onGuildMemberLeave(event);
         }
-        plugin.getEventManager().callEvent(new MemberLeaveEvent(event));
+        eventManager.callEvent(new MemberLeaveEvent(event));
     }
 
     public void onGuildMemberRoleAdd(@NotNull GuildMemberRoleAddEvent event) {
         for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
             adapter.onGuildMemberRoleAdd(event);
         }
-        plugin.getEventManager().callEvent(new MemberRoleEvent(event));
+        eventManager.callEvent(new MemberRoleEvent(event));
     }
 
     public void onGuildMemberRoleRemove(@NotNull GuildMemberRoleRemoveEvent event) {
         for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
             adapter.onGuildMemberRoleRemove(event);
         }
-        plugin.getEventManager().callEvent(new MemberRoleEvent(event));
+        eventManager.callEvent(new MemberRoleEvent(event));
     }
 
     public void onGuildMemberUpdateNickname(@NotNull GuildMemberUpdateNicknameEvent event) {
         for (ListenerAdapter adapter : eventManager.getListenerAdapters()) {
             adapter.onGuildMemberUpdateNickname(event);
         }
-        plugin.getEventManager().callEvent(new MemberUpdateNameEvent(event));
+        eventManager.callEvent(new MemberUpdateNameEvent(event));
     }
 }

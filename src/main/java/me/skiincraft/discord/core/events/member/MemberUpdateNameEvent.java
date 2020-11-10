@@ -7,9 +7,9 @@ import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameE
 
 public class MemberUpdateNameEvent extends MemberEvent implements Updateable<String> {
 	
-	private Member member;
-	private String newName;
-	private String oldName;
+	private final Member member;
+	private final String newName;
+	private final String oldName;
 	private Guild guild;
 	
 	public MemberUpdateNameEvent(GuildMemberUpdateNicknameEvent e) {

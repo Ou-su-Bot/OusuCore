@@ -1,0 +1,26 @@
+{
+  "Token": null,
+  "Shards": 1,
+  "ChunkFilter": false,
+  "CacheFlag": {
+    "ACTIVITY": false,
+    "VOICE_STATE": false,
+    "EMOTE": false,
+    "CLIENT_STATUS": false,
+    "MEMBER_OVERRIDES": false
+  },
+  "GatewayIntents": {
+    "GUILD_MEMBERS": false,
+    "GUILD_BANS": false,
+    "GUILD_EMOJIS": false,
+    "GUILD_INVITES": false,
+    "GUILD_VOICE_STATES": false,
+    "GUILD_PRESENCES": false,
+    "GUILD_MESSAGES": false,
+    "GUILD_MESSAGE_REACTIONS": false,
+    "GUILD_MESSAGE_TYPING": false,
+    "DIRECT_MESSAGES": false,
+    "DIRECT_MESSAGE_REACTIONS": false,
+    "DIRECT_MESSAGE_TYPING": false
+  }
+}

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%d{dd-MM-yyyy HH:mm:ss} %-5level]: [%t] - %msg%n"/>
+        </Console>
+        <RollingFile name="fileAppender" fileName="logs/latest.log"
+                     filePattern="logs/$${date:yyyy-MM}/ousu-core-%d{MM-dd-yyyy HH-mm}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>[%d{dd-MM-yyyy HH:mm:ss} %p]: [%t] - %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="1 MB"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="me.skiincraft" level="debug" additivity="false">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="fileAppender"/>
+        </Logger>
+        <Root level="error">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="fileAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>

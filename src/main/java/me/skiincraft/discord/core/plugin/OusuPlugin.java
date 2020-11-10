@@ -3,23 +3,14 @@ package me.skiincraft.discord.core.plugin;
 import net.dv8tion.jda.api.sharding.ShardManager;
 
 public abstract class OusuPlugin {
-	
-	private Plugin plugin;
-	private ShardManager shardmanager;
+
+	private ShardManager shardManager;
 
 	public void onLoad() {}
-	
-	public void onEnable() {
-	}
-	
+	public void onEnable() {}
 	public void onDisable() {}
-	
-	
-	public final ShardManager getShardManager() {
-		return shardmanager;
-	}
 
-	public Plugin getPlugin() {
-		return plugin;
+	public final ShardManager getShardManager() {
+		return shardManager;
 	}
 }

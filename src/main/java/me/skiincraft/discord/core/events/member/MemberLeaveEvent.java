@@ -6,8 +6,8 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberLeaveEvent;
 
 public class MemberLeaveEvent extends MemberEvent {
 
-	private Guild guild;
-	private Member member; 
+	private final Guild guild;
+	private final Member member;
 	
 	public MemberLeaveEvent(GuildMemberLeaveEvent e) {
 		guild = e.getGuild();

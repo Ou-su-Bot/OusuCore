@@ -3,13 +3,11 @@ package me.skiincraft.discord.core.configuration;
 import java.util.Locale;
 
 import me.skiincraft.discord.core.OusuCore;
-import me.skiincraft.discord.core.plugin.Plugin;
-
 import net.dv8tion.jda.api.entities.Guild;
 
 public final class Language {
 	
-	private Locale locale;
+	private final Locale locale;
 	
 	public Language(Locale locale) {
 		this.locale = locale;
@@ -44,10 +42,7 @@ public final class Language {
 	}
 	
 	public static Language getGuildLanguage(Guild guild) {
-		Plugin plugin = OusuCore.getPluginManager().getPlugin();
-		GuildDB db = new GuildDB(guild);
-		
-		return plugin.getLanguages().stream().filter(l-> l.getLanguageName().equalsIgnoreCase(db.get("language"))).findAny().orElse(getDefaultLanguage());
+		return OusuCore.getLanguages().stream().filter(l-> l.getLanguageName().equalsIgnoreCase(new GuildDB(guild).get("language"))).findAny().orElse(getDefaultLanguage());
 	}
 	
 }

@@ -1,10 +1,9 @@
 package me.skiincraft.discord.core.events.bot;
 
-import me.skiincraft.discord.core.command.ChannelInteract;
+import me.skiincraft.discord.core.command.InteractChannel;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -17,21 +16,17 @@ import net.dv8tion.jda.api.entities.TextChannel;
  */
 public class BotReceivedMessage extends BotEvent {
 	
-	private Guild guild;
+	private final Guild guild;
 	private TextChannel textChannel;
 	private PrivateChannel privChannel;
-	private String prefixUsed;
-	private Message message;
-	private ChannelInteract interact;
+	private final String prefixUsed;
+	private final Message message;
+	private final InteractChannel interact;
 	
 	
 	public BotReceivedMessage(TextChannel channel, Message message, String prefixUsed) {
 		this.prefixUsed = prefixUsed;
-		this.interact = new ChannelInteract() {
-			protected MessageChannel getTextChannel() {
-				return channel;
-			}
-		};
+		this.interact = new InteractChannel(channel);
 		
 		this.textChannel = channel;
 		this.message = message;
@@ -58,7 +53,7 @@ public class BotReceivedMessage extends BotEvent {
 		return guild;
 	}
 	
-	public ChannelInteract getInteract() {
+	public InteractChannel getInteract() {
 		return interact;
 	}
 	

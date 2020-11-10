@@ -2,19 +2,16 @@ package me.skiincraft.discord.core.command;
 
 import java.util.List;
 
-import me.skiincraft.discord.core.OusuCore;
 import me.skiincraft.discord.core.configuration.LanguageManager;
-import me.skiincraft.discord.core.plugin.Plugin;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import me.skiincraft.discord.core.event.EventTarget;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 
-public abstract class Command extends ChannelInteract {
+public abstract class Command {
 
-	private String name;
-	private List<String> aliases;
-	private String usage;
-	
-	private TextChannel channel;
+	private final String name;
+	private final List<String> aliases;
+	private final String usage;
 	
 	public Command(String name, List<String> aliases, String usage) {
 		this.name = name;
@@ -25,8 +22,8 @@ public abstract class Command extends ChannelInteract {
 	public String getCommandDescription(LanguageManager language) {
 		return language.getString("CommandDescription", name.toUpperCase() +"_DESCRIPTION");
 	}
-	
-	public abstract void execute(User user, String[] args, TextChannel channel);
+	@EventTarget
+	public abstract void execute(Member user, String[] args, InteractChannel channel);
 
 	public String getCommandName() {
 		return name;
@@ -41,16 +38,8 @@ public abstract class Command extends ChannelInteract {
 		return usage;
 	}
 	
-	public Plugin getPlugin() {
-		return OusuCore.getPluginManager().getPlugin();
-	}
-	
-	public TextChannel getTextChannel() {
-		return channel;
-	}
-	
-	public LanguageManager getLanguageManager() {
-		return new LanguageManager(getTextChannel().getGuild());
+	public LanguageManager getLanguageManager(Guild guild) {
+		return new LanguageManager(guild);
 	}
 	
 }

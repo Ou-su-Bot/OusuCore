@@ -3,8 +3,13 @@ package me.skiincraft.discord.core.command;
 import java.util.ArrayList;
 
 public class CommandManager {
-	
-	private ArrayList<Command> commands = new ArrayList<>();
+
+	private static CommandManager instance;
+
+	private CommandManager() {
+	}
+
+	private final ArrayList<Command> commands = new ArrayList<>();
 	
 	public boolean registerCommand(Command command) {
 		return commands.add(command);
@@ -22,4 +27,7 @@ public class CommandManager {
 		return commands;
 	}
 
+	public static CommandManager getInstance() {
+		return (instance == null) ? instance = new CommandManager() : instance;
+	}
 }

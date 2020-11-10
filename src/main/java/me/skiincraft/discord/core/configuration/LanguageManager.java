@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -18,7 +19,7 @@ import net.dv8tion.jda.api.entities.Guild;
 
 public class LanguageManager {
 
-	private Language lang;
+	private final Language lang;
 	private JsonObject object;
 	private JsonArray array;
 	private String langfile;
@@ -30,12 +31,11 @@ public class LanguageManager {
 	public LanguageManager(Language language) {
 		this.lang = language;
 		try {
-			langfile = "file:" + OusuCore.getPluginManager().getPlugin().getPluginPath().getAbsolutePath()  + "/language/" + lang.getLanguageCode() + "_" + lang.getCountryCode() + ".json";
+			langfile = "file:" + OusuCore.getPluginPath().toFile().getAbsolutePath()  + "/language/" + lang.getLanguageCode() + "_" + lang.getCountryCode() + ".json";
 			InputStream in = new URL(langfile).openStream();
 			
 			JsonArray arr = new JsonParser().parse(new InputStreamReader(in)).getAsJsonArray();
-			JsonObject obj = arr.get(0).getAsJsonObject();
-			object = obj;
+			object = arr.get(0).getAsJsonObject();
 			array = arr;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -56,6 +56,7 @@ public class LanguageManager {
 			e.printStackTrace();
 		} finally {
 			try {
+				assert io != null;
 				io.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -80,12 +81,7 @@ public class LanguageManager {
 			write(array);
 			return " "+property+"."+key;
 		}
-			try {
-				return " " + new String(ob.get(key).getAsString().getBytes(), "UTF-8").replace("{l}", "\n");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-			return null;
+		return " " + new String(ob.get(key).getAsString().getBytes(), StandardCharsets.UTF_8).replace("{l}", "\n");
 	}
 	
 	public String[] getStrings(String property, String key) {
@@ -103,12 +99,7 @@ public class LanguageManager {
 			write(array);
 			return new String[]{" "+property+"."+key};
 		}
-			try {
-				return new String(ob.get(key).getAsString().getBytes(), "UTF-8").replace("{l}", ";").split(";");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-			return null;
+		return new String(ob.get(key).getAsString().getBytes(), StandardCharsets.UTF_8).replace("{l}", ";").split(";");
 	}
 	
 	public String getString(Class<?> property, String key) {

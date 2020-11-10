@@ -12,8 +12,8 @@ import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
  */
 public class BotLeaveEvent extends BotEvent {
 
-	private Guild guild; 
-	private SelfUser selfUser;
+	private final Guild guild;
+	private final SelfUser selfUser;
 	
 	public BotLeaveEvent(GuildLeaveEvent e) {
 		this.guild = e.getGuild();

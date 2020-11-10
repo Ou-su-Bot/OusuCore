@@ -11,9 +11,9 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleRemoveEvent;
 
 public class MemberRoleEvent extends MemberEvent {
 
-	private EventType eventType;
-	private Guild guild;
-	private Member member;
+	private final EventType eventType;
+	private final Guild guild;
+	private final Member member;
 	private List<Role> roles;
 	
 	public MemberRoleEvent(GuildMemberRoleAddEvent e) {

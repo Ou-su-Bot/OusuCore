@@ -1,53 +1,47 @@
 package me.skiincraft.discord.core.sqlite;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.function.Consumer;
-
-import me.skiincraft.discord.core.plugin.Plugin;
+import me.skiincraft.discord.core.OusuCore;
 import me.skiincraft.discord.core.sqlobjects.Table;
 import me.skiincraft.discord.core.sqlobjects.Table.Column;
+
+import java.sql.*;
+import java.util.function.Consumer;
 
 public class SQLite {
 
 	private Connection connection;
 	private Statement statement;
 	private PreparedStatement preparedStatement;
-	
-	private Plugin plugin;
-	
-	public SQLite(Plugin main) {
-		this.plugin = main;
+	private final String databaseName;
+
+	public String getDatabaseName() {
+		return databaseName;
+	}
+
+	public SQLite(String databaseName) {
+		this.databaseName = databaseName;
 	}
 
 	public synchronized boolean connect() {
 		try {
 			if (this.connection != null) {
 				if (!connection.isClosed()) {
-					System.out.println("Conexão com banco de dados já esta estabelecida!");
+					OusuCore.getLogger().warn("Ainda há uma conexão estabelecida com banco de dados.");
 					return true;
 				}
 			}
 			
 			Class.forName("com.mysql.jdbc.Driver");
-			String url = "jdbc:sqlite:" + plugin.getName() +"_sqlite.db";
-			
-			this.connection = DriverManager.getConnection(url);
+			this.connection = DriverManager.getConnection(String.format("jdbc:sqlite:%s_sqlite.db", databaseName));
 			this.statement = connection.createStatement();
-			
-			System.out.println("Conexão com banco de dados estabelecida com sucesso.");
+			OusuCore.getLogger().info("Conexão com banco de dados estabelecida com sucesso.");
 			return true;
-		} catch (ClassNotFoundException exception) {
-			exception.printStackTrace();
-			System.out.println("Driver JDBC não foi encontrado.");
+		} catch (ClassNotFoundException e) {
+			OusuCore.getLogger().info("Não foi encontrado o Driver JDBC necessario para ativar o banco de dados.");
 			return false;
-		} catch (SQLException exception) {
-			exception.printStackTrace();
-			System.out.println("SQLException: Alguma operação com banco de dados falhou.");
+		} catch (SQLException e) {
+			OusuCore.getLogger().info("OusuCore falhou ao tentar conectar com o banco de dados.");
+			OusuCore.getLogger().throwing(e);
 			return false;
 		}
 	}
@@ -62,8 +56,9 @@ public class SQLite {
 				this.statement.close();
 			}
 			return true;
-		} catch (SQLException exception) {
-			exception.printStackTrace();
+		} catch (SQLException e) {
+			OusuCore.getLogger().info("OusuCore falhou ao tentar parar conexão com o banco de dados.");
+			OusuCore.getLogger().throwing(e);
 			return false;
 		}
 	}
@@ -72,6 +67,7 @@ public class SQLite {
 		if (connection == null) {
 			connect();
 		}
+
         try {
         	ResultSet rs = connection.getMetaData().getTables(null, null, tableName, null);
             while (rs.next()) { 
@@ -96,11 +92,10 @@ public class SQLite {
 		try {
 			if (!state.isClosed()) {
 				state.close();
-				return;
 			}
 		} catch (SQLException e) {
-			System.out.println("Não foi possive fechar a conexão com Statement");
-			e.printStackTrace();
+			OusuCore.getLogger().error("Não foi possível fechar a conexão com um statement");
+			OusuCore.getLogger().throwing(e);
 		}
 	}
 	
@@ -111,11 +106,10 @@ public class SQLite {
 		try {
 			if (!state.isClosed()) {
 				state.close();
-				return;
 			}
 		} catch (SQLException e) {
-			System.out.println("Não foi possive fechar a conexão com PrepareStatement");
-			e.printStackTrace();
+			OusuCore.getLogger().error("Não foi possível fechar a conexão com um prepared statement");
+			OusuCore.getLogger().throwing(e);
 		}
 	}
 
@@ -130,11 +124,10 @@ public class SQLite {
 			}
 			if (!state.isClosed()) {
 				state.close();
-				return;
 			}
 		} catch (SQLException e) {
-			System.out.println("Não foi possive fechar a conexão com Statement/ResultSet");
-			e.printStackTrace();
+			OusuCore.getLogger().error("Não foi possível fechar a conexão com um statement/resultset");
+			OusuCore.getLogger().throwing(e);
 		}
 	}
 	
@@ -184,10 +177,10 @@ public class SQLite {
 	
 	public void createTable(Table table) {
 		executeStatementTask(statement ->{
-			StringBuffer buffer = new StringBuffer();
-			buffer.append("CREATE TABLE IF NOT EXISTS ");
-			buffer.append("" + table.getTableName() + " ");
-			buffer.append("(ID INTEGER PRIMARY KEY AUTOINCREMENT, ");
+			StringBuilder buffer = new StringBuilder();
+			buffer.append("CREATE TABLE IF NOT EXISTS ")
+					.append(table.getTableName())
+					.append(" (ID INTEGER PRIMARY KEY AUTOINCREMENT, ");
 			
 			int tb = 0;
 			for (Column column :table.columns()) {
@@ -200,8 +193,10 @@ public class SQLite {
 			buffer.append(");");
 				try {
 					statement.execute(buffer.toString());
+					OusuCore.getLogger().info(String.format("[SQL] A tabela '%s' foi criada com sucesso", table.getTableName()));
 				} catch (SQLException e) {
-					e.printStackTrace();
+					OusuCore.getLogger().error("[SQL] Não foi possível criar uma nova tabela.");
+					OusuCore.getLogger().throwing(e);
 				}
 		});
 	}
@@ -213,8 +208,5 @@ public class SQLite {
 	public Statement getStatement() {
 		return statement;
 	}
-	
-	public Plugin getPlugin() {
-		return plugin;
-	}
+
 }
