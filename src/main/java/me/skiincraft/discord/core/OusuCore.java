@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -22,10 +21,10 @@ public final class OusuCore {
 
     private static CommandManager commandManager;
     private static EventManager eventManager;
-    private static OusuPlugin instance;
-
-    private static ShardManager shardManager;
     private static InternalSettings internalSettings;
+
+    private static OusuPlugin instance;
+    private static ShardManager shardManager;
     private static Logger logger;
 
     private OusuCore() {}
@@ -71,7 +70,7 @@ public final class OusuCore {
     }
 
     public static Path getAssetsPath() {
-        return Paths.get("bots/" + internalSettings.getBotName() + "/fonts/");
+        return Paths.get("bots/" + internalSettings.getBotName() + "/assets/");
     }
 
     public static Path getLanguagePath() {
@@ -118,10 +117,18 @@ public final class OusuCore {
         logger.info("Bot está sendo desativado.");
         instance.onDisable();
         logger.info("Encerrando conexões com JDA");
-        shardManager.shutdown();
+        if (shardManager != null) {
+            shardManager.shutdown();
+        }
         logger.info("Desativando conexão com o banco de dados");
-        getSQLiteDatabase().stop();
+        if (getSQLiteDatabase().getConnection() != null) {
+            getSQLiteDatabase().stop();
+        }
         System.exit(0);
+    }
+
+    public static void printStackTrace(String message, Throwable throwable) {
+        getLogger().error(message, throwable);
     }
 
     public static void printStackTrace(Throwable throwable) {
@@ -129,16 +136,12 @@ public final class OusuCore {
     }
 
     public static void inicialize(CommandManager commandManager, EventManager eventManager, OusuPlugin instance, ShardManager shardManager, InternalSettings internalSettings, Logger logger)  {
-        if (OusuCore.commandManager != null){
+        if (OusuCore.commandManager != null) {
             logger.warn("Tentou criar uma instancia OusuCore, mas é possivel somente 1 instancia(s) ativa(s).");
             return;
         }
 
         try {
-            Field field = instance.getClass().getDeclaredField("shardManager");
-            field.setAccessible(true);
-            field.set(instance.getClass(), shardManager);
-
             OusuCore.commandManager = commandManager;
             OusuCore.eventManager = eventManager;
             OusuCore.instance = instance;
@@ -146,17 +149,15 @@ public final class OusuCore {
             OusuCore.internalSettings = internalSettings;
             OusuCore.logger = logger;
 
-            boolean sqlconnection = getSQLiteDatabase().connect();
-            if (!sqlconnection){
-                System.exit(0);
+            boolean sqlConnection = getSQLiteDatabase().connect();
+            if (!sqlConnection){
+                logger.fatal("Não foi possivel conectar no banco de dados.");
+                shutdown();
             }
             instance.onEnable();
             logger.info(String.format("%s foi carregado com sucesso!", internalSettings.getBotName()));
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
         } catch (Exception e){
-            logger.error("Ocorreu um problema ao carregar onEnable, verifique se está atualizado!");
-            logger.throwing(e);
+            logger.error("Ocorreu um problema ao carregar onEnable, verifique se está atualizado!", e);
         }
     }
 }
