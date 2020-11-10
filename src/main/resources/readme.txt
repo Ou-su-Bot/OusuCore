@@ -10,23 +10,19 @@ sofreu um rework, pois tinha vestigios da antiga ideia, que fazia o codigo do pr
 Para desfrutar completamente o uso, recomendo utilizar o OusuCore-Commons.
 ### Directory Struture
 
-.
-├── _logs
-│   └── 07/11/2020-ousubot.log
-├── _bots
-│   ├── YourBot.jar
-│   └── _YourBot
-│       ├── Fonts (load your fonts)
-│       ├── Assets (bot files, and etc)
-│       └── Language (bot language files '.json')
-├── _dependency
-│   ├── botDependency_1.jar
-│   └── botDependency_2.jar
-├── _library
-│   └── JDA(last version).jar
-├── settings.json
-├── YourBot_sqlite.db
-└── OusuCore.jar
+OusuCore:.
+├───./bots
+│   ├─── YourBot.jar
+│   └───./YourBot
+│       ├───assets
+│       ├───fonts
+│       └───language
+├───./dependency
+├───./library
+├───./logs
+├─── settings.json
+├─── YourBot_sqlite.db
+└─── OusuCore.jar
 
 #### Settings File
 {
@@ -46,7 +42,7 @@ Para desfrutar completamente o uso, recomendo utilizar o OusuCore-Commons.
 
  > Caso não queira ativar o padrão só deixe o JsonObject nulo.
   "CacheFlag": null,
-  "GatewayIntents": { (para gateway intents crie um none)
+  "GatewayIntents": {
     "DEFAULT": true
   }
 

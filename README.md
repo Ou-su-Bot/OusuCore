@@ -12,25 +12,23 @@ Para desfrutar completamente o uso, recomendo utilizar o OusuCore-Commons.
 <h4>Directory Struture</h4>
 
 ```markdown
-.
-├── _/logs
-│   └── 07/11/2020-ousubot.log
-├── _/bots
-│   ├── YourBot.jar
-│   └── _/YourBot
-│       ├── Fonts (load your fonts)
-│       ├── Assets (bot files, and etc)
-│       └── Language (bot language files '.json')
-├── _/dependency
-│   ├── botDependency_1.jar
-│   └── botDependency_2.jar
-├── _/library
-│   └── JDA(last version).jar
-├── settings.json
-├── YourBot_sqlite.db
-└── OusuCore.jar
+OusuCore:.
+├───./bots
+│   ├─── YourBot.jar
+│   └───./YourBot
+│       ├───assets
+│       ├───fonts
+│       └───language
+├───./dependency
+├───./library
+├───./logs
+├─── settings.json
+├─── YourBot_sqlite.db
+└─── OusuCore.jar
 ```
+
 <h4>Settings File</h4>
+
 ```json
 {
   "Token": "yourbottoken",
@@ -48,11 +46,14 @@ Para desfrutar completamente o uso, recomendo utilizar o OusuCore-Commons.
 * Cache flag e Gateway Intents
 
 Caso não queira ativar o padrão só deixe o JsonObject nulo.
+
 ```json
   "CacheFlag": null,
   "GatewayIntents": null
 ```
+
 ou se quiser deixar as configurações padrões deixe
+
 ```json
   "CacheFlag": {
     "DEFAULT": true
