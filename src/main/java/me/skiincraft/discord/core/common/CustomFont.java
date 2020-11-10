@@ -17,7 +17,7 @@ public class CustomFont {
 	
 	public static Font getFont(String fontName, int style, float size) {
 		try {
-			List<File> files = getFonts().stream().filter(file -> file.getName().substring(0, file.getName().length()-4)
+			List<File> files = getFontsFiles().stream().filter(file -> file.getName().substring(0, file.getName().length()-4)
 					.equalsIgnoreCase(fontName))
 					.collect(Collectors.toList());
 
@@ -39,7 +39,8 @@ public class CustomFont {
 		return new Font("arial", Font.PLAIN, 12);
 	}
 
-	public static List<File> getFonts() throws IOException {
+
+	public static List<File> getFontsFiles() throws IOException {
 		List<Path> files = new ArrayList<>();
 		Files.newDirectoryStream(OusuCore.getFontPath()).forEach(files::add);
 		return files.stream().map(Path::toFile).filter(file -> file.getName().toLowerCase().endsWith(".ttf"))

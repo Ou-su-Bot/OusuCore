@@ -19,9 +19,8 @@ public class CoreSettings {
     private final List<CacheFlag> cacheFlags;
     private final List<GatewayIntent> gatewayIntents;
 
-    private static final CacheFlag[] DEFAULT_FLAG = new CacheFlag[]{ CacheFlag.EMOTE, CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE};
-    private static final GatewayIntent[] DEFAULT_INTENT = new GatewayIntent[]{ GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_TYPING, GatewayIntent.DIRECT_MESSAGE_TYPING};
-
+    private static final CacheFlag[] DEFAULT_FLAG = new CacheFlag[]{ CacheFlag.EMOTE, CacheFlag.MEMBER_OVERRIDES};
+    private static final GatewayIntent[] DEFAULT_INTENT = new GatewayIntent[]{GatewayIntent.GUILD_BANS, GatewayIntent.GUILD_EMOJIS, GatewayIntent.GUILD_INVITES, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.DIRECT_MESSAGE_REACTIONS};
     CoreSettings(String token, int shards, ChunkingFilter filter, List<CacheFlag> cacheFlags, List<GatewayIntent> gatewayIntents) {
         this.token = token;
         this.shards = shards;

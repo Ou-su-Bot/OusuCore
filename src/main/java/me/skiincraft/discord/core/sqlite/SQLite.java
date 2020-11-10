@@ -37,11 +37,10 @@ public class SQLite {
 			OusuCore.getLogger().info("Conexão com banco de dados estabelecida com sucesso.");
 			return true;
 		} catch (ClassNotFoundException e) {
-			OusuCore.getLogger().info("Não foi encontrado o Driver JDBC necessario para ativar o banco de dados.");
+			OusuCore.getLogger().warn("Não foi encontrado o Driver JDBC necessario para ativar o banco de dados.", e);
 			return false;
 		} catch (SQLException e) {
-			OusuCore.getLogger().info("OusuCore falhou ao tentar conectar com o banco de dados.");
-			OusuCore.getLogger().throwing(e);
+			OusuCore.getLogger().warn("OusuCore falhou ao tentar conectar com o banco de dados.", e);
 			return false;
 		}
 	}
@@ -57,8 +56,7 @@ public class SQLite {
 			}
 			return true;
 		} catch (SQLException e) {
-			OusuCore.getLogger().info("OusuCore falhou ao tentar parar conexão com o banco de dados.");
-			OusuCore.getLogger().throwing(e);
+			OusuCore.getLogger().error("OusuCore falhou ao tentar parar conexão com o banco de dados.", e);
 			return false;
 		}
 	}
@@ -77,7 +75,7 @@ public class SQLite {
                 }
             }
         } catch (SQLException e) {
-        	e.printStackTrace();
+        	OusuCore.getLogger().throwing(e);
 		}
         return false;
     }
@@ -94,8 +92,7 @@ public class SQLite {
 				state.close();
 			}
 		} catch (SQLException e) {
-			OusuCore.getLogger().error("Não foi possível fechar a conexão com um statement");
-			OusuCore.getLogger().throwing(e);
+			OusuCore.getLogger().error("Não foi possível fechar a conexão com um statement", e);
 		}
 	}
 	
@@ -108,8 +105,7 @@ public class SQLite {
 				state.close();
 			}
 		} catch (SQLException e) {
-			OusuCore.getLogger().error("Não foi possível fechar a conexão com um prepared statement");
-			OusuCore.getLogger().throwing(e);
+			OusuCore.getLogger().error("Não foi possível fechar a conexão com um prepared statement", e);
 		}
 	}
 
@@ -126,8 +122,7 @@ public class SQLite {
 				state.close();
 			}
 		} catch (SQLException e) {
-			OusuCore.getLogger().error("Não foi possível fechar a conexão com um statement/resultset");
-			OusuCore.getLogger().throwing(e);
+			OusuCore.getLogger().error("Não foi possível fechar a conexão com um statement/resultset", e);
 		}
 	}
 	
@@ -195,8 +190,7 @@ public class SQLite {
 					statement.execute(buffer.toString());
 					OusuCore.getLogger().info(String.format("[SQL] A tabela '%s' foi criada com sucesso", table.getTableName()));
 				} catch (SQLException e) {
-					OusuCore.getLogger().error("[SQL] Não foi possível criar uma nova tabela.");
-					OusuCore.getLogger().throwing(e);
+					OusuCore.getLogger().error("[SQL] Não foi possível criar uma nova tabela.", e);
 				}
 		});
 	}

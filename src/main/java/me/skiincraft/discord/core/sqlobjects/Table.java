@@ -61,8 +61,7 @@ public abstract class Table {
 			try {
 				statement.execute("INSERT INTO \"" + tableName + "\"" + insert + " VALUES" + value + ";");
 			} catch (SQLException e){
-				OusuCore.getLogger().error("Não foi criar uma valor em uma tabela: " + "INSERT INTO \"" + tableName + "\"" + insert + " VALUES" + value + ";");
-				OusuCore.getLogger().throwing(e);
+				OusuCore.getLogger().error("Não foi criar uma valor em uma tabela: " + "INSERT INTO \"" + tableName + "\"" + insert + " VALUES" + value + ";", e);
 			}
 		});
 	}
@@ -80,7 +79,7 @@ public abstract class Table {
 				ResultSet result = statement.executeQuery(buffer);
 				atomicBoolean.set(result.next() && result.getString(getAccess().getWhere()) != null);
 			} catch (SQLException e) {
-				OusuCore.getLogger().throwing(e);
+				OusuCore.getLogger().error("Não foi possivel verificar existencia de um valor", e);
 			}
 		});
 		return atomicBoolean.get();
