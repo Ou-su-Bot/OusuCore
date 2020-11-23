@@ -5,7 +5,7 @@
     </CustomLevels>
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern="[%d{dd-MM-yyyy HH:mm:ss} %-5level]: [%t] - %msg%n"/>
+            <PatternLayout pattern="[%d{dd-MM-yyyy HH:mm:ss} %p]: [%t] - %msg%n"/>
         </Console>
         <RollingFile name="fileAppender" fileName="logs/latest.log"
                      filePattern="logs/$${date:yyyy-MM}/ousu-core-%d{MM-dd-yyyy HH-mm}-%i.log.gz">
