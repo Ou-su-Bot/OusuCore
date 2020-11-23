@@ -31,25 +31,18 @@ public class InteractChannel {
 	private Consumer<Message> eventConsumer(AtomicReference<Message> message){
 		return con ->{
 			OusuCore.getEventManager().callEvent(new BotSendMessage((TextChannel) con.getChannel(), con, con.getJDA().getSelfUser()));
-			if (message.get() == null) message.set(con);
+			if (message != null && message.get() == null) message.set(con);
 		};
 	}
 
 	private Thread queueThread(AtomicReference<Message> message, Consumer<Message> consumer) {
 		return new Thread(()-> {
-			AtomicInteger loop = new AtomicInteger(0);
+			final long currentTime = System.currentTimeMillis();
 			while (message.get() == null) {
-				if (loop.get() >= 15) {
+				if ((System.currentTimeMillis() - currentTime) >= 3200){
 					OusuCore.getLogger().warn("Não foi possivel completar uma mensagem (consumer)");
 					return;
 				}
-				try {
-					Thread.sleep(200L);
-				} catch (InterruptedException e) {
-					OusuCore.getLogger().error("Não foi possivel completar uma mensagem.", e);
-					return;
-				}
-				loop.set(loop.get()+1);
 			}
 			
 			Message con = message.get();
