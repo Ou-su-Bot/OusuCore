@@ -121,18 +121,22 @@ public final class OusuCore {
     }
 
     public static void shutdown() {
-        if (!console.isClosed()) {
-            console.close();
-        }
-        logger.info("Bot está sendo desativado.");
-        instance.onDisable();
-        logger.info("Encerrando conexões com JDA");
-        if (shardManager != null) {
-            shardManager.shutdown();
-        }
-        logger.info("Desativando conexão com o banco de dados");
-        if (getSQLiteDatabase().getConnection() != null) {
-            getSQLiteDatabase().stop();
+        try {
+            if (!console.isClosed()) {
+                console.close();
+            }
+            logger.info("Bot está sendo desativado.");
+            instance.onDisable();
+            logger.info("Encerrando conexões com JDA");
+            if (shardManager != null) {
+                shardManager.shutdown();
+            }
+            logger.info("Desativando conexão com o banco de dados");
+            if (getSQLiteDatabase().getConnection() != null) {
+                getSQLiteDatabase().stop();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         System.exit(0);
     }
