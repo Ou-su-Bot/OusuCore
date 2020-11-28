@@ -3,7 +3,6 @@ package me.skiincraft.discord.core.prompt;
 import me.skiincraft.discord.core.OusuCore;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.*;
 
 public class ConsoleApplication implements Closeable {
