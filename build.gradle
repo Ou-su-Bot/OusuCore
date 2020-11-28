@@ -5,7 +5,7 @@ plugins {
 }
 
 group('me.skiincraft')
-version('2020.1110.0')
+version('2020.1128.0')
 
 repositories {
     jcenter()
@@ -29,6 +29,11 @@ dependencies {
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2')
     implementation(group: 'org.codehaus.groovy', name: 'groovy-jsr223', version: '3.0.0-alpha-4')
     implementation(group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30')
+}
+shadowJar {
+    archiveBaseName.set('OusuCore-all')
+    archiveClassifier.set('')
+    archiveVersion.set('')
 }
 
 application {
