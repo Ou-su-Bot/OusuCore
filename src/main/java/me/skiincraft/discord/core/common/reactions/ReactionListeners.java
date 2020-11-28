@@ -1,5 +1,7 @@
 package me.skiincraft.discord.core.common.reactions;
 
+import me.skiincraft.discord.core.OusuCore;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
@@ -42,9 +44,14 @@ public class ReactionListeners extends ListenerAdapter {
         if (event.getUser().isBot()){
             return;
         }
-
-        Message eventMessage = Objects.requireNonNull(event.getReaction().getTextChannel())
-                .retrieveMessageById(event.getMessageIdLong()).complete();
+        Message eventMessage;
+        try {
+            eventMessage = Objects.requireNonNull(event.getReaction().getTextChannel(), "Channel null")
+                    .retrieveMessageById(event.getMessageIdLong()).complete();
+        } catch (Exception e) {
+            OusuCore.getLogger().warn(String.format("Não foi possível localizar a mensagem de um reaction: %s", event.getMessageIdLong()));
+            return;
+        }
 
         if (eventMessage.getMember() == null){
             return;
@@ -81,13 +88,16 @@ public class ReactionListeners extends ListenerAdapter {
             return;
         }
 
-        event.getReaction().removeReaction(event.getUser()).queue();
+        if (event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_MANAGE)) {
+            event.getReaction().removeReaction(event.getUser()).queue();
+        }
+
         objects.forEach(reactionObject -> {
-            if (reactionsInterface.containsKey(reactionObject)){
+            if (reactionsInterface.containsKey(reactionObject)) {
                 Reaction reaction = reactionsInterface.get(reactionObject);
                 String emote = (reactionEmote.isEmoji()) ? reactionEmote.getAsCodepoints() : reactionEmote.getName();
                 boolean response = reaction.execute(event.getMember(), emote, reactionObject);
-                if (!response){
+                if (!response) {
                     removeElement(reactionObject);
                 }
             }
