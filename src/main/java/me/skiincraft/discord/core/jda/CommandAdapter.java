@@ -1,5 +1,6 @@
 package me.skiincraft.discord.core.jda;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import me.skiincraft.discord.core.OusuCore;
 import me.skiincraft.discord.core.command.Command;
 import me.skiincraft.discord.core.command.InteractChannel;
@@ -11,11 +12,19 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CommandAdapter extends ListenerAdapter {
 
-	private final AtomicInteger nextInt = new AtomicInteger(1);
+	private final ExecutorService commandExecutor;
+
+	public CommandAdapter() {
+		this.commandExecutor = Executors.newFixedThreadPool(10,
+				new ThreadFactoryBuilder()
+						.setNameFormat("Ou!su Commands ").build());
+	}
 
 	public Command getCommand(final ArrayList<Command> list, final String name){
 	    return list.stream().filter(o -> o.getCommandName().equalsIgnoreCase(name))
@@ -30,10 +39,7 @@ public class CommandAdapter extends ListenerAdapter {
 	}
 	
 	private Command validateCommand(GuildMessageReceivedEvent e, String[] args) {
-		if (e.getAuthor().isBot() || !e.getChannel().canTalk()) {
-			return null;
-		}
-		if (args.length == 0) {
+		if (e.getAuthor().isBot() || !e.getChannel().canTalk() || args.length == 0) {
 			return null;
 		}
 
@@ -63,24 +69,21 @@ public class CommandAdapter extends ListenerAdapter {
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		String[] args = event.getMessage().getContentRaw().split(" ");
 		Command command = validateCommand(event, args);
-		if (command == null){
+		if (Objects.isNull(command)){
 			return;
 		}
-
 		PreCommandEvent preCommandEvent = new PreCommandEvent(event.getMessage(), event.getMember(), event.getChannel(), command);
 		OusuCore.callEvent(preCommandEvent);
 		if (preCommandEvent.isCancelled()){
 			return;
 		}
-
-		new Thread(() -> {
+		commandExecutor.execute(() -> {
 			event.getChannel().sendTyping().queue();
-
 			OusuCore.getLogger().log(Level.getLevel("COMMAND"), String.format("%s executou o comando %s. [%s]",
 					event.getAuthor().getName() + "#" + event.getAuthor().getDiscriminator(),
 					command.getCommandName(), String.join(" ", args)));
 
 			command.execute(event.getMember(), StringUtils.removeString(args, 0), new InteractChannel(event.getChannel()));
-		}, command.getCommandName() + "Command-" + nextInt.getAndIncrement()).start();
+	});
 	}
 }
