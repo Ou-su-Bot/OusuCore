@@ -17,15 +17,14 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.io.IoBuilder;
 
 import javax.annotation.Nullable;
 import javax.security.auth.login.LoginException;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -46,6 +45,7 @@ public class CoreStarter {
 	static Logger logger = LogManager.getLogger(CoreStarter.class);
 	
 	public static void main(String[] args) {
+		System.setOut(IoBuilder.forLogger(logger).setLevel(Level.INFO).buildPrintStream());
 		logger.info("Starting log4J - OusuCore\n");
 		CoreStarter.JAVA_ARGUMENTS = args;
 		CoreUtils.createPath("bots", "library", "dependency", "logs");
