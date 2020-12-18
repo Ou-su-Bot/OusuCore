@@ -17,7 +17,7 @@ public class EventManager {
 	private EventManager(){}
 	
 	public void callEvent(Event event) {
-		new Thread(() -> call(event), event.getClass().getSimpleName()).start();
+		call(event);
 	}
 	
 	public List<ListenerAdapter> getListenerAdapters(){
