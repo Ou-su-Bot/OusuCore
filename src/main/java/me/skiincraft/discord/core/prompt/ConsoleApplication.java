@@ -8,13 +8,14 @@ import java.util.*;
 public class ConsoleApplication implements Closeable {
 
     private static ConsoleApplication instance;
+    private final Thread consoleThread;
     private Scanner scanner;
 
     private final List<ConsoleAction> consoleActions;
 
     private ConsoleApplication() {
         consoleActions = new ArrayList<>();
-        new Thread(() -> {
+        consoleThread = new Thread(() -> {
             scanner = new Scanner(System.in);
             while (scanner.hasNextLine()) {
                 String[] next = scanner.nextLine().split(" ");
@@ -23,13 +24,14 @@ public class ConsoleApplication implements Closeable {
                 }
 
                 ConsoleAction action = consoleActions.stream().filter(a -> a.getCommand().equalsIgnoreCase(next[0])).findFirst().orElse(null);
-                if (action == null){
+                if (action == null) {
                     OusuCore.getLogger().info("Comando desconhecido. digite \"help\" para ajuda.");
                 } else {
                     action.execute(next[0], Arrays.stream(next).skip(1).toArray(String[]::new), this);
                 }
             }
-        }, "Console").start();
+        }, "Console");
+        consoleThread.start();
         OusuCore.getLogger().info("Console interativo. Digite \"help\" para ajuda.");
         registerVanilla();
     }
@@ -45,11 +47,12 @@ public class ConsoleApplication implements Closeable {
     @Override
     public void close() {
         scanner.close();
+        consoleThread.stop();
         OusuCore.getLogger().info("Prompt de comando foi fechado.");
     }
 
     public boolean isClosed(){
-        return scanner == null;
+        return scanner == null || !consoleThread.isAlive();
     }
 
     public static ConsoleApplication getInstance() {

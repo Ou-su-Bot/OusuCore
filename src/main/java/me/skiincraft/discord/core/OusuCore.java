@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 
 public final class OusuCore {
 
@@ -122,7 +123,7 @@ public final class OusuCore {
 
     public static void shutdown() {
         try {
-            if (!console.isClosed()) {
+            if (Objects.nonNull(console) && !console.isClosed()) {
                 console.close();
             }
             logger.info("Bot está sendo desativado.");
@@ -170,7 +171,7 @@ public final class OusuCore {
             }
             instance.onEnable();
             logger.info(String.format("%s foi carregado com sucesso!", internalSettings.getBotName()));
-            console = ConsoleApplication.getInstance();
+            //console = ConsoleApplication.getInstance();
         } catch (Exception e){
             logger.error("Ocorreu um problema ao carregar onEnable, verifique se está atualizado!", e);
         }
