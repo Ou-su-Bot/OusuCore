@@ -8,7 +8,7 @@ import me.skiincraft.discord.core.configuration.GuildDB;
 import me.skiincraft.discord.core.events.member.PreCommandEvent;
 import me.skiincraft.discord.core.utils.StringUtils;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
@@ -16,14 +16,14 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class CommandAdapter extends ListenerAdapter {
+public class CommandAdapter {
 
 	private final ExecutorService commandExecutor;
 
 	public CommandAdapter() {
 		this.commandExecutor = Executors.newFixedThreadPool(10,
 				new ThreadFactoryBuilder()
-						.setNameFormat("Ou!su Commands ").build());
+						.setNameFormat("Ou!su Commands").build());
 	}
 
 	public Command getCommand(final ArrayList<Command> list, final String name){
@@ -64,9 +64,9 @@ public class CommandAdapter extends ListenerAdapter {
 		}
 		return command;
 	}
-	
-	@Override
-	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
+
+    @SubscribeEvent
+	public void execute(GuildMessageReceivedEvent event) {
 		String[] args = event.getMessage().getContentRaw().split(" ");
 		Command command = validateCommand(event, args);
 		if (Objects.isNull(command)){

@@ -13,6 +13,7 @@ import me.skiincraft.discord.core.plugin.OusuPlugin;
 import me.skiincraft.discord.core.plugin.ShardBuilderLoader;
 import me.skiincraft.discord.core.sqlite.SQLite;
 import me.skiincraft.discord.core.utils.CoreUtils;
+import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -136,6 +137,7 @@ public class CoreStarter {
 			applyCacheFlag(shardBuilder, coreSettings.getCacheFlags());
 			applyGatewayIntents(shardBuilder, coreSettings.getGatewayIntents());
 
+			shardBuilder.addEventListenerProvider((id) -> new AnnotatedEventManager());
 			shardBuilder.enableCache(coreSettings.getCacheFlags());
 			shardBuilder.addEventListeners(new CommandAdapter());
 			shardBuilder.addEventListeners(new ListenerAdaptation());
