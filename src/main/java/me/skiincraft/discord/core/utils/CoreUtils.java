@@ -1,25 +1,22 @@
 package me.skiincraft.discord.core.utils;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
 import me.skiincraft.discord.core.CoreStarter;
+import me.skiincraft.discord.core.OusuConfiguration;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 public class CoreUtils {
-	
+
 	public static void createPath(String... uri) {
 		try {
 			for (String i : uri) {
@@ -44,22 +41,18 @@ public class CoreUtils {
 		}
 	}
 
-	public static Gson newGsonPretty(){
-		return new GsonBuilder().serializeNulls().setPrettyPrinting().create();
-	}
-
-	public static void createConfig() {
-		File file = new File("settings.json");
+	public static void createConfigurationFiles() {
 		try {
-			if (!file.exists()) {
-				InputStreamReader input = new InputStreamReader(CoreStarter.class.getResourceAsStream("/config_settings.json"));
-				FileWriter writer = new FileWriter(file);
-				writer.write(newGsonPretty().toJson(new JsonParser().parse(input)));
-				writer.close();
-				CoreStarter.getLogger().warn("Configure o arquivo: settings.json");
+			OusuConfiguration configuration = new OusuConfiguration();
+			boolean settings = configuration.createSettingsFile(Paths.get("Settings.ini"));
+			boolean sql = configuration.createSQLConfiguration(Paths.get("SQLConfiguration.ini"));
+			if (settings || sql) {
+				String[] configs = new String[] {(sql && settings)
+						? "Settings.ini, SQLConfiguration.ini" : (sql) ? "SQLConfiguration.ini" : "Settings.ini"};
+				CoreStarter.getLogger().info(String.format("Arquivo de configuração criado: %s", Arrays.toString(configs)));
 				System.exit(0);
 			}
-		} catch (IOException e) {
+		} catch (Exception e){
 			e.printStackTrace();
 		}
 	}

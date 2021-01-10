@@ -1,16 +1,18 @@
 package me.skiincraft.discord.core;
 
+import me.skiincraft.beans.InjectManager;
 import me.skiincraft.discord.core.command.Command;
 import me.skiincraft.discord.core.command.CommandManager;
+import me.skiincraft.discord.core.common.EventListener;
 import me.skiincraft.discord.core.configuration.InternalSettings;
 import me.skiincraft.discord.core.configuration.Language;
-import me.skiincraft.discord.core.event.Event;
-import me.skiincraft.discord.core.event.EventManager;
-import me.skiincraft.discord.core.event.Listener;
 import me.skiincraft.discord.core.plugin.OusuPlugin;
-import me.skiincraft.discord.core.prompt.ConsoleApplication;
-import me.skiincraft.discord.core.sqlite.SQLite;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import me.skiincraft.discord.core.plugin.PluginLoader;
+import me.skiincraft.discord.core.repository.GuildRepository;
+import me.skiincraft.sql.BasicSQL;
+import me.skiincraft.sql.exceptions.RepositoryException;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,15 +23,11 @@ import java.util.Objects;
 
 public final class OusuCore {
 
-    private static CommandManager commandManager;
-    private static EventManager eventManager;
     private static InternalSettings internalSettings;
 
     private static OusuPlugin instance;
     private static ShardManager shardManager;
     private static Logger logger;
-
-    private static ConsoleApplication console;
 
     private OusuCore() {}
 
@@ -50,23 +48,19 @@ public final class OusuCore {
     }
 
     public static void registerCommand(Command command) {
-        commandManager.registerCommand(command);
+        getCommandManager().registerCommand(command);
     }
 
     public static void unregisterCommand(Command command) {
-        commandManager.registerCommand(command);
+        getCommandManager().registerCommand(command);
     }
 
-    public static void registerListener(Listener listener) {
-        eventManager.registerListener(listener);
+    public static void registerListener(EventListener listener) {
+        shardManager.removeEventListener(listener);
     }
 
-    public static void registerListener(ListenerAdapter listener) {
-        eventManager.registerListener(listener);
-    }
-
-    public static void unregisterListener(Listener listener) {
-        eventManager.unregisterListener(listener);
+    public static void unregisterListener(EventListener listener) {
+        shardManager.addEventListener(listener);
     }
 
     public static Path getFontPath() {
@@ -85,20 +79,12 @@ public final class OusuCore {
         return Paths.get("bots/" + internalSettings.getBotName() + "/");
     }
 
-    public static SQLite getSQLiteDatabase(){
-        return internalSettings.getSQLite();
-    }
-
     public static InternalSettings getInternalSettings() {
         return internalSettings;
     }
 
     public static CommandManager getCommandManager() {
-        return commandManager;
-    }
-
-    public static EventManager getEventManager() {
-        return eventManager;
+        return CommandManager.getInstance();
     }
 
     public static OusuPlugin getInstance() {
@@ -109,23 +95,16 @@ public final class OusuCore {
         return Paths.get("bots/" + internalSettings.getBotName());
     }
 
-    public static void callEvent(Event event) {
-        eventManager.callEvent(event);
+    public static void callEvent(GenericEvent event, JDA jda) {
+        jda.getEventManager().handle(event);
     }
 
     public static Logger getLogger() {
         return logger;
     }
 
-    public static ConsoleApplication getConsole() {
-        return console;
-    }
-
     public static void shutdown() {
         try {
-            if (Objects.nonNull(console) && !console.isClosed()) {
-                console.close();
-            }
             logger.info("Bot está sendo desativado.");
             instance.onDisable();
             logger.info("Encerrando conexões com JDA");
@@ -133,9 +112,7 @@ public final class OusuCore {
                 shardManager.shutdown();
             }
             logger.info("Desativando conexão com o banco de dados");
-            if (getSQLiteDatabase().getConnection() != null) {
-                getSQLiteDatabase().stop();
-            }
+            BasicSQL.getSQL().close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -150,30 +127,34 @@ public final class OusuCore {
         getLogger().throwing(throwable);
     }
 
-    public static void inicialize(CommandManager commandManager, EventManager eventManager, OusuPlugin instance, ShardManager shardManager, InternalSettings internalSettings, Logger logger)  {
-        if (OusuCore.commandManager != null) {
+    public static void inicialize(PluginLoader loader, ShardManager shardManager, InternalSettings internalSettings, Logger logger)  {
+        if (OusuCore.instance != null) {
             logger.warn("Tentou criar uma instancia OusuCore, mas é possivel somente 1 instancia(s) ativa(s).");
             return;
         }
 
         try {
-            OusuCore.commandManager = commandManager;
-            OusuCore.eventManager = eventManager;
-            OusuCore.instance = instance;
+            OusuCore.instance = loader.getOusuPlugin();
             OusuCore.shardManager = shardManager;
             OusuCore.internalSettings = internalSettings;
             OusuCore.logger = logger;
+            
+            InjectManager.getInstance().mapClasses(instance);
+            InjectManager.getInstance().map(Objects.requireNonNull(getGuildRepository()));
+            InjectManager.getInstance().map(loader);
 
-            boolean sqlConnection = getSQLiteDatabase().connect();
-            if (!sqlConnection){
-                logger.fatal("Não foi possivel conectar no banco de dados.");
-                shutdown();
-            }
             instance.onEnable();
             logger.info(String.format("%s foi carregado com sucesso!", internalSettings.getBotName()));
-            //console = ConsoleApplication.getInstance();
         } catch (Exception e){
             logger.error("Ocorreu um problema ao carregar onEnable, verifique se está atualizado!", e);
+        }
+    }
+
+    public static GuildRepository getGuildRepository() {
+        try {
+            return BasicSQL.getInstance().registerRepository(GuildRepository.class);
+        } catch (RepositoryException e) {
+            throw new RuntimeException("GuildRepository is Null");
         }
     }
 }

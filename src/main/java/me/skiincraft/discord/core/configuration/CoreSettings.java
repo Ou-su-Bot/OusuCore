@@ -1,15 +1,13 @@
 package me.skiincraft.discord.core.configuration;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.apache.commons.configuration2.INIConfiguration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CoreSettings {
 
@@ -21,7 +19,8 @@ public class CoreSettings {
 
     private static final CacheFlag[] DEFAULT_FLAG = new CacheFlag[]{ CacheFlag.EMOTE, CacheFlag.MEMBER_OVERRIDES};
     private static final GatewayIntent[] DEFAULT_INTENT = new GatewayIntent[]{GatewayIntent.GUILD_BANS, GatewayIntent.GUILD_EMOJIS, GatewayIntent.GUILD_INVITES, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.DIRECT_MESSAGE_REACTIONS};
-    CoreSettings(String token, int shards, ChunkingFilter filter, List<CacheFlag> cacheFlags, List<GatewayIntent> gatewayIntents) {
+
+    public CoreSettings(String token, int shards, ChunkingFilter filter, List<CacheFlag> cacheFlags, List<GatewayIntent> gatewayIntents) {
         this.token = token;
         this.shards = shards;
         this.filter = filter;
@@ -50,52 +49,27 @@ public class CoreSettings {
         return new ArrayList<>(gatewayIntents);
     }
 
-    public static CoreSettings of(JsonObject json){
-        if (containsJsonNull(json)){
-            throw new JsonParseException("Algo de errado não está certo no arquivo: settings.json");
-        }
+    public static CoreSettings of(INIConfiguration ini){
         Builder builder = new Builder()
-                .setToken(json.get("Token").getAsString())
-                .setShards(json.get("Shards").getAsInt())
-                .setFilter((json.has("ChunkFilter")) || json.get("ChunkFilter").getAsBoolean()? ChunkingFilter.ALL: ChunkingFilter.NONE);
+                .setToken(ini.getString("BotConfiguration.token"))
+                .setShards(ini.getInt("BotConfiguration.shards"))
+                .setFilter(ini.getBoolean("OtherConfiguration.chunkfilter") ? ChunkingFilter.ALL : ChunkingFilter.NONE);
 
         List<CacheFlag> flags = new ArrayList<>();
-        if (json.has("CacheFlag") && !json.get("CacheFlag").isJsonNull()){
-            JsonObject cf = json.get("CacheFlag").getAsJsonObject();
-            if (cf.has("DEFAULT")){
-                flags.addAll(Arrays.asList(DEFAULT_FLAG));
-            } else {
-                flags.addAll(Arrays.stream(CacheFlag.values())
-                        .filter(flag -> cf.has(flag.name()) && cf.get(flag.name()).getAsBoolean())
-                        .collect(Collectors.toList()));
-            }
+        String cacheFlag = ini.getString("OtherConfiguration.cacheflag");
+        if (cacheFlag.equalsIgnoreCase("default")){
+            flags.addAll(Arrays.asList(DEFAULT_FLAG));
         }
 
         List<GatewayIntent> intents = new ArrayList<>();
-        if (json.has("GatewayIntents") && !json.get("GatewayIntents").isJsonNull()){
-            JsonObject cf = json.get("GatewayIntents").getAsJsonObject();
-            if (cf.has("DEFAULT")) {
-                intents.addAll(Arrays.asList(DEFAULT_INTENT));
-            } else {
-                intents.addAll(Arrays.stream(GatewayIntent.values())
-                        .filter(flag -> cf.has(flag.name()) && cf.get(flag.name()).getAsBoolean())
-                        .collect(Collectors.toList()));
-            }
+        String gatewayIntents = ini.getString("OtherConfiguration.gatewayintents");
+        if (gatewayIntents.equalsIgnoreCase("default")){
+            intents.addAll(Arrays.asList(DEFAULT_INTENT));
         }
 
-        builder.setCacheFlags(flags);
-        builder.setGatewayIntents(intents);
-        return builder.createCoreSettings();
-    }
-
-    private static boolean containsJsonNull(JsonObject object){
-        if (object.has("Token") && object.has("Shards")
-                && object.has("ChunkFilter")){
-            return object.get("Token").isJsonNull() || (object.get("Shards").isJsonNull() || object.get("Shards").getAsInt() == 0)
-                    || object.get("ChunkFilter").isJsonNull();
-        } else {
-            return false;
-        }
+        return builder.setCacheFlags(flags)
+                .setGatewayIntents(intents)
+                .createCoreSettings();
     }
 
     public static class Builder {

@@ -1,12 +1,10 @@
 package me.skiincraft.discord.core.command;
 
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import me.skiincraft.discord.core.OusuCore;
-import me.skiincraft.discord.core.events.bot.BotSendMessage;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -30,7 +28,7 @@ public class InteractChannel {
 
 	private Consumer<Message> eventConsumer(AtomicReference<Message> message){
 		return con ->{
-			OusuCore.getEventManager().callEvent(new BotSendMessage((TextChannel) con.getChannel(), con, con.getJDA().getSelfUser()));
+			//OusuCore.getEventManager().callEvent(new BotSendMessage((TextChannel) con.getChannel(), con, con.getJDA().getSelfUser()));
 			if (message != null && message.get() == null) message.set(con);
 		};
 	}

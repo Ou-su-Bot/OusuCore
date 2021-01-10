@@ -4,17 +4,19 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import me.skiincraft.discord.core.OusuCore;
 import me.skiincraft.discord.core.command.Command;
 import me.skiincraft.discord.core.command.InteractChannel;
-import me.skiincraft.discord.core.configuration.GuildDB;
-import me.skiincraft.discord.core.events.member.PreCommandEvent;
-import me.skiincraft.discord.core.utils.StringUtils;
+import me.skiincraft.discord.core.repository.OusuGuild;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import org.apache.logging.log4j.Level;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class CommandAdapter {
 
@@ -29,10 +31,10 @@ public class CommandAdapter {
 	public Command getCommand(final ArrayList<Command> list, final String name){
 	    return list.stream().filter(o -> o.getCommandName().equalsIgnoreCase(name))
 				.findAny()
-				.orElse(getCommandByAliase(list, name));
+				.orElse(getCommandByAlias(list, name));
 	}
 	
-	public Command getCommandByAliase(final ArrayList<Command> list, final String name){
+	public Command getCommandByAlias(final ArrayList<Command> list, final String name){
 		return list.stream().filter(c -> c.getAliases() != null && c.getAliases().stream().anyMatch(o -> o.equalsIgnoreCase(name)))
 				.findFirst()
 				.orElse(null);
@@ -44,7 +46,8 @@ public class CommandAdapter {
 		}
 
 		ArrayList<Command> commands = OusuCore.getCommandManager().getCommands();
-		String prefix = new GuildDB(e.getGuild()).get("prefix");
+		OusuGuild guild = OusuCore.getGuildRepository().getById(e.getGuild().getIdLong()).get();
+		String prefix = guild.getPrefix();
 		
 		if (!args[0].toLowerCase().startsWith(prefix) || args[0].length() <= prefix.length()) {
 			return null;
@@ -65,16 +68,11 @@ public class CommandAdapter {
 		return command;
 	}
 
-    @SubscribeEvent
-	public void execute(GuildMessageReceivedEvent event) {
+	@SubscribeEvent
+	public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
 		String[] args = event.getMessage().getContentRaw().split(" ");
 		Command command = validateCommand(event, args);
 		if (Objects.isNull(command)){
-			return;
-		}
-		PreCommandEvent preCommandEvent = new PreCommandEvent(event.getMessage(), event.getMember(), event.getChannel(), command);
-		OusuCore.callEvent(preCommandEvent);
-		if (preCommandEvent.isCancelled()){
 			return;
 		}
 		commandExecutor.execute(() -> {
@@ -83,7 +81,9 @@ public class CommandAdapter {
 					event.getAuthor().getName() + "#" + event.getAuthor().getDiscriminator(),
 					command.getCommandName(), String.join(" ", args)));
 
-			command.execute(event.getMember(), StringUtils.removeString(args, 0), new InteractChannel(event.getChannel()));
+			List<String> args2 = Arrays.stream(args).collect(Collectors.toList());
+			args2.remove(0);
+			command.execute(event.getMember(), args2.toArray(new String[0]), new InteractChannel(event.getChannel()));
 	});
 	}
 }

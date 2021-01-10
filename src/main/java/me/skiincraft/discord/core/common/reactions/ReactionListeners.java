@@ -5,13 +5,13 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ReactionListeners extends ListenerAdapter {
+public class ReactionListeners {
 
     private final List<ReactionObject> reactionObjects;
     private final Map<ReactionObject, Reaction> reactionsInterface;
@@ -39,8 +39,8 @@ public class ReactionListeners extends ListenerAdapter {
         reactionsInterface.remove(object);
     }
 
-    @Override
-    public void onGuildMessageReactionAdd(@NotNull GuildMessageReactionAddEvent event) {
+    @SubscribeEvent
+    public void reactionEvent(@NotNull GuildMessageReactionAddEvent event) {
         if (event.getUser().isBot()){
             return;
         }

@@ -1,13 +1,13 @@
 package me.skiincraft.discord.core.common.chooser;
 
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ChooserListeners extends ListenerAdapter {
+public class ChooserListeners {
 
     private final List<ChooserObject> chooserObjects;
     private final Map<ChooserObject, ChooserInterface> chooserInterfaces;
@@ -35,8 +35,8 @@ public class ChooserListeners extends ListenerAdapter {
         chooserInterfaces.remove(object);
     }
 
-    @Override
-    public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
+    @SubscribeEvent
+    public void chooserEvent(@NotNull GuildMessageReceivedEvent event) {
         if (event.isWebhookMessage() || Objects.requireNonNull(event.getMember()).getUser().isBot()) {
             return;
         }

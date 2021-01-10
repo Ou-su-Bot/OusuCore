@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class CommandManager {
 
-	private static CommandManager instance;
+	private static final CommandManager instance = new CommandManager();
 
 	private CommandManager() {
 	}
@@ -28,6 +28,6 @@ public class CommandManager {
 	}
 
 	public static CommandManager getInstance() {
-		return (instance == null) ? instance = new CommandManager() : instance;
+		return instance;
 	}
 }

@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -22,7 +21,7 @@ public class LanguageManager {
 	private final Language lang;
 	private JsonObject object;
 	private JsonArray array;
-	private String langfile;
+	private String langFile;
 	
 	public LanguageManager(Guild guild) {
 		this(Language.getGuildLanguage(guild));
@@ -31,8 +30,8 @@ public class LanguageManager {
 	public LanguageManager(Language language) {
 		this.lang = language;
 		try {
-			langfile = "file:" + OusuCore.getPluginPath().toFile().getAbsolutePath()  + "/language/" + lang.getLanguageCode() + "_" + lang.getCountryCode() + ".json";
-			InputStream in = new URL(langfile).openStream();
+			langFile = "file:" + OusuCore.getPluginPath().toFile().getAbsolutePath()  + "/language/" + lang.getLanguageCode() + "_" + lang.getCountryCode() + ".json";
+			InputStream in = new URL(langFile).openStream();
 			
 			JsonArray arr = new JsonParser().parse(new InputStreamReader(in)).getAsJsonArray();
 			object = arr.get(0).getAsJsonObject();
@@ -50,7 +49,7 @@ public class LanguageManager {
 	void write(JsonArray jsonarray){
 		FileWriter io = null;
 		try {
-			io = new FileWriter(new File(langfile.substring(5)));
+			io = new FileWriter(new File(langFile.substring(5)));
 			io.write(new GsonBuilder().setPrettyPrinting().create().toJson(jsonarray));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -104,18 +103,5 @@ public class LanguageManager {
 	
 	public String getString(Class<?> property, String key) {
 		return getString(property.getSimpleName(), key);
-	}
-	
-	public static JsonArray jsonTemplate() {
-		JsonArray a = new JsonArray();
-		JsonObject ob1 = new JsonObject();
-		JsonObject obj1 = new JsonObject();
-		JsonObject obj2 = new JsonObject();
-		obj1.addProperty("EXAMPLE_DESCRIPTION", "This command is a example");
-		obj2.addProperty("PING_MESSAGE", "personal");
-		ob1.add("CommandDescription", obj1);
-		ob1.add("Example", obj2);
-		a.add(ob1);
-		return a;
 	}
 }

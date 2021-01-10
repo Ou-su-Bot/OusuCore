@@ -1,23 +1,22 @@
 package me.skiincraft.discord.core;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
-import me.skiincraft.discord.core.command.CommandManager;
 import me.skiincraft.discord.core.configuration.CoreSettings;
 import me.skiincraft.discord.core.configuration.InternalSettings;
-import me.skiincraft.discord.core.event.EventManager;
 import me.skiincraft.discord.core.jda.CommandAdapter;
-import me.skiincraft.discord.core.jda.ListenerAdaptation;
+import me.skiincraft.discord.core.jda.GuildEvents;
 import me.skiincraft.discord.core.plugin.OusuPlugin;
-import me.skiincraft.discord.core.plugin.ShardBuilderLoader;
-import me.skiincraft.discord.core.sqlite.SQLite;
+import me.skiincraft.discord.core.plugin.PluginLoader;
+import me.skiincraft.discord.core.repository.GuildRepository;
 import me.skiincraft.discord.core.utils.CoreUtils;
+import me.skiincraft.sql.BasicSQL;
+import me.skiincraft.sql.exceptions.RepositoryException;
+import me.skiincraft.sql.platform.SQLConfiguration;
+import me.skiincraft.sql.platform.template.PostgreSQL;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
-import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.apache.commons.configuration2.INIConfiguration;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,133 +24,74 @@ import org.apache.logging.log4j.io.IoBuilder;
 
 import javax.annotation.Nullable;
 import javax.security.auth.login.LoginException;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CoreStarter {
 
-	public static String[] JAVA_ARGUMENTS;
 	static Logger logger = LogManager.getLogger(CoreStarter.class);
 	
 	public static void main(String[] args) {
-		System.setOut(IoBuilder.forLogger(logger).setLevel(Level.INFO).buildPrintStream());
-		logger.info("Starting log4J - OusuCore\n");
-		CoreStarter.JAVA_ARGUMENTS = args;
+		System.setOut(IoBuilder.forLogger(logger)
+				.setLevel(Level.INFO)
+				.buildPrintStream());
+
+		CoreStarter.getLogger().info("Starting log4J - OusuCore\n");
 		CoreUtils.createPath("bots", "library", "dependency", "logs");
-		CoreUtils.createConfig();
+		CoreUtils.createConfigurationFiles();
 
 		File botJar = getAvailableBot();
-		if (botJar == null) {
-			logger.error("Não foi encontrado nenhum bot na pasta ./bots");
-			return;
-		}
-
-		AtomicReference<JsonObject> botJson = new AtomicReference<>();
-		try {
-			JarURLConnection connection = (JarURLConnection) new URL("jar:file:" + botJar.getAbsolutePath() + "!/bot.json").openConnection();
-			botJson.set(new JsonParser().parse(new InputStreamReader(connection.getInputStream())).getAsJsonObject());
-			logger.info(String.format("%s Está sendo iniciado...", botJson.get().get("BotName").getAsString()));
-		} catch (IOException e) {
-			logger.error(e.getMessage());
+		if (Objects.isNull(botJar)) {
+			CoreStarter.getLogger().error("Não foi encontrado nenhum bot na pasta ./bots");
 			return;
 		}
 
 		loadDependency();
 		loadLibrary();
 
-		URL url = ((URLClassLoader) Thread.currentThread()
+		if (Objects.isNull(((URLClassLoader) Thread.currentThread()
 				.getContextClassLoader())
-				.findResource("net/dv8tion/jda");
-
-		if (url == null) {
-			logger.fatal("JDA não está instalado na pasta ./library");
+				.findResource("net/dv8tion/jda"))) {
+			CoreStarter.getLogger().fatal("JDA não está instalado na pasta ./library");
 			return;
 		}
 
-		AtomicReference<DefaultShardManagerBuilder> atomicShardBuilder = new AtomicReference<>();
-		AtomicReference<OusuPlugin> atomicOusuPlugin = new AtomicReference<>();
-		AtomicReference<CoreSettings> atomicCoreSettings = new AtomicReference<>();
+		CoreSettings settings = CoreSettings.of(new OusuConfiguration().getConfiguration(Paths.get("Settings.ini")));
+		PluginLoader pluginLoader = new PluginLoader(botJar);
 
-
-		try {
-			Class<?> clazz = Class.forName(botJson.get().get("Main").getAsString(), true, new URLClassLoader(new URL[]{botJar.toURI().toURL()}));
-			atomicOusuPlugin.set(clazz.asSubclass(OusuPlugin.class).newInstance());
-			atomicCoreSettings.set(CoreSettings.of(new JsonParser().parse(new FileReader(new File("settings.json"))).getAsJsonObject()));
-			atomicShardBuilder.set(DefaultShardManagerBuilder.createDefault(atomicCoreSettings.get().getToken()));
-		} catch (NoClassDefFoundError e) {
-			logger.error(String.format("Alguma dependência está faltando no seu bot! (%s)", e.getMessage()));
-			return;
-		} catch (ClassNotFoundException e) {
-			logger.error(String.format("Ops! A classe main está incorreta: (%s)", e.getMessage()));
-			return;
-		} catch (ClassCastException e) {
-			logger.error(String.format("A classe main não está estendendo %s", OusuPlugin.class.getSimpleName()));
-			return;
-		} catch (JsonParseException e) {
-			logger.error("O arquivo settings.json está invalido, verifique se há problemas.");
-			return;
-		} catch (Exception e) {
-			logger.error("Ops... Alguma coisa aconteceu! " + e.getMessage());
-			return;
-		}
-
-		OusuPlugin plugin = atomicOusuPlugin.get();
-		logger.info("Carregando " + plugin.getClass().getSimpleName());
-		CoreUtils.createPath("bots/" + botJson.get().get("BotName").getAsString() + "/",
+		OusuPlugin plugin = pluginLoader.getOusuPlugin();
+		CoreStarter.getLogger().info("Carregando " + plugin.getClass().getSimpleName());
+		CoreUtils.createPath("bots/" + pluginLoader.getBotFile().getBotName() + "/",
 				new String[]{"assets", "fonts", "language"});
-
 		plugin.onLoad();
-		DefaultShardManagerBuilder shardBuilder = atomicShardBuilder.get();
-		if (botJson.get().has("Preloader")) {
-			try {
-				Class<?> clazz = Class.forName(botJson.get().get("Preloader").getAsString(), true, new URLClassLoader(new URL[]{botJar.toURI().toURL()}));
-				ShardBuilderLoader builder = clazz.asSubclass(ShardBuilderLoader.class).newInstance();
-				builder.inicialize(shardBuilder);
-			} catch (NoClassDefFoundError e) {
-				logger.error(String.format("Alguma dependência está faltando no seu bot! (%s)", e.getMessage()));
-				return;
-			} catch (ClassNotFoundException e) {
-				logger.error(String.format("Ops! A classe Preloader está incorreta: (%s)", e.getMessage()));
-				return;
-			} catch (ClassCastException e) {
-				logger.error(String.format("A classe Preloader não está implementando %s", ShardBuilderLoader.class.getSimpleName()));
-				return;
-			} catch (Exception e) {
-				logger.error("Ops... Alguma coisa aconteceu! " + e.getMessage());
-				return;
-			}
-		} else {
-			CoreSettings coreSettings = atomicCoreSettings.get();
-			applyCacheFlag(shardBuilder, coreSettings.getCacheFlags());
-			applyGatewayIntents(shardBuilder, coreSettings.getGatewayIntents());
 
-			shardBuilder.addEventListenerProvider((id) -> new AnnotatedEventManager());
-			shardBuilder.enableCache(coreSettings.getCacheFlags());
-			shardBuilder.addEventListeners(new CommandAdapter());
-			shardBuilder.addEventListeners(new ListenerAdaptation());
-			shardBuilder.setChunkingFilter(coreSettings.getFilter());
-			shardBuilder.setShardsTotal(coreSettings.getShards());
-		}
+		DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createDefault(settings.getToken());
+		applyCacheFlag(shardBuilder, settings.getCacheFlags());
+		applyGatewayIntents(shardBuilder, settings.getGatewayIntents());
+		applyOthers(shardBuilder, settings);
 
-		logger.info("ShardBuilder foi configurado com sucesso.");
+		loadSQLDatabase();
+
+		CoreStarter.getLogger().info("ShardBuilder foi configurado com sucesso.");
 		try {
-			logger.info("Iniciando ShardManager, espero que dê certo!");
-			ShardManager shardManager = shardBuilder.build();
-			OusuCore.inicialize(CommandManager.getInstance(), EventManager.getInstance(), plugin, shardManager, new InternalSettings(new ArrayList<>(), new SQLite(botJson.get().get("BotName").getAsString()), botJson.get()), logger);
+			CoreStarter.getLogger().info("Iniciando ShardManager, espero que dê certo!");
+			OusuCore.inicialize(pluginLoader, shardBuilder.build(), new InternalSettings(new ArrayList<>(), pluginLoader.getBotFile()), logger);
 		} catch (LoginException | CompletionException e) {
-			logger.warn("Suas credenciais estão incorretas verifique o Token em settings.json", e);
+			CoreStarter.getLogger().warn("Suas credenciais estão incorretas verifique o Token em settings.ini", e);
 		}
 	}
 
@@ -174,6 +114,31 @@ public class CoreStarter {
 			smb.enableCache(cacheFlags);
 			logger.info("Estão habilitados os Cache Flags: " + cacheFlags.stream()
 					.map(i -> "[" + i.name() + "] ").collect(Collectors.joining()));
+		}
+	}
+
+	private static void applyOthers(DefaultShardManagerBuilder smb, CoreSettings settings){
+		smb.setEventManagerProvider((id) -> new AnnotatedEventManager());
+		smb.enableCache(settings.getCacheFlags());
+		smb.addEventListeners(new CommandAdapter());
+		smb.addEventListeners(new GuildEvents());
+		smb.setChunkingFilter(settings.getFilter());
+		smb.setShardsTotal(settings.getShards());
+	}
+
+	private static void loadSQLDatabase(){
+		INIConfiguration ini = new OusuConfiguration().getConfiguration(Paths.get("SQLConfiguration.ini"));
+		SQLConfiguration configuration = SQLConfiguration.getPostgresConfig();
+		configuration.setHost(String.format("jdbc:postgresql://%s:%s/", ini.getString("DatabaseCredentials.server"),
+				ini.getLong("DatabaseCredentials.port")));
+		configuration.setDatabase(ini.getString("DatabaseCredentials.database"));
+		configuration.setUser(ini.getString("DatabaseCredentials.user"));
+		configuration.setPassword(ini.getString("DatabaseCredentials.password"));
+		try {
+			BasicSQL.create(new PostgreSQL(configuration)).registerRepository(GuildRepository.class);
+		} catch (InstantiationException | SQLException | RepositoryException e) {
+			CoreStarter.getLogger().fatal("Não foi possível carregar o banco de dados.", e);
+			System.exit(0);
 		}
 	}
 
@@ -210,7 +175,10 @@ public class CoreStarter {
 	@Nullable
 	public static File getAvailableBot() {
 		try {
-			Stream<Path> stream = CoreUtils.iteratorToList(Files.newDirectoryStream(Paths.get("bots")).iterator()).stream();
+			Stream<Path> stream = CoreUtils.iteratorToList(Files.newDirectoryStream(Paths.get("bots"))
+					.iterator())
+					.stream();
+
 			List<File> list = stream.filter(path -> path.getFileName().toString().contains(".jar"))
 					.map(Path::toFile)
 					.filter(file -> {
@@ -222,6 +190,7 @@ public class CoreStarter {
 						}
 					})
 					.collect(Collectors.toList());
+
 			if (list.size() == 0) {
 				return null;
 			}
