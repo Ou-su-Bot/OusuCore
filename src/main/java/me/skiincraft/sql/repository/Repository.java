@@ -14,7 +14,7 @@ public interface Repository<T, ID> extends UseStatement {
 
     long size();
     void remove(int index);
-    void remove(T index);
+    void removeObject(T index);
     void save(T item);
 
 }

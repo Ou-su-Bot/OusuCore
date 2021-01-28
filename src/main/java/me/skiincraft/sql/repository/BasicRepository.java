@@ -11,10 +11,13 @@ import me.skiincraft.sql.util.SQLField;
 import me.skiincraft.sql.util.SQLFieldType;
 
 import javax.annotation.Nonnull;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.nio.charset.StandardCharsets;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -37,6 +40,7 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
     private void mapClass(ClassUtils<T> classUtils) throws RepositoryException {
         this.classUtils = classUtils;
         this.idField = classUtils.getFieldWithAnnotation(Id.class);
+        this.idField.setAccessible(true);
         this.fields = SQLField.of(classUtils.getGenericClass().getDeclaredFields())
                 .stream()
                 .filter(field -> !field.getField().isAnnotationPresent(Ignore.class))
@@ -66,8 +70,9 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
         try {
             Statement statement = getStatement();
             statement.execute(String.format("CREATE TABLE IF NOT EXISTS %s (%s %s PRIMARY KEY,%s);",
-                    tableName, idField.getName(), SQLFieldType.getByClass(idField.getType()).getName(), String.join(",", str)));
+                    tableName, idField.getName(), SQLFieldType.getBy(idField.getType()).getName(), String.join(",", str)));
         } catch (SQLException throwables) {
+            revert();
             throwables.printStackTrace();
             throw new RepositoryException("Não foi possivel criar esta tabela");
         }
@@ -92,6 +97,7 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
                 toIndex++;
             }
         } catch (SQLException e) {
+            revert();
             e.printStackTrace();
         }
         commit();
@@ -113,6 +119,7 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
                 return Optional.of(createInstance(resultSet));
             }
         } catch (Exception throwables) {
+            revert();
             throwables.printStackTrace();
         }
         return Optional.empty();
@@ -123,10 +130,27 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
             T newInstance = classUtils.getGenericClass().newInstance();
             for (SQLField field : fields) {
                 field.getField().setAccessible(true);
+                if (field.isBlob()){
+                    Blob blob = resultSet.getBlob(field.getField().getName());
+                    if (blob == null){
+                        continue;
+                    }
+                    if (field.getType() == SQLFieldType.TEXT){
+                        field.parseItem(newInstance, new BufferedReader(new InputStreamReader(blob.getBinaryStream(), StandardCharsets.UTF_8))
+                                .lines()
+                                .collect(Collectors.joining("\n")));
+                        continue;
+                    }
+                    field.parseItem(newInstance, blob.getBinaryStream());
+                    continue;
+                }
                 field.parseItem(newInstance, resultSet.getObject(field.getField().getName()));
             }
             return newInstance;
-        } catch (InstantiationException | IllegalAccessException | SQLException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            revert();
             e.printStackTrace();
         }
         return null;
@@ -143,6 +167,7 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
             }
             return all;
         } catch (Exception throwables) {
+            revert();
             throwables.printStackTrace();
         }
         return all;
@@ -154,9 +179,10 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
             Statement statement = getStatement();
             Field field = item.getClass().getDeclaredField(idField.getName());
             field.setAccessible(true);
-            ResultSet result = statement.executeQuery(String.format("SELECT * FROM %s WHERE \"%s\" = %s;", tableName, idField.getName(), field.get(item)));
+            ResultSet result = statement.executeQuery(String.format("SELECT * FROM %s WHERE %s = '%s';", tableName, idField.getName(), field.get(item)));
             return result.next() && result.getString(idField.getName()) != null;
         } catch (Exception e){
+            revert();
             e.printStackTrace();
         }
         return false;
@@ -171,6 +197,7 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
                 return resultSet.getLong(1);
             }
         } catch (SQLException throwables) {
+            revert();
             throwables.printStackTrace();
         }
         return 0;
@@ -191,20 +218,23 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
                 toIndex++;
             }
         } catch (SQLException e) {
+            revert();
             e.printStackTrace();
         }
         commit();
     }
 
     @Override
-    public void remove(T index) {
+    public void removeObject(T index) {
         if (contains(index)){
             try {
                 Statement statement = getStatement();
                 Field field = index.getClass().getDeclaredField(idField.getName());
                 field.setAccessible(true);
-                statement.execute(String.format("DELETE FROM %s WHERE %s = %s", tableName, idField.getName(), idField.get(index)));
+                statement.execute(String.format("DELETE FROM %s WHERE %s = '%s'", tableName, field.getName(), field.get(index)));
+                commit();
             } catch (Exception e){
+                revert();
                 e.printStackTrace();
             }
         }
@@ -213,6 +243,10 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
     @Override
     public void save(T item) {
         try {
+            if (containsBlob()){
+                savePrepare(item);
+                return;
+            }
             Statement statement = getStatement();
             idField.setAccessible(true);
             if (!contains(item)) {
@@ -223,12 +257,46 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
             statement.execute(String.format("UPDATE %s SET %s WHERE %s = '%s'", tableName, updateSet(item), idField.getName(), idField.get(item)));
             commit();
         } catch (Exception e){
+            revert();
             e.printStackTrace();
         }
     }
 
+    private void savePrepare(T item) throws Exception {
+        idField.setAccessible(true);
+        if (!contains(item)) {
+            PreparedStatement statement = getPreparedStatement(String.format("INSERT INTO %s (%s) VALUES (%s)", tableName, columns(), wildCardValues()));
+            statementUpdate(statement, item);
+            statement.executeUpdate();
+            commit();
+            return;
+        }
+        PreparedStatement statement = getPreparedStatement(String.format("UPDATE %s SET %s WHERE %s = '%s'", tableName, wildCardUpdate(), idField.getName(), idField.get(item)));
+        statementUpdate(statement, item);
+        statement.executeUpdate();
+        commit();
+    }
+    private void statementUpdate(PreparedStatement statement, T item) throws SQLException {
+        int i = 1;
+        for (SQLField sql : fields){
+            if (sql.isBlob()) {
+                statement.setBlob(i, (sql.getField().getType() == String.class)
+                        ? (sql.toSQLFormat(item) == null) ? null :new ByteArrayInputStream(sql.toSQLFormat(item).getBytes(StandardCharsets.UTF_8))
+                        : (InputStream) sql.getItem(item));
+                i++;
+                continue;
+            }
+            statement.setObject(i, sql.toSQLFormat(item, false));
+            i++;
+        }
+    }
+
+    private boolean containsBlob(){
+        return fields.stream().anyMatch(SQLField::isBlob);
+    }
+
     private String updateSet(T item){
-        return fields.stream().map(sqlField -> String.format("%s = '%s'", sqlField.getField().getName(), sqlField.toSQLFormat(item))).collect(Collectors.joining(", "));
+        return fields.stream().map(sqlField -> String.format("%s = %s", sqlField.getField().getName(), (sqlField.toSQLFormat(item) == null)? null : "'" + sqlField.toSQLFormat(item) + "'")).collect(Collectors.joining(", "));
     }
 
     private String columns(){
@@ -237,9 +305,19 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
                 .collect(Collectors.joining(", "));
     }
 
+    private String wildCardUpdate(){
+        return fields.stream().map(sqlField -> String.format("%s = ?", sqlField.getField().getName())).collect(Collectors.joining(", "));
+    }
+
+    private String wildCardValues(){
+        return fields.stream()
+                .map(sqlField -> "?")
+                .collect(Collectors.joining(", "));
+    }
+
     private String values(T item){
         return fields.stream()
-                .map(sqlField -> "'" + sqlField.toSQLFormat(item) + "'")
+                .map(sqlField -> (sqlField.toSQLFormat(item) == null) ? null : "'" + sqlField.toSQLFormat(item) + "'")
                 .collect(Collectors.joining(", "));
     }
 
@@ -247,9 +325,25 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
         return getSQL().createNewStatement(this);
     }
 
+    private PreparedStatement getPreparedStatement(String sql) throws SQLException {
+        return getSQL().createNewPreparedStatement(sql, this);
+    }
+
+    public Class<T> getParameterType(){
+        return classUtils.getGenericClass();
+    }
+
     private void commit(){
         try {
             getSQL().getConnection().commit();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    private void revert(){
+        try {
+            getSQL().getConnection().rollback();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

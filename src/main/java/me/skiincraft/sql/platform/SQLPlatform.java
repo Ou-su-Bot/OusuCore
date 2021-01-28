@@ -3,6 +3,7 @@ package me.skiincraft.sql.platform;
 import me.skiincraft.sql.util.StatementUpdater;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -17,7 +18,7 @@ public abstract class SQLPlatform {
 
     public abstract Connection getConnection();
     public abstract Statement createNewStatement(UseStatement useSQL) throws SQLException;
-    //public abstract PreparedStatement createNewPreparedStatement(String sql, UseStatement useSQL) throws SQLException;
+    public abstract PreparedStatement createNewPreparedStatement(String sql, UseStatement useSQL) throws SQLException;
 
     public SQLConfiguration getSQLConfiguration() {
         return sqlConfiguration;

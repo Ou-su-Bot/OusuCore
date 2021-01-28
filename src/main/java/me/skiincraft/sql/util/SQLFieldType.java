@@ -1,5 +1,9 @@
 package me.skiincraft.sql.util;
 
+import me.skiincraft.sql.annotation.Lob;
+
+import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,6 +15,7 @@ public enum SQLFieldType {
     CHAR      ("CHAR",     char.class  , Character.class),
     VARCHAR   ("VARCHAR",                   String.class),
     TEXT      ("TEXT",                      String.class),
+    BLOB      ("Blob",                 InputStream.class),
     BOOLEAN   ("BOOLEAN", boolean.class,   Boolean.class),
     SMALLINT  ("SMALLINT",  short.class,     Short.class),
     INT       ("INT",       int.class,    Integer.class),
@@ -37,7 +42,14 @@ public enum SQLFieldType {
         return classTypes[0];
     }
 
-    public static SQLFieldType getByClass(Class<?> clazz) {
+    public static SQLFieldType getBy(Field field) {
+        if (field.getType() == String.class && field.isAnnotationPresent(Lob.class)){
+            return TEXT;
+        }
+        return getBy(field.getType());
+    }
+
+    public static SQLFieldType getBy(Class<?> clazz) {
         if (clazz.isEnum()){
             return INT;
         }
@@ -56,14 +68,14 @@ public enum SQLFieldType {
         return name;
     }
 
-    public static SQLFieldType getByType(Type clazz) {
-        if (((Class<?>) clazz).isEnum()){
+    public static SQLFieldType getBy(Type type) {
+        if (((Class<?>) type).isEnum()){
             return INT;
         }
         return Arrays.stream(values())
                 .filter(elementType -> {
                     for (Class<?> classType : elementType.getClassTypes()) {
-                        if (classType == clazz) {
+                        if (classType == type) {
                             return true;
                         }
                     }

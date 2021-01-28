@@ -4,10 +4,7 @@ import me.skiincraft.sql.platform.SQLConfiguration;
 import me.skiincraft.sql.platform.SQLPlatform;
 import me.skiincraft.sql.platform.UseStatement;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class PostgreSQL extends SQLPlatform {
 
@@ -24,6 +21,11 @@ public class PostgreSQL extends SQLPlatform {
     @Override
     public Statement createNewStatement(UseStatement useSQL) throws SQLException {
         return getStatementUpdater().getStatement(useSQL);
+    }
+
+    @Override
+    public PreparedStatement createNewPreparedStatement(String sql, UseStatement useSQL) throws SQLException {
+        return getStatementUpdater().getStatement(sql, useSQL);
     }
 
     @Override

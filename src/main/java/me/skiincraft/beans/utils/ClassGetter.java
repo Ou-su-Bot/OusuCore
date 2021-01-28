@@ -39,6 +39,10 @@ public class ClassGetter {
                 .collect(Collectors.toList());
     }
 
+    public ArrayList<Class<?>> getClassesByReference(){
+        return getClasses(referenceClass.getPackage().getName());
+    }
+
     public ArrayList<Class<?>> getClasses(String packageName) {
         ArrayList<Class<?>> classes = new ArrayList<>();
         CodeSource src = referenceClass.getProtectionDomain().getCodeSource();

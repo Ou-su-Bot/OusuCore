@@ -1,14 +1,15 @@
 package me.skiincraft.discord.core;
 
-import me.skiincraft.beans.InjectManager;
+import me.skiincraft.beans.Injector;
 import me.skiincraft.discord.core.command.Command;
 import me.skiincraft.discord.core.command.CommandManager;
 import me.skiincraft.discord.core.common.EventListener;
 import me.skiincraft.discord.core.configuration.InternalSettings;
-import me.skiincraft.discord.core.configuration.Language;
+import me.skiincraft.discord.core.language.Language;
 import me.skiincraft.discord.core.plugin.OusuPlugin;
 import me.skiincraft.discord.core.plugin.PluginLoader;
 import me.skiincraft.discord.core.repository.GuildRepository;
+import me.skiincraft.discord.core.utils.InjectorUtils;
 import me.skiincraft.sql.BasicSQL;
 import me.skiincraft.sql.exceptions.RepositoryException;
 import net.dv8tion.jda.api.JDA;
@@ -28,6 +29,7 @@ public final class OusuCore {
     private static OusuPlugin instance;
     private static ShardManager shardManager;
     private static Logger logger;
+    private static Injector injector;
 
     private OusuCore() {}
 
@@ -56,11 +58,11 @@ public final class OusuCore {
     }
 
     public static void registerListener(EventListener listener) {
-        shardManager.removeEventListener(listener);
+        shardManager.addEventListener(listener);
     }
 
     public static void unregisterListener(EventListener listener) {
-        shardManager.addEventListener(listener);
+        shardManager.removeEventListener(listener);
     }
 
     public static Path getFontPath() {
@@ -103,6 +105,10 @@ public final class OusuCore {
         return logger;
     }
 
+    public static Injector getInjector(){
+        return injector;
+    }
+
     public static void shutdown() {
         try {
             logger.info("Bot está sendo desativado.");
@@ -127,23 +133,27 @@ public final class OusuCore {
         getLogger().throwing(throwable);
     }
 
-    public static void inicialize(PluginLoader loader, ShardManager shardManager, InternalSettings internalSettings, Logger logger)  {
+    public static void inicialize(PluginLoader loader, Injector injector, ShardManager shardManager, InternalSettings internalSettings, Logger logger)  {
         if (OusuCore.instance != null) {
             logger.warn("Tentou criar uma instancia OusuCore, mas é possivel somente 1 instancia(s) ativa(s).");
             return;
         }
-
         try {
             OusuCore.instance = loader.getOusuPlugin();
             OusuCore.shardManager = shardManager;
             OusuCore.internalSettings = internalSettings;
             OusuCore.logger = logger;
-            
-            InjectManager.getInstance().mapClasses(instance);
-            InjectManager.getInstance().map(Objects.requireNonNull(getGuildRepository()));
-            InjectManager.getInstance().map(loader);
+            OusuCore.injector = injector;
 
+            InjectorUtils.configureInjector(injector);
+            getInjector().map(shardManager);
+            getInjector().map(instance);
+            getInjector().map(Objects.requireNonNull(getGuildRepository()));
+            getInjector().map(loader);
+
+            getInjector().start();
             instance.onEnable();
+            getInjector().commit();
             logger.info(String.format("%s foi carregado com sucesso!", internalSettings.getBotName()));
         } catch (Exception e){
             logger.error("Ocorreu um problema ao carregar onEnable, verifique se está atualizado!", e);

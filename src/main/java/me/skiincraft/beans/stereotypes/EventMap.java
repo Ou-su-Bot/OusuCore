@@ -1,4 +1,6 @@
-package me.skiincraft.beans.annotation;
+package me.skiincraft.beans.stereotypes;
+
+import me.skiincraft.beans.annotation.Component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,5 +9,6 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CommandMap {
+@Component
+public @interface EventMap {
 }

@@ -1,4 +1,6 @@
-package me.skiincraft.sql.annotation;
+package me.skiincraft.beans.stereotypes;
+
+import me.skiincraft.beans.annotation.Component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,5 +9,6 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Entity {
+@Component
+public @interface UtilMap {
 }

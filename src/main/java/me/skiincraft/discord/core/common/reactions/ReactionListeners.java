@@ -1,17 +1,17 @@
 package me.skiincraft.discord.core.common.reactions;
 
 import me.skiincraft.discord.core.OusuCore;
+import me.skiincraft.discord.core.common.EventListener;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ReactionListeners {
+public class ReactionListeners implements EventListener {
 
     private final List<ReactionObject> reactionObjects;
     private final Map<ReactionObject, Reaction> reactionsInterface;
@@ -40,7 +40,7 @@ public class ReactionListeners {
     }
 
     @SubscribeEvent
-    public void reactionEvent(@NotNull GuildMessageReactionAddEvent event) {
+    public void reactionEvent(GuildMessageReactionAddEvent event) {
         if (event.getUser().isBot()){
             return;
         }
@@ -83,12 +83,11 @@ public class ReactionListeners {
                 .collect(Collectors.toList());
 
         boolean existentEmote = emotes.stream().filter(emote -> reactionEmote.getName().equalsIgnoreCase(emote.getReactionEmote().getName())).count() == 1;
-        if (!existentEmote){
-            event.getReaction().removeReaction(event.getUser()).queue();
-            return;
-        }
-
         if (event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_MANAGE)) {
+            if (!existentEmote) {
+                event.getReaction().removeReaction(event.getUser()).queue();
+                return;
+            }
             event.getReaction().removeReaction(event.getUser()).queue();
         }
 

@@ -3,7 +3,9 @@ package me.skiincraft.sql.util;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import me.skiincraft.sql.platform.SQLPlatform;
 import me.skiincraft.sql.platform.UseStatement;
+import org.postgresql.PGStatement;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -46,17 +48,28 @@ public class StatementUpdater {
         }, 60, 30, TimeUnit.SECONDS);
     }
 
-    private Statement getExistent(UseStatement useSQL) throws SQLException {
-        StatementData data = statementData.stream().filter(stmtData -> stmtData.getStatementOwner() == useSQL)
-                .findFirst()
-                .orElse(new StatementData(getSQL().getConnection().createStatement(), useSQL));
+    private Statement getExistent(String sql, UseStatement useSQL) throws SQLException {
+        StatementData data;
+        if (sql == null) {
+             data = statementData.stream()
+                    .filter(stmtData -> stmtData.getStatementOwner() == useSQL)
+                    .filter(stmtData -> !(stmtData.getStatement() instanceof PreparedStatement))
+                    .findFirst()
+                    .orElse(new StatementData(getSQL().getConnection().createStatement(), useSQL));
+        } else {
+            data = new StatementData(getSQL().getConnection().prepareStatement(sql), useSQL);
+        }
 
         statementData.add(data);
         return data.getStatement();
     }
 
     public Statement getStatement(UseStatement useSQL) throws SQLException {
-        return getExistent(useSQL);
+        return getExistent(null, useSQL);
+    }
+
+    public PreparedStatement getStatement(String prepareSQL, UseStatement useSQL) throws SQLException {
+        return (PreparedStatement) getExistent(prepareSQL, useSQL);
     }
 
 

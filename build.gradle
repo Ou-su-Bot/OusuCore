@@ -5,7 +5,7 @@ plugins {
 }
 
 group('me.skiincraft')
-version('2021.0110.0')
+version('2021.0127.0')
 
 repositories {
     jcenter()

@@ -1,7 +1,7 @@
 package me.skiincraft.discord.core.utils;
 
 import me.skiincraft.discord.core.CoreStarter;
-import me.skiincraft.discord.core.OusuConfiguration;
+import me.skiincraft.discord.core.configuration.OusuConfiguration;
 
 import java.io.File;
 import java.io.IOException;

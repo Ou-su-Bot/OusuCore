@@ -1,6 +1,6 @@
 package me.skiincraft.discord.core.repository;
 
-import me.skiincraft.discord.core.configuration.Language;
+import me.skiincraft.discord.core.language.Language;
 import me.skiincraft.sql.annotation.Id;
 import me.skiincraft.sql.annotation.Table;
 import net.dv8tion.jda.api.entities.Guild;

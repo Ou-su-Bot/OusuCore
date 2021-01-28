@@ -1,5 +1,6 @@
 package me.skiincraft.discord.core.configuration;
 
+import me.skiincraft.discord.core.language.Language;
 import me.skiincraft.discord.core.utils.BotFile;
 
 import java.util.ArrayList;
@@ -10,8 +11,8 @@ public class InternalSettings {
     private final List<Language> languages;
     private final BotFile botFile;
 
-    public InternalSettings(List<Language> languages, BotFile botFile) {
-        this.languages = languages;
+    public InternalSettings(BotFile botFile) {
+        this.languages = new ArrayList<>();
         this.botFile = botFile;
     }
 

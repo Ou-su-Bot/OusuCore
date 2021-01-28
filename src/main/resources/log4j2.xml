@@ -5,7 +5,7 @@
     </CustomLevels>
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern="[%d{dd-MM-yyyy HH:mm:ss} %p]: [%t] - %msg%n"/>
+            <PatternLayout disableAnsi="false" pattern="%style{[%d{dd-MM-yyyy HH:mm:ss}%5p]}{cyan}: %style{[%t]}{magenta} %msg%n{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=white, DEBUG=green bold, TRACE=blue, COMMAND=green}" charset="UTF-8"/>
         </Console>
         <RollingFile name="fileAppender" fileName="logs/latest.log"
                      filePattern="logs/$${date:yyyy-MM}/ousu-core-%d{MM-dd-yyyy HH-mm}-%i.log.gz">

@@ -1,6 +1,6 @@
 package me.skiincraft.discord.core.command;
 
-import me.skiincraft.discord.core.configuration.LanguageManager;
+import me.skiincraft.discord.core.language.Language;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 
@@ -18,8 +18,8 @@ public abstract class Command {
 		this.usage = usage;
 	}
 	
-	public String getCommandDescription(LanguageManager language) {
-		return language.getString("CommandDescription", name.toUpperCase() +"_DESCRIPTION");
+	public String getCommandDescription(Language language) {
+		return language.getString("command", "description", name.toLowerCase());
 	}
 
 	public abstract void execute(Member user, String[] args, InteractChannel channel);
@@ -37,8 +37,8 @@ public abstract class Command {
 		return usage;
 	}
 	
-	public LanguageManager getLanguageManager(Guild guild) {
-		return new LanguageManager(guild);
+	public Language getLanguage(Guild guild) {
+		return Language.getGuildLanguage(guild);
 	}
 	
 }

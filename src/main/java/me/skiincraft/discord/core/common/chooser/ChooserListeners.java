@@ -1,5 +1,6 @@
 package me.skiincraft.discord.core.common.chooser;
 
+import me.skiincraft.discord.core.common.EventListener;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import org.jetbrains.annotations.NotNull;
@@ -7,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ChooserListeners {
+public class ChooserListeners implements EventListener {
 
     private final List<ChooserObject> chooserObjects;
     private final Map<ChooserObject, ChooserInterface> chooserInterfaces;

@@ -1,7 +1,14 @@
 package me.skiincraft.discord.core;
 
+import me.skiincraft.beans.InjectorFactory;
+import me.skiincraft.beans.annotation.Component;
+import me.skiincraft.beans.stereotypes.CommandMap;
+import me.skiincraft.beans.stereotypes.EventMap;
+import me.skiincraft.beans.stereotypes.RepositoryMap;
+import me.skiincraft.beans.stereotypes.UtilMap;
 import me.skiincraft.discord.core.configuration.CoreSettings;
 import me.skiincraft.discord.core.configuration.InternalSettings;
+import me.skiincraft.discord.core.configuration.OusuConfiguration;
 import me.skiincraft.discord.core.jda.CommandAdapter;
 import me.skiincraft.discord.core.jda.GuildEvents;
 import me.skiincraft.discord.core.plugin.OusuPlugin;
@@ -33,7 +40,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +49,9 @@ import java.util.stream.Stream;
 
 public class CoreStarter {
 
+	private static final Class[] injectorAnnotations =  new Class[]
+			{Component.class, CommandMap.class, EventMap.class, RepositoryMap.class, UtilMap.class};
+
 	static Logger logger = LogManager.getLogger(CoreStarter.class);
 	
 	public static void main(String[] args) {
@@ -51,6 +60,7 @@ public class CoreStarter {
 				.buildPrintStream());
 
 		CoreStarter.getLogger().info("Starting log4J - OusuCore\n");
+
 		CoreUtils.createPath("bots", "library", "dependency", "logs");
 		CoreUtils.createConfigurationFiles();
 
@@ -89,7 +99,8 @@ public class CoreStarter {
 		CoreStarter.getLogger().info("ShardBuilder foi configurado com sucesso.");
 		try {
 			CoreStarter.getLogger().info("Iniciando ShardManager, espero que dê certo!");
-			OusuCore.inicialize(pluginLoader, shardBuilder.build(), new InternalSettings(new ArrayList<>(), pluginLoader.getBotFile()), logger);
+			OusuCore.inicialize(pluginLoader, InjectorFactory.getInstance().createNewInjector(plugin.getClass(), injectorAnnotations),
+					shardBuilder.build(), new InternalSettings(pluginLoader.getBotFile()), logger);
 		} catch (LoginException | CompletionException e) {
 			CoreStarter.getLogger().warn("Suas credenciais estão incorretas verifique o Token em settings.ini", e);
 		}

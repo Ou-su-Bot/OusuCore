@@ -1,4 +1,4 @@
-package me.skiincraft.discord.core;
+package me.skiincraft.discord.core.configuration;
 
 
 import org.apache.commons.configuration2.INIConfiguration;

@@ -33,7 +33,6 @@ public class Reactions {
         return allChooser.stream().filter(chooser -> chooser.getListener().contains(object)).collect(Collectors.toList());
     }
 
-    @Nullable
     public static Reactions getInstance() {
         if (allChooser.size() == 0){
             return null;

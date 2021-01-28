@@ -1,7 +1,7 @@
 package me.skiincraft.discord.core.jda;
 
 import me.skiincraft.discord.core.OusuCore;
-import me.skiincraft.discord.core.configuration.Language;
+import me.skiincraft.discord.core.language.Language;
 import me.skiincraft.discord.core.repository.OusuGuild;
 import net.dv8tion.jda.api.Region;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 public class GuildEvents {
+
 
     @SubscribeEvent
     public void onReady(GuildReadyEvent event){
@@ -37,7 +38,7 @@ public class GuildEvents {
         if (dbGuild == null){
             return;
         }
-        OusuCore.getGuildRepository().remove(dbGuild);
+        OusuCore.getGuildRepository().removeObject(dbGuild);
     }
 
     private Language getLanguageByRegion(Region region) {
@@ -46,7 +47,13 @@ public class GuildEvents {
                 .sorted(Comparator.nullsLast(Comparator.comparing(language -> (language.getRegions() == null) ? null : language.getRegions()[0])))
                 .toArray(Language[]::new);
 
-        return (languageList.length != 0) ? languageList[0] : (OusuCore.getLanguages().size() == 0) ? null : OusuCore.getLanguages().get(0);
+        return (languageList.length != 0) ? languageList[0] : (OusuCore.getLanguages().size() == 0) ? ifIsNull() : OusuCore.getLanguages().get(0);
+    }
+
+    private Language ifIsNull(){
+        Language defaultLanguage = Language.getDefaultLanguage();
+        OusuCore.addLanguage(defaultLanguage);
+        return defaultLanguage;
     }
 
 }

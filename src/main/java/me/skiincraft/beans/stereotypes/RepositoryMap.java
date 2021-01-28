@@ -1,4 +1,6 @@
-package me.skiincraft.beans.annotation;
+package me.skiincraft.beans.stereotypes;
+
+import me.skiincraft.beans.annotation.Component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
