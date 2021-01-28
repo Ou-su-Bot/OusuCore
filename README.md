@@ -22,43 +22,38 @@ OusuCore:.
 ├───./dependency
 ├───./library
 ├───./logs
-├─── settings.json
-├─── YourBot_sqlite.db
+├─── Settings.ini
+├─── SQLConfiguration.ini
 └─── OusuCore.jar
 ```
 
 <h4>Settings File</h4>
 
-```json
-{
-  "Token": "yourbottoken",
-  "Shards": 1,
-  "ChunkFilter": false, (eu recomendo false)
-  "CacheFlag": { (coloque os cache flags que quer utilizar)
-    "ACTIVITY": true,
-    "VOICE_STATEE": true (caso o nome esteja errado não será ativado)
-  }, 
-  "GatewayIntents": { (mesma função para o gateway intents)
-    "GUILD_MEMBERS": true
-  }
-}
+```ini
+[BotConfiguration]
+token = BOT-TOKEN
+shards = 1
+
+[OtherConfiguration]
+chunkfilter = true
+cacheflag = default
+gatewayintents = default
 ```
-* Cache flag e Gateway Intents
+* CacheFlag & GatewayIntents
+Only the default option is available
 
-Caso não queira ativar o padrão só deixe o JsonObject nulo.
+<h4>SQL File</h4>
 
-```json
-  "CacheFlag": null,
-  "GatewayIntents": null
-```
+```ini
+[Database]
+template = postgres
+; Only Postgres
 
-ou se quiser deixar as configurações padrões deixe
+[DatabaseCredentials]
+server = localhost
+database = postgres
+port = 5432
+user = postgres
+password = 123
 
-```json
-  "CacheFlag": {
-    "DEFAULT": true
-  },
-  "GatewayIntents": {
-    "DEFAULT": true
-  }
 ```
