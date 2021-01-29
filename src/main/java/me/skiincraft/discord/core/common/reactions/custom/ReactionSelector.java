@@ -4,6 +4,7 @@ import me.skiincraft.discord.core.common.reactions.Reaction;
 import me.skiincraft.discord.core.common.reactions.ReactionObject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,7 +22,7 @@ public class ReactionSelector implements Reaction {
     }
 
     @Override
-    public boolean execute(Member member, String emote, ReactionObject object) {
+    public boolean execute(TextChannel channel, Member member, String emote, ReactionObject object) {
         // Checando se todos podem reagir ou somente o dono da mensagem.
         if (!isEveryoneReacts() && member.getIdLong() != object.getUserId()){
             return true;

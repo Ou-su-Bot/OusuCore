@@ -95,7 +95,7 @@ public class ReactionListeners implements EventListener {
             if (reactionsInterface.containsKey(reactionObject)) {
                 Reaction reaction = reactionsInterface.get(reactionObject);
                 String emote = (reactionEmote.isEmoji()) ? reactionEmote.getAsCodepoints() : reactionEmote.getName();
-                boolean response = reaction.execute(event.getMember(), emote, reactionObject);
+                boolean response = reaction.execute(event.getChannel(), event.getMember(), emote, reactionObject);
                 if (!response) {
                     removeElement(reactionObject);
                 }
