@@ -18,7 +18,7 @@ public final class Language extends LanguageBundle {
 	}
 	
 	public String getLanguageName() {
-		return locale.getDisplayLanguage(Locale.ENGLISH);
+		return locale.getDisplayLanguage(Locale.US);
 	}
 	
 	public String getName() {
@@ -26,7 +26,7 @@ public final class Language extends LanguageBundle {
 	}
 	
 	public String getCountry() {
-		return locale.getDisplayCountry(Locale.ENGLISH);
+		return locale.getDisplayCountry(Locale.US);
 	}
 	
 	public String getCountryCode() {
@@ -38,18 +38,19 @@ public final class Language extends LanguageBundle {
 	}
 	
 	public static Language getDefaultLanguage() {
-		return new Language(Locale.getDefault());
+		return new Language(Locale.US);
 	}
 	
 	public static Language getGuildLanguage(Guild guild) {
-		return OusuCore.getLanguages().stream().filter(l-> l.getLanguageName().equalsIgnoreCase(getLanguageStringFromDatabase(guild)))
+		return OusuCore.getLanguages().stream()
+				.filter(l-> l.getLanguageName().equalsIgnoreCase(getLanguageStringFromDatabase(guild)))
 				.findAny()
 				.orElse(getGuildLanguageFromDatabase(guild));
 	}
 
 	public static Language getGuildLanguageFromDatabase(Guild guild){
 		return Arrays.stream(Locale.getAvailableLocales())
-				.filter(locale -> locale.getDisplayLanguage(Locale.ENGLISH)
+				.filter(locale -> locale.getDisplayLanguage(Locale.US)
 						.equalsIgnoreCase(getLanguageStringFromDatabase(guild)))
 				.findFirst()
 				.map(Language::new)
@@ -58,7 +59,7 @@ public final class Language extends LanguageBundle {
 
 	private static String getLanguageStringFromDatabase(Guild guild){
 		return OusuCore.getGuildRepository().getById(guild.getIdLong())
-				.map(OusuGuild::getLanguage).orElse(Locale.ENGLISH.getDisplayLanguage());
+				.map(OusuGuild::getLanguage).orElse(Locale.US.getDisplayLanguage());
 	}
 
 	public Region[] getRegions() {

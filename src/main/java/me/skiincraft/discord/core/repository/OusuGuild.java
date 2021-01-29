@@ -62,7 +62,7 @@ public class OusuGuild {
         if (language == null)
             return this;
 
-        this.language = language.getName();
+        this.language = language.getLanguageName();
         return this;
     }
 
@@ -82,5 +82,16 @@ public class OusuGuild {
     public OusuGuild setAddedIn(OffsetDateTime addedIn) {
         this.addedIn = addedIn;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "OusuGuild{" +
+                "id=" + id +
+                ", guildName='" + guildName + '\'' +
+                ", language='" + language + '\'' +
+                ", prefix='" + prefix + '\'' +
+                ", addedIn=" + addedIn +
+                '}';
     }
 }
