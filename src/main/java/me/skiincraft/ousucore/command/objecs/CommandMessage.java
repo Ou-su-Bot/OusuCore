@@ -39,6 +39,18 @@ public class CommandMessage {
         message.delete().queue();
     }
 
+    public void editMessage(CharSequence message){
+        editMessage(message, null);
+    }
+
+    public void editMessage(Message message){
+        editMessage(message, null);
+    }
+
+    public void editMessage(MessageEmbed message){
+        editMessage(message, null);
+    }
+
     public void editMessage(CharSequence message, ThrowableConsumer<CommandMessage> consumer){
         ChannelUtils.ConsumerMessage consumerMessage = new ChannelUtils.ConsumerMessage();
         this.message.editMessage(message).queue(consumerMessage);
@@ -79,5 +91,9 @@ public class CommandMessage {
         } catch (Exception e){
             throw new ThrowableConsumerException(e);
         }
+    }
+
+    public Message getMessage() {
+        return message;
     }
 }
