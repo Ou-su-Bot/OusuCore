@@ -33,7 +33,7 @@ public class CommandParser {
             return;
         }
         User member = Objects.requireNonNull(event.getMember(), "user").getUser();
-        if (member.isBot() || member.isFake() || event.getChannel().canTalk()){
+        if (member.isBot() || member.isFake() || !event.getChannel().canTalk()){
             return;
         }
         String[] args = event.getMessage().getContentRaw().split(" ");
@@ -41,7 +41,7 @@ public class CommandParser {
                 .map(OusuGuild::getPrefix)
                 .orElse(OusuCore.getInternalSettings().getDefaultPrefix());
 
-        if (args[0].startsWith(prefix) && args[0].length() != prefix.length()){
+        if (startWithIgnoreCase(args[0], prefix)){
             service.execute(() -> {
                 Command command = new Command(removePrefix(prefix, args), event.getMessage(), commandManager);
                 FindCommandEvent cmdEvent = new FindCommandEvent(command, event.getJDA());
@@ -51,6 +51,10 @@ public class CommandParser {
                 }
             });
         }
+    }
+
+    private boolean startWithIgnoreCase(String arg, String prefix){
+        return arg.toLowerCase().startsWith(prefix.toLowerCase());
     }
 
     private String[] removePrefix(String prefix, String[] args){

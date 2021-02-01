@@ -14,7 +14,6 @@ import java.util.Comparator;
 
 public class GuildEvents {
 
-
     @SubscribeEvent
     public void onReady(GuildReadyEvent event){
         if (OusuCore.getGuildRepository().getById(event.getGuild().getIdLong()).isPresent()) {

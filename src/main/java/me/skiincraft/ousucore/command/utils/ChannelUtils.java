@@ -1,6 +1,5 @@
 package me.skiincraft.ousucore.command.utils;
 
-import me.skiincraft.ousucore.OusuCore;
 import me.skiincraft.ousucore.command.objecs.CommandMessage;
 import me.skiincraft.ousucore.command.objecs.ContentMessage;
 import me.skiincraft.ousucore.exception.ThrowableConsumerException;
@@ -9,7 +8,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
-
 import java.util.function.Consumer;
 
 public class ChannelUtils {
@@ -38,62 +36,66 @@ public class ChannelUtils {
 
     public void reply(CharSequence message, ThrowableConsumer<CommandMessage> consumer) {
         ConsumerMessage consumerMessage = new ConsumerMessage();
-        channel.sendMessage(message).queue(consumerMessage);
-        if (consumer == null){
-            return;
-        }
-        try {
-            consumer.accept(new CommandMessage(consumerMessage.getMessage()));
-        } catch (Exception e) {
-            throw new ThrowableConsumerException(e);
-        }
+        channel.sendMessage(message).queue(consumerMessage.andThen((msg) -> {
+            if (consumer == null){
+                return;
+            }
+            try {
+                consumer.accept(new CommandMessage(consumerMessage.getMessage()));
+            } catch (Exception e) {
+                throw new ThrowableConsumerException(e);
+            }
+        }));
     }
 
     public void reply(Message message, ThrowableConsumer<CommandMessage> consumer) {
         ConsumerMessage consumerMessage = new ConsumerMessage();
-        channel.sendMessage(message).queue(consumerMessage);
-        if (consumer == null){
-            return;
-        }
-        try {
-            consumer.accept(new CommandMessage(consumerMessage.getMessage()));
-        } catch (Exception e) {
-            throw new ThrowableConsumerException(e);
-        }
+        channel.sendMessage(message).queue(consumerMessage.andThen((msg) ->{
+            if (consumer == null){
+                return;
+            }
+            try {
+                consumer.accept(new CommandMessage(consumerMessage.getMessage()));
+            } catch (Exception e) {
+                throw new ThrowableConsumerException(e);
+            }
+        }));
     }
 
     public void reply(MessageEmbed message, ThrowableConsumer<CommandMessage> consumer) {
         ConsumerMessage consumerMessage = new ConsumerMessage();
-        channel.sendMessage(message).queue(consumerMessage);
-
-        if (consumer == null){
-            return;
-        }
-        try {
-            consumer.accept(new CommandMessage(consumerMessage.getMessage()));
-        } catch (Exception e) {
-            throw new ThrowableConsumerException(e);
-        }
+        channel.sendMessage(message).queue(consumerMessage.andThen((msg) -> {
+            if (consumer == null){
+                return;
+            }
+            try {
+                consumer.accept(new CommandMessage(consumerMessage.getMessage()));
+            } catch (Exception e) {
+                throw new ThrowableConsumerException(e);
+            }
+        }));
     }
 
     public void reply(ContentMessage message, ThrowableConsumer<CommandMessage> consumer) {
         ConsumerMessage consumerMessage = new ConsumerMessage();
+        Consumer<Message> then = (msg) -> {
+            if (consumer == null){
+                return;
+            }
+            try {
+                consumer.accept(new CommandMessage(consumerMessage.getMessage()));
+            } catch (Exception e) {
+                throw new ThrowableConsumerException(e);
+            }
+        };
         if (message.isEmbedMessage()){
             EmbedBuilder embedBuilder = new EmbedBuilder(message.getMessageEmbed());
             embedBuilder.setImage("attachment://" + message.getInputName() + message.getInputExtension());
             channel.sendMessage(embedBuilder.build()).addFile(message.getInputStream(), message.getInputName() + message.getInputExtension())
-                    .queue(consumerMessage);
+                    .queue(consumerMessage.andThen(then));
         } else {
             channel.sendMessage(message.getMessage()).addFile(message.getInputStream(), message.getInputName() + message.getInputExtension())
-                    .queue(consumerMessage);
-        }
-        if (consumer == null){
-            return;
-        }
-        try {
-            consumer.accept(new CommandMessage(consumerMessage.getMessage()));
-        } catch (Exception e) {
-            throw new ThrowableConsumerException(e);
+                    .queue(consumerMessage.andThen(then));
         }
     }
 
@@ -111,13 +113,6 @@ public class ChannelUtils {
         }
 
         public Message getMessage() {
-            final long currentTime = System.currentTimeMillis();
-            while (message == null) {
-                if ((System.currentTimeMillis() - currentTime) >= 3200) {
-                    OusuCore.getLogger().warn("Não foi possivel completar uma mensagem (consumer)");
-                    break;
-                }
-            }
             return message;
         }
     }

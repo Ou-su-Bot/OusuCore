@@ -51,5 +51,5 @@ test {
 
 
 application {
-    mainClassName('me.skiincraft.discord.core.CoreStarter')
+    mainClassName('me.skiincraft.ousucore.CoreStarter')
 }

@@ -53,44 +53,47 @@ public class CommandMessage {
 
     public void editMessage(CharSequence message, ThrowableConsumer<CommandMessage> consumer){
         ChannelUtils.ConsumerMessage consumerMessage = new ChannelUtils.ConsumerMessage();
-        this.message.editMessage(message).queue(consumerMessage);
-        this.message = consumerMessage.getMessage();
-        if (consumer == null){
-            return;
-        }
-        try {
-            consumer.accept(this);
-        } catch (Exception e){
-            throw new ThrowableConsumerException(e);
-        }
+        this.message.editMessage(message).queue(consumerMessage.andThen((msg) -> {
+            this.message = consumerMessage.getMessage();
+            if (consumer == null){
+                return;
+            }
+            try {
+                consumer.accept(this);
+            } catch (Exception e){
+                throw new ThrowableConsumerException(e);
+            }
+        }));
     }
 
     public void editMessage(Message message, ThrowableConsumer<CommandMessage> consumer){
         ChannelUtils.ConsumerMessage consumerMessage = new ChannelUtils.ConsumerMessage();
-        this.message.editMessage(message).queue(consumerMessage);
-        this.message = consumerMessage.getMessage();
-        if (consumer == null){
-            return;
-        }
-        try {
-            consumer.accept(this);
-        } catch (Exception e){
-            throw new ThrowableConsumerException(e);
-        }
+        this.message.editMessage(message).queue(consumerMessage.andThen((msg) -> {
+            this.message = consumerMessage.getMessage();
+            if (consumer == null){
+                return;
+            }
+            try {
+                consumer.accept(this);
+            } catch (Exception e){
+                throw new ThrowableConsumerException(e);
+            }
+        }));
     }
 
     public void editMessage(MessageEmbed message, ThrowableConsumer<CommandMessage> consumer){
         ChannelUtils.ConsumerMessage consumerMessage = new ChannelUtils.ConsumerMessage();
-        this.message.editMessage(message).queue(consumerMessage);
-        this.message = consumerMessage.getMessage();
-        if (consumer == null){
-            return;
-        }
-        try {
-            consumer.accept(this);
-        } catch (Exception e){
-            throw new ThrowableConsumerException(e);
-        }
+        this.message.editMessage(message).queue(consumerMessage.andThen((msg -> {
+            this.message = consumerMessage.getMessage();
+            if (consumer == null){
+                return;
+            }
+            try {
+                consumer.accept(this);
+            } catch (Exception e){
+                throw new ThrowableConsumerException(e);
+            }
+        })));
     }
 
     public Message getMessage() {
