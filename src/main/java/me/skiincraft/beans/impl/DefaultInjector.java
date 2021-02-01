@@ -2,8 +2,8 @@ package me.skiincraft.beans.impl;
 
 import me.skiincraft.beans.Injector;
 import me.skiincraft.beans.annotation.Inject;
-import me.skiincraft.beans.proxy.ProxyHandler;
 import me.skiincraft.beans.scanner.ComponentScanner;
+import me.skiincraft.sql.reflection.DynamicProxyInvocationHandler;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
@@ -166,8 +166,8 @@ public class DefaultInjector implements Injector {
             }
             Object inject = instances.stream().filter(clazz -> {
                 if (Proxy.isProxyClass(clazz.getClass())) {
-                    if (Proxy.getInvocationHandler(clazz).getClass().isAssignableFrom(ProxyHandler.class)) {
-                        ProxyHandler<?> handler = (ProxyHandler<?>) Proxy.getInvocationHandler(clazz);
+                    if (Proxy.getInvocationHandler(clazz).getClass().isAssignableFrom(DynamicProxyInvocationHandler.class)) {
+                        DynamicProxyInvocationHandler<?> handler = (DynamicProxyInvocationHandler<?>) Proxy.getInvocationHandler(clazz);
                         return handler.getType() == field.getType();
                     }
                 }

@@ -1,8 +1,8 @@
 package me.skiincraft.sql;
 
-import me.skiincraft.beans.proxy.ProxyHandler;
 import me.skiincraft.sql.exceptions.RepositoryException;
 import me.skiincraft.sql.platform.SQLPlatform;
+import me.skiincraft.sql.reflection.DynamicProxyInvocationHandler;
 import me.skiincraft.sql.repository.BasicRepository;
 import me.skiincraft.sql.repository.Repository;
 
@@ -47,7 +47,7 @@ public class BasicSQL {
 
     private <E extends Repository<T, ID>, T, ID> Object createNewInstance(Class<E> type, Class<T> t1, Class<ID> id) throws RepositoryException {
         Repository<T, ID> repository = new BasicRepository<>(t1, id);
-        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class<?>[]{type}, new ProxyHandler<>(repository, type));
+        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class<?>[]{type}, new DynamicProxyInvocationHandler<>(repository, type));
     }
 
 

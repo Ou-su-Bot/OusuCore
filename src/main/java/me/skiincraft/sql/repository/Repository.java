@@ -9,6 +9,7 @@ public interface Repository<T, ID> extends UseStatement {
 
     Optional<T> get(int index);
     Optional<T> getById(ID id);
+    Optional<T> getByRow(String row, Object value);
     List<T> getAll();
     boolean contains(T item);
 

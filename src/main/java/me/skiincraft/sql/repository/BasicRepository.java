@@ -74,7 +74,7 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
         } catch (SQLException throwables) {
             revert();
             throwables.printStackTrace();
-            throw new RepositoryException("Não foi possível criar esta tabela");
+            throw new RepositoryException("Não foi possivel criar esta tabela");
         }
         commit();
     }
@@ -107,6 +107,31 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
     private void rangeCheck(int index) {
         if (index < 0 || index >= size())
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + this.size());
+    }
+
+    @Nonnull
+    @Override
+    public Optional<T> getByRow(String row, Object value) {
+        SQLField field = getSQLField(row);
+        if (field != null) {
+            try {
+                Statement statement = getStatement();
+                ResultSet resultSet = statement.executeQuery(String.format("SELECT * FROM \"%s\" WHERE %s = '%s'", tableName, field.getField().getName(), value.toString()));
+                if (resultSet.next()) {
+                    return Optional.of(createInstance(resultSet));
+                }
+            } catch (Exception throwables) {
+                revert();
+                throwables.printStackTrace();
+            }
+        }
+        return Optional.empty();
+    }
+
+    private SQLField getSQLField(String name){
+        return fields.stream().filter(sqlField -> sqlField.getField().getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -243,7 +268,7 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
     @Override
     public void save(T item) {
         try {
-            if (containsBlob()) {
+            if (containsBlob()){
                 savePrepare(item);
                 return;
             }
