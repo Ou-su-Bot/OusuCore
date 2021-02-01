@@ -1,7 +1,7 @@
 package me.skiincraft.discord.core.configuration;
 
 import me.skiincraft.discord.core.language.Language;
-import me.skiincraft.discord.core.utils.BotFile;
+import me.skiincraft.discord.core.plugin.objects.BotFile;
 
 import java.util.ArrayList;
 import java.util.List;

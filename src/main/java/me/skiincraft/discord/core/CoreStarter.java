@@ -6,10 +6,12 @@ import me.skiincraft.beans.stereotypes.CommandMap;
 import me.skiincraft.beans.stereotypes.EventMap;
 import me.skiincraft.beans.stereotypes.RepositoryMap;
 import me.skiincraft.beans.stereotypes.UtilMap;
+import me.skiincraft.discord.core.command.impl.CommandParser;
+import me.skiincraft.discord.core.command.impl.DefaultCommandManager;
 import me.skiincraft.discord.core.configuration.CoreSettings;
+import me.skiincraft.discord.core.configuration.InicializeOptions;
 import me.skiincraft.discord.core.configuration.InternalSettings;
 import me.skiincraft.discord.core.configuration.OusuConfiguration;
-import me.skiincraft.discord.core.jda.CommandAdapter;
 import me.skiincraft.discord.core.jda.GuildEvents;
 import me.skiincraft.discord.core.plugin.OusuPlugin;
 import me.skiincraft.discord.core.plugin.PluginLoader;
@@ -87,20 +89,20 @@ public class CoreStarter {
 		CoreStarter.getLogger().info("Carregando " + plugin.getClass().getSimpleName());
 		CoreUtils.createPath("bots/" + pluginLoader.getBotFile().getBotName() + "/",
 				new String[]{"assets", "fonts", "language"});
-		plugin.onLoad();
+		InicializeOptions inicializeOptions = new InicializeOptions(new DefaultCommandManager("OusuCommands", 10), settings);
+		plugin.onLoad(inicializeOptions);
 
-		DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createDefault(settings.getToken());
-		applyCacheFlag(shardBuilder, settings.getCacheFlags());
-		applyGatewayIntents(shardBuilder, settings.getGatewayIntents());
-		applyOthers(shardBuilder, settings);
-
+		DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createDefault(inicializeOptions.getToken());
+		applyCacheFlag(shardBuilder, inicializeOptions.getCacheFlag());
+		applyGatewayIntents(shardBuilder, inicializeOptions.getGatewayIntent());
+		applyOthers(shardBuilder, inicializeOptions, settings);
 		loadSQLDatabase();
 
 		CoreStarter.getLogger().info("ShardBuilder foi configurado com sucesso.");
 		try {
 			CoreStarter.getLogger().info("Iniciando ShardManager, espero que dê certo!");
 			OusuCore.inicialize(pluginLoader, InjectorFactory.getInstance().createNewInjector(plugin.getClass(), injectorAnnotations),
-					shardBuilder.build(), new InternalSettings(pluginLoader.getBotFile()), logger);
+					shardBuilder.build(), inicializeOptions.getCommandManager(), new InternalSettings(pluginLoader.getBotFile()), logger);
 		} catch (LoginException | CompletionException e) {
 			CoreStarter.getLogger().warn("Suas credenciais estão incorretas verifique o Token em settings.ini", e);
 		}
@@ -128,10 +130,10 @@ public class CoreStarter {
 		}
 	}
 
-	private static void applyOthers(DefaultShardManagerBuilder smb, CoreSettings settings){
+	private static void applyOthers(DefaultShardManagerBuilder smb, InicializeOptions inicializeOptions, CoreSettings settings){
 		smb.setEventManagerProvider((id) -> new AnnotatedEventManager());
-		smb.enableCache(settings.getCacheFlags());
-		smb.addEventListeners(new CommandAdapter());
+		smb.setChunkingFilter(inicializeOptions.getChunkfilter());
+		smb.addEventListeners(new CommandParser(inicializeOptions.getCommandManager()));
 		smb.addEventListeners(new GuildEvents());
 		smb.setChunkingFilter(settings.getFilter());
 		smb.setShardsTotal(settings.getShards());

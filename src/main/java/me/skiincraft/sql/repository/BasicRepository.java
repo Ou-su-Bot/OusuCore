@@ -74,7 +74,7 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
         } catch (SQLException throwables) {
             revert();
             throwables.printStackTrace();
-            throw new RepositoryException("Não foi possivel criar esta tabela");
+            throw new RepositoryException("Não foi possível criar esta tabela");
         }
         commit();
     }
@@ -243,7 +243,7 @@ public class BasicRepository<T, ID> implements Repository<T, ID> {
     @Override
     public void save(T item) {
         try {
-            if (containsBlob()){
+            if (containsBlob()) {
                 savePrepare(item);
                 return;
             }

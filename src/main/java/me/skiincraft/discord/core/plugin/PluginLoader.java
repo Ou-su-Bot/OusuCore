@@ -2,7 +2,7 @@ package me.skiincraft.discord.core.plugin;
 
 import com.google.gson.Gson;
 import me.skiincraft.discord.core.exception.BotLoaderException;
-import me.skiincraft.discord.core.utils.BotFile;
+import me.skiincraft.discord.core.plugin.objects.BotFile;
 
 import java.io.File;
 import java.io.InputStream;

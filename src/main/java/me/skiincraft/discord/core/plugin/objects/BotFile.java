@@ -1,4 +1,4 @@
-package me.skiincraft.discord.core.utils;
+package me.skiincraft.discord.core.plugin.objects;
 
 import com.google.gson.annotations.SerializedName;
 

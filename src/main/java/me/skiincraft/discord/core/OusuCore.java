@@ -1,8 +1,8 @@
 package me.skiincraft.discord.core;
 
 import me.skiincraft.beans.Injector;
-import me.skiincraft.discord.core.command.Command;
-import me.skiincraft.discord.core.command.CommandManager;
+import me.skiincraft.discord.core.command.CommandExecutor;
+import me.skiincraft.discord.core.command.ICommandManager;
 import me.skiincraft.discord.core.common.EventListener;
 import me.skiincraft.discord.core.configuration.InternalSettings;
 import me.skiincraft.discord.core.language.Language;
@@ -25,11 +25,11 @@ import java.util.Objects;
 public final class OusuCore {
 
     private static InternalSettings internalSettings;
-
     private static OusuPlugin instance;
     private static ShardManager shardManager;
     private static Logger logger;
     private static Injector injector;
+    private static ICommandManager commandManager;
 
     private OusuCore() {}
 
@@ -49,11 +49,11 @@ public final class OusuCore {
         return internalSettings.getLanguages();
     }
 
-    public static void registerCommand(Command command) {
+    public static void registerCommand(CommandExecutor command) {
         getCommandManager().registerCommand(command);
     }
 
-    public static void unregisterCommand(Command command) {
+    public static void unregisterCommand(CommandExecutor command) {
         getCommandManager().registerCommand(command);
     }
 
@@ -85,8 +85,8 @@ public final class OusuCore {
         return internalSettings;
     }
 
-    public static CommandManager getCommandManager() {
-        return CommandManager.getInstance();
+    public static ICommandManager getCommandManager() {
+        return commandManager;
     }
 
     public static OusuPlugin getInstance() {
@@ -133,7 +133,7 @@ public final class OusuCore {
         getLogger().throwing(throwable);
     }
 
-    public static void inicialize(PluginLoader loader, Injector injector, ShardManager shardManager, InternalSettings internalSettings, Logger logger)  {
+    public static void inicialize(PluginLoader loader, Injector injector, ShardManager shardManager, ICommandManager commandManager, InternalSettings internalSettings, Logger logger)  {
         if (OusuCore.instance != null) {
             logger.warn("Tentou criar uma instancia OusuCore, mas é possivel somente 1 instancia(s) ativa(s).");
             return;
@@ -141,12 +141,14 @@ public final class OusuCore {
         try {
             OusuCore.instance = loader.getOusuPlugin();
             OusuCore.shardManager = shardManager;
+            OusuCore.commandManager = commandManager;
             OusuCore.internalSettings = internalSettings;
             OusuCore.logger = logger;
             OusuCore.injector = injector;
 
             InjectorUtils.configureInjector(injector);
             getInjector().map(shardManager);
+            getInjector().map(commandManager);
             getInjector().map(instance);
             getInjector().map(Objects.requireNonNull(getGuildRepository()));
             getInjector().map(loader);

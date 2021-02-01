@@ -5,7 +5,7 @@ import me.skiincraft.beans.stereotypes.CommandMap;
 import me.skiincraft.beans.stereotypes.EventMap;
 import me.skiincraft.beans.stereotypes.RepositoryMap;
 import me.skiincraft.discord.core.OusuCore;
-import me.skiincraft.discord.core.command.Command;
+import me.skiincraft.discord.core.command.CommandExecutor;
 import me.skiincraft.discord.core.common.EventListener;
 import me.skiincraft.sql.BasicSQL;
 import me.skiincraft.sql.exceptions.RepositoryException;
@@ -24,7 +24,7 @@ public class InjectorUtils {
             return null;
         }, RepositoryMap.class);
 
-        injector.onMap((object) -> OusuCore.registerCommand((Command) object), CommandMap.class);
+        injector.onMap((object) -> OusuCore.registerCommand((CommandExecutor) object), CommandMap.class);
         injector.onMap((object) -> OusuCore.registerListener((EventListener) object), EventMap.class);
     }
 
