@@ -3,6 +3,7 @@ package me.skiincraft.ousucore.command;
 import me.skiincraft.ousucore.command.utils.ChannelUtils;
 import me.skiincraft.ousucore.command.utils.CommandTools;
 
+import java.util.Collections;
 import java.util.List;
 
 public abstract class CommandExecutor implements CommandOperation {
@@ -24,7 +25,7 @@ public abstract class CommandExecutor implements CommandOperation {
     }
 
     public List<String> getAliases() {
-        return aliases;
+        return (aliases == null) ? Collections.emptyList() : aliases;
     }
 
     public String getUsage() {

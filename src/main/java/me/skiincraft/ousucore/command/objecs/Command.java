@@ -50,7 +50,7 @@ public class Command {
     private CommandExecutor searchCommandExecutor() {
         if (executor != null)
             return executor;
-        List<CommandExecutor> executors = commandManager.getCommands((cmd) -> cmd.getName().equalsIgnoreCase(getName()) || cmd.getAliases().stream().anyMatch(alias -> alias.equalsIgnoreCase(cmd.getName())));
+        List<CommandExecutor> executors = commandManager.getCommands((cmd) -> cmd.getName().equalsIgnoreCase(getName()) || cmd.getAliases().stream().anyMatch(alias -> alias.equalsIgnoreCase(getName())));
         if (executors.size() == 0){
             return null;
         }
