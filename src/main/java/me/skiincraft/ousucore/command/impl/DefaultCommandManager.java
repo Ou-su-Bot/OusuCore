@@ -5,7 +5,9 @@ import me.skiincraft.ousucore.command.CommandExecutor;
 import me.skiincraft.ousucore.command.ICommandManager;
 import me.skiincraft.ousucore.command.objecs.Command;
 import me.skiincraft.ousucore.command.utils.CommandTools;
+import me.skiincraft.ousucore.events.CommandExecuteEvent;
 import me.skiincraft.ousucore.exception.ThrowableConsumerException;
+import net.dv8tion.jda.api.JDA;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +47,8 @@ public class DefaultCommandManager implements ICommandManager {
         }
         executor.execute(() -> {
             try {
+                JDA jda = command.getMessage().getJDA();
+                jda.getEventManager().handle(new CommandExecuteEvent(command, jda));
                 cmdExecutor.execute(command.getName(), command.getArgs(), new CommandTools(command.getMessage()));
                 cmdExecutor.onSuccessful(command);
             } catch (Exception e) {
