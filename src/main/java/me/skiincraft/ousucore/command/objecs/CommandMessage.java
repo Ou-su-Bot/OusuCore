@@ -6,6 +6,7 @@ import me.skiincraft.ousucore.utils.ThrowableConsumer;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.TextChannel;
 
 public class CommandMessage {
 
@@ -52,48 +53,59 @@ public class CommandMessage {
     }
 
     public void editMessage(CharSequence message, ThrowableConsumer<CommandMessage> consumer){
-        ChannelUtils.ConsumerMessage consumerMessage = new ChannelUtils.ConsumerMessage();
-        this.message.editMessage(message).queue(consumerMessage.andThen((msg) -> {
-            this.message = consumerMessage.getMessage();
-            if (consumer == null){
+        ChannelUtils.MessageConsumer messageConsumer = new ChannelUtils.MessageConsumer(Thread.currentThread());
+        try {
+            this.message.editMessage(message).queue(messageConsumer, messageConsumer.ifException());
+            if (consumer == null)
                 return;
-            }
-            try {
-                consumer.accept(this);
-            } catch (Exception e){
-                throw new ThrowableConsumerException(e);
-            }
-        }));
+
+            messageConsumer.waitConsumer();
+            if (messageConsumer.error())
+                throw messageConsumer.getThrowable();
+
+            consumer.accept(new CommandMessage(messageConsumer.get()));
+        } catch (Throwable e) {
+            throw new ThrowableConsumerException(e);
+        }
     }
 
     public void editMessage(Message message, ThrowableConsumer<CommandMessage> consumer){
-        ChannelUtils.ConsumerMessage consumerMessage = new ChannelUtils.ConsumerMessage();
-        this.message.editMessage(message).queue(consumerMessage.andThen((msg) -> {
-            this.message = consumerMessage.getMessage();
-            if (consumer == null){
+        ChannelUtils.MessageConsumer messageConsumer = new ChannelUtils.MessageConsumer(Thread.currentThread());
+        try {
+            this.message.editMessage(message).queue(messageConsumer, messageConsumer.ifException());
+            if (consumer == null)
                 return;
-            }
-            try {
-                consumer.accept(this);
-            } catch (Exception e){
-                throw new ThrowableConsumerException(e);
-            }
-        }));
+
+            messageConsumer.waitConsumer();
+            if (messageConsumer.error())
+                throw messageConsumer.getThrowable();
+
+            consumer.accept(new CommandMessage(messageConsumer.get()));
+        } catch (Throwable e) {
+            throw new ThrowableConsumerException(e);
+        }
     }
 
     public void editMessage(MessageEmbed message, ThrowableConsumer<CommandMessage> consumer){
-        ChannelUtils.ConsumerMessage consumerMessage = new ChannelUtils.ConsumerMessage();
-        this.message.editMessage(message).queue(consumerMessage.andThen((msg -> {
-            this.message = consumerMessage.getMessage();
-            if (consumer == null){
+        ChannelUtils.MessageConsumer messageConsumer = new ChannelUtils.MessageConsumer(Thread.currentThread());
+        try {
+            this.message.editMessage(message).queue(messageConsumer, messageConsumer.ifException());
+            if (consumer == null)
                 return;
-            }
-            try {
-                consumer.accept(this);
-            } catch (Exception e){
-                throw new ThrowableConsumerException(e);
-            }
-        })));
+
+            messageConsumer.waitConsumer();
+            if (messageConsumer.error())
+                throw messageConsumer.getThrowable();
+
+            consumer.accept(new CommandMessage(messageConsumer.get()));
+        } catch (Throwable e) {
+            throw new ThrowableConsumerException(e);
+        }
+    }
+
+
+    public TextChannel getTextChannel(){
+        return message.getTextChannel();
     }
 
     public Message getMessage() {

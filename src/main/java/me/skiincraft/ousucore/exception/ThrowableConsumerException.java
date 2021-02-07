@@ -2,13 +2,14 @@ package me.skiincraft.ousucore.exception;
 
 public class ThrowableConsumerException extends RuntimeException {
 
-    private Exception exception;
+    private Throwable throwable;
 
-    public ThrowableConsumerException(Exception exception){
-        this.exception = exception;
+    public ThrowableConsumerException(Throwable cause) {
+        super(cause);
+        this.throwable = cause;
     }
 
     public Exception getException() {
-        return exception;
+        return (throwable instanceof Exception) ? (Exception) throwable : this;
     }
 }
