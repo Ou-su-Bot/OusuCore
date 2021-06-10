@@ -44,7 +44,7 @@ public class CommandParser {
         if (startWithIgnoreCase(args[0], prefix)){
             service.execute(() -> {
                 Command command = new Command(removePrefix(prefix, args), event.getMessage(), commandManager);
-                FindCommandEvent cmdEvent = new FindCommandEvent(command, event.getJDA());
+                FindCommandEvent cmdEvent = new FindCommandEvent(command);
                 event.getJDA().getEventManager().handle(cmdEvent);
                 if (!cmdEvent.isCancel()){
                     commandManager.call(command);

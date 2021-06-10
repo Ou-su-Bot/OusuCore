@@ -48,7 +48,7 @@ public class DefaultCommandManager implements ICommandManager {
         executor.execute(() -> {
             try {
                 JDA jda = command.getMessage().getJDA();
-                jda.getEventManager().handle(new CommandExecuteEvent(command, jda));
+                jda.getEventManager().handle(new CommandExecuteEvent(command));
                 cmdExecutor.execute(command.getName(), command.getArgs(), new CommandTools(command.getMessage()));
                 cmdExecutor.onSuccessful(command);
             } catch (Exception e) {
